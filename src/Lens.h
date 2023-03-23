@@ -174,11 +174,11 @@ enum class LensParam
     /// AF range (write/read). Value:
     /// Value depends on particular lens controller.
     AF_RANGE,
-    /// Zoom full wide field of view (write/read). Value: FOV degree.
+    /// Zoom full wide field of view (write/read). Value: FOV degree * 1000.
     ZOOM_FULL_WIDE_FOV_DEG,
-    /// Zoom full tele field of view (write/read). Value: FOV degree.
+    /// Zoom full tele field of view (write/read). Value: FOV degree * 1000.
     ZOOM_FULL_TELE_FOV_DEG,
-    /// Fiels of view, degree (write/read). Value: FOV degree.
+    /// Fiels of view, degree (write/read). Value: FOV degree * 1000.
     FOV_DEG
 };
 
