@@ -44,7 +44,9 @@ enum class LensCommand
     /// Autofocus stop. No arguments.
     AF_STOP,
     /// Restart lens controller. No arguments.
-    RESTART
+    RESTART,
+    /// Do zoom and focus hardware range detection.
+    DETECT_HW_RANGES
 };
 
 
@@ -153,7 +155,11 @@ enum class LensParam
     /// Iris mode. (write/read). Value:
     /// Value depends on particular lens controller.
     IRIS_MODE,
-    /// Debug info in terminal mode (write/read). Value: 0 - off, 1 - on.
+    /// Debug info in terminal mode (write/read). Value:
+    /// 0 - off,
+    /// 1 - only terminal,
+    /// 2 - only file,
+    /// 3 - file and terminal.
     DEBUG_INFO_MODE,
     /// Auto ROI width (write/read). Value: 0 to video frame size, pxl.
     AUTO_AF_ROI_WIDTH,
