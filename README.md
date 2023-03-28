@@ -236,61 +236,64 @@ Enum declaration:
 ```cpp
 enum class LensCommand
 {
-        /// Zoom tele. No arguments.
-        ZOOM_TELE = 1,
-        /// Zoom wide. No arguments.
-        ZOOM_WIDE,
-        /// Zoom to position. Argument:
-        /// zoom position 0(full wide) - 65535(full tele).
-        ZOOM_TO_POS,
-        /// Stop zoom. No arguments.
-        ZOOM_STOP,
-        /// Focus far. No arguments.
-        FOCUS_FAR,
-        /// Focus near. No arguments.
-        FOCUS_NEAR,
-        /// Focus to position. Argument:
-        /// focus position 0(full near) - 65535(full far).
-        FOCUS_TO_POS,
-        /// Focus stop. No arguments.
-        FOCUS_STOP,
-        /// Iris open. No arguments.
-        IRIS_OPEN,
-        /// Iris close. No arguments.
-        IRIS_CLOSE,
-        /// Iris to position. Argument:
-        /// iris position 0(full close) - 65535(full open).
-        IRIS_TO_POS,
-        /// Iris stop. No arguments.
-        IRIS_STOP,
-        /// Autofocus start. No arguments.
-        AF_START,
-        /// Autofocus stop. No arguments.
-        AF_STOP,
-        /// Restart lens controller. No arguments.
-        RESTART
+    /// Zoom tele. No arguments.
+    ZOOM_TELE = 1,
+    /// Zoom wide. No arguments.
+    ZOOM_WIDE,
+    /// Zoom to position. Argument:
+    /// zoom position 0(full wide) - 65535(full tele).
+    ZOOM_TO_POS,
+    /// Stop zoom. No arguments.
+    ZOOM_STOP,
+    /// Focus far. No arguments.
+    FOCUS_FAR,
+    /// Focus near. No arguments.
+    FOCUS_NEAR,
+    /// Focus to position. Argument:
+    /// focus position 0(full near) - 65535(full far).
+    FOCUS_TO_POS,
+    /// Focus stop. No arguments.
+    FOCUS_STOP,
+    /// Iris open. No arguments.
+    IRIS_OPEN,
+    /// Iris close. No arguments.
+    IRIS_CLOSE,
+    /// Iris to position. Argument:
+    /// iris position 0(full close) - 65535(full open).
+    IRIS_TO_POS,
+    /// Iris stop. No arguments.
+    IRIS_STOP,
+    /// Autofocus start. No arguments.
+    AF_START,
+    /// Autofocus stop. No arguments.
+    AF_STOP,
+    /// Restart lens controller. No arguments.
+    RESTART,
+    /// Do zoom and focus hardware range detection.
+    DETECT_HW_RANGES
 };
 ```
 
 **Table 2** - Lens commands description. Some commands maybe unsupported by particular lens controller.
 
-| Command      | Description                                                  |
-| ------------ | ------------------------------------------------------------ |
-| ZOOM_TELE    | Move zoom tele (in). Command doesn't have arguments.         |
-| ZOOM_WIDE    | Move zoom wide (out). Command doesn't have arguments.        |
-| ZOOM_TO_POS  | Move zoom to position. Lens controller should have zoom range from 0 (full wide) to 65535 (full tele) regardless of the hardware value of the zoom position. If the minimum and maximum zoom position limits are set by the user in the lens parameters, the range of the hardware zoom position must be scaled to the user space 0-65535 range. Command argument: zoom position 0-65535. |
-| ZOOM_STOP    | Stop zoom moving including stop zoom to position command.    |
-| FOCUS_FAR    | Move focus far. Command doesn't have arguments.              |
-| FOCUS_NEAR   | Move focus near. Command doesn't have arguments.             |
-| FOCUS_TO_POS | Move focus to position. Lens controller should have focus range from 0 (full near) to 65535 (full far) regardless of the hardware value of the focus position. If the minimum and maximum focus position limits are set by the user in the lens parameters, the range of the hardware focus position must be scaled to the 0-65535 user space range. Command argument: focus position 0-65535. |
-| FOCUS_STOP   | Stop focus moving including stop focus to position command.  |
-| IRIS_OPEN    | Move iris open. Command doesn't have arguments.              |
-| IRIS_CLOSE   | Move iris close. Command doesn't have arguments.             |
-| IRIS_TO_POS  | Move iris to position. Lens controller should have iris range from 0 (full close) to 65535 (full far) regardless of the hardware value of the iris position. If the minimum and maximum iris position limits are set by the user in the lens parameters, the range of the hardware iris position must be scaled to the 0-65535 user space range. Command argument: iris position 0-65535. |
-| IRIS_STOP    | Stop iris moving including stop iris to position command. Command doesn't have arguments. |
-| AF_START     | Start autofocus.  Command doesn't have arguments.            |
-| AF_STOP      | Stop autofocus.  Command doesn't have arguments.             |
-| RESTART      | Restart lens controller.                                     |
+| Command          | Description                                                  |
+| ---------------- | ------------------------------------------------------------ |
+| ZOOM_TELE        | Move zoom tele (in). Command doesn't have arguments.         |
+| ZOOM_WIDE        | Move zoom wide (out). Command doesn't have arguments.        |
+| ZOOM_TO_POS      | Move zoom to position. Lens controller should have zoom range from 0 (full wide) to 65535 (full tele) regardless of the hardware value of the zoom position. If the minimum and maximum zoom position limits are set by the user in the lens parameters, the range of the hardware zoom position must be scaled to the user space 0-65535 range. Command argument: zoom position 0-65535. |
+| ZOOM_STOP        | Stop zoom moving including stop zoom to position command.    |
+| FOCUS_FAR        | Move focus far. Command doesn't have arguments.              |
+| FOCUS_NEAR       | Move focus near. Command doesn't have arguments.             |
+| FOCUS_TO_POS     | Move focus to position. Lens controller should have focus range from 0 (full near) to 65535 (full far) regardless of the hardware value of the focus position. If the minimum and maximum focus position limits are set by the user in the lens parameters, the range of the hardware focus position must be scaled to the 0-65535 user space range. Command argument: focus position 0-65535. |
+| FOCUS_STOP       | Stop focus moving including stop focus to position command.  |
+| IRIS_OPEN        | Move iris open. Command doesn't have arguments.              |
+| IRIS_CLOSE       | Move iris close. Command doesn't have arguments.             |
+| IRIS_TO_POS      | Move iris to position. Lens controller should have iris range from 0 (full close) to 65535 (full far) regardless of the hardware value of the iris position. If the minimum and maximum iris position limits are set by the user in the lens parameters, the range of the hardware iris position must be scaled to the 0-65535 user space range. Command argument: iris position 0-65535. |
+| IRIS_STOP        | Stop iris moving including stop iris to position command. Command doesn't have arguments. |
+| AF_START         | Start autofocus.  Command doesn't have arguments.            |
+| AF_STOP          | Stop autofocus.  Command doesn't have arguments.             |
+| RESTART          | Restart lens controller.                                     |
+| DETECT_HW_RANGES | Detect zoom and focus hardware ranges. After execution this command the lens controller should automatically set parameters (LensParam enum): ZOOM_HW_TELE_LIMIT, ZOOM_HW_WIDE_LIMIT, FOCUS_HW_FAR_LIMIT and FOCUS_HW_NEAR_LIMIT. |
 
 ## LensParam enum
 
@@ -299,134 +302,138 @@ Enum declaration:
 ```cpp
 enum class LensParam
 {
-        /// Zoom position (write/read). Value:
-        /// zoom position 0(full wide) - 65535(full tele).
-        ZOOM_POS = 1,
-        /// Hardware zoom position (write/read). Argument:
-        /// zoom position. Value depends on particular lens controller.
-        ZOOM_HW_POS,
-        /// Focus position (write/read). Value:
-        /// focus position 0(full near) - 65535(full far).
-        FOCUS_POS,
-        /// Hardware focus position (write/read). Value:
-        /// focus position. Value depends on particular lens controller.
-        FOCUS_HW_POS,
-        /// Iris position (write/read). Value:
-        /// iris position 0(full close) - 65535(full open).
-        IRIS_POS,
-        /// Hardware iris position (write/read). Value:
-        /// iris position. Value depends on particular lens controller.
-        IRIS_HW_POS,
-        /// Focus mode (write/read). Value:
-        /// Value depends on particular lens controller.
-        FOCUS_MODE,
-        /// Filter mode (write/read).  Value:
-        /// Value depends on particular lens controller.
-        FILTER_MODE,
-        /// Auto focus ROI top-left coordinate (write/read). Value:
-        /// ROI top-left horizontal coordinate in pixels.
-        AF_ROI_X0,
-        /// Auto focus ROI top-left coordinate (write/read). Value:
-        /// ROI top-left vertical coordinate in pixels.
-        AF_ROI_Y0,
-        /// Auto focus ROI bottom-right coordinate (write/read). Value:
-        /// ROI bottom-right horizontal coordinate in pixels.
-        AF_ROI_X1,
-        /// Auto focus ROI bottom-right coordinate (write/read). Value:
-        /// ROI bottom-right vertical coordinate in pixels.
-        AF_ROI_Y1,
-        /// Zoom speed (write/read). Value:
-        /// zoom speed 0 to 100 %.
-        ZOOM_SPEED,
-        /// Hardware zoom speed (write/read). Value:
-        /// zoom speed. Value depends on particular lens controller.
-        ZOOM_HW_SPEED,
-        /// Max hardware zoom speed (write/read). Value:
-        /// zoom speed. Value depends on particular lens controller.
-        ZOOM_HW_MAX_SPEED,
-        /// Focus speed (write/read). Value:
-        /// focus speed 0 to 100 %.
-        FOCUS_SPEED,
-        /// Hardware focus speed (write/read). Value:
-        /// focus speed. Value depends on particular lens controller.
-        FOCUS_HW_SPEED,
-        /// Max hardware focus speed (write/read). Argument:
-        /// focus speed. Value depends on particular lens controller.
-        FOCUS_HW_MAX_SPEED,
-        /// Iris speed (write/read). Value:
-        /// iris speed 0 to 100 %.
-        IRIS_SPEED,
-        /// Hardware iris speed (write/read). Value:
-        /// iris speed. Value depends on particular lens controller.
-        IRIS_HW_SPEED,
-        /// Max hardware iris speed (write/read). Value:
-        /// iris speed. Value depends on particular lens controller.
-        IRIS_HW_MAX_SPEED,
-        /// Hardware zoom tele limit (write/read). Value:
-        /// hardware zoom position. Value depends on particular lens controller.
-        ZOOM_HW_TELE_LIMIT,
-        /// Hardware zoom wide limit (write/read). Value:
-        /// hardware zoom position. Value depends on particular lens controller.
-        ZOOM_HW_WIDE_LIMIT,
-        /// Hardware focus far limit (write/read). Value:
-        /// hardware focus position. Value depends on particular lens controller.
-        FOCUS_HW_FAR_LIMIT,
-        /// Hardware focus near limit (write/read). Value:
-        /// hardware focus position. Value depends on particular lens controller.
-        FOCUS_HW_NEAR_LIMIT,
-        /// Hardware iris open limit (write/read). Value:
-        /// hardware iris position. Value depends on particular lens controller.
-        IRIS_HW_OPEN_LIMIT,
-        /// Hardware iris close limit (write/read). Value:
-        /// hardware iris position. Value depends on particular lens controller.
-        IRIS_HW_CLOSE_LIMIT,
-        /// Focus factor value (read only). Value:
-        /// Value depends on particular lens controller.
-        FOCUS_FACTOR,
-        /// Connection status (read only). Value:
-        /// 0 - not connected, 1 - connected.
-        IS_CONNECTED,
-        /// Hardware focus speed in AF mode (write/read). Value:
-        /// hardware focus speed. Value depends on particular lens controller.
-        FOCUS_HW_AF_SPEED,
-        /// Threshold for focus factor to start refocus (write/read). Value:
-        /// threshold %: 0 - no check, 100 - changing x2.
-        FOCUS_FACTOR_THRESHOLD,
-        /// Refocus timeout, sec (write/read). Value:
-        /// 0 - no refocus, to 100000 sec.
-        REFOCUS_TIMEOUT_SEC,
-        /// AF process mode (read only). Value: 0 - not active, 1 - active.
-        AF_IS_ACTIVE,
-        /// Iris mode. (write/read). Value:
-        /// Value depends on particular lens controller.
-        IRIS_MODE,
-        /// Debug info in terminal mode (write/read). Value: 0 - off, 1 - on.
-        DEBUG_INFO_MODE,
-        /// Auto ROI width (write/read). Value: 0 to video frame size, pxl.
-        AUTO_AF_ROI_WIDTH,
-        /// Auto ROI height (write/read). Value: 0 to video frame size, pxl.
-        AUTO_AF_ROI_HEIGHT,
-        /// Auto ROI frame border in pixels (write/read). Value:
-        /// border size from 0 to video frame min(width/height) / 2.
-        AUTO_AF_ROI_BORDER,
-        /// AF ROI mode (write/read). Value:
-        /// 0 - Manual position, 1 - Auto position.
-        AF_ROI_MODE,
-        /// Optical extender mode (write/read). Value:
-        /// Value depends on particular lens controller. Default: 0 -Off, 1 -On.
-        EXTENDER_MODE,
-        /// Stabilizer mode (write/read). Value:
-        /// 0 - Off, 1 - On.
-        STABILIZER_MODE,
-        /// AF range (write/read). Value:
-        /// Value depends on particular lens controller.
-        AF_RANGE,
-        /// Zoom full wide field of view (write/read). Value: FOV degree.
-        ZOOM_FULL_WIDE_FOV_DEG,
-        /// Zoom full tele field of view (write/read). Value: FOV degree.
-        ZOOM_FULL_TELE_FOV_DEG,
-        /// Fiels of view, degree (write/read). Value: FOV degree.
-        FOV_DEG
+    /// Zoom position (write/read). Value:
+    /// zoom position 0(full wide) - 65535(full tele).
+    ZOOM_POS = 1,
+    /// Hardware zoom position (write/read). Argument:
+    /// zoom position. Value depends on particular lens controller.
+    ZOOM_HW_POS,
+    /// Focus position (write/read). Value:
+    /// focus position 0(full near) - 65535(full far).
+    FOCUS_POS,
+    /// Hardware focus position (write/read). Value:
+    /// focus position. Value depends on particular lens controller.
+    FOCUS_HW_POS,
+    /// Iris position (write/read). Value:
+    /// iris position 0(full close) - 65535(full open).
+    IRIS_POS,
+    /// Hardware iris position (write/read). Value:
+    /// iris position. Value depends on particular lens controller.
+    IRIS_HW_POS,
+    /// Focus mode (write/read). Value:
+    /// Value depends on particular lens controller.
+    FOCUS_MODE,
+    /// Filter mode (write/read).  Value:
+    /// Value depends on particular lens controller.
+    FILTER_MODE,
+    /// Auto focus ROI top-left coordinate (write/read). Value:
+    /// ROI top-left horizontal coordinate in pixels.
+    AF_ROI_X0,
+    /// Auto focus ROI top-left coordinate (write/read). Value:
+    /// ROI top-left vertical coordinate in pixels.
+    AF_ROI_Y0,
+    /// Auto focus ROI bottom-right coordinate (write/read). Value:
+    /// ROI bottom-right horizontal coordinate in pixels.
+    AF_ROI_X1,
+    /// Auto focus ROI bottom-right coordinate (write/read). Value:
+    /// ROI bottom-right vertical coordinate in pixels.
+    AF_ROI_Y1,
+    /// Zoom speed (write/read). Value:
+    /// zoom speed 0 to 100 %.
+    ZOOM_SPEED,
+    /// Hardware zoom speed (write/read). Value:
+    /// zoom speed. Value depends on particular lens controller.
+    ZOOM_HW_SPEED,
+    /// Max hardware zoom speed (write/read). Value:
+    /// zoom speed. Value depends on particular lens controller.
+    ZOOM_HW_MAX_SPEED,
+    /// Focus speed (write/read). Value:
+    /// focus speed 0 to 100 %.
+    FOCUS_SPEED,
+    /// Hardware focus speed (write/read). Value:
+    /// focus speed. Value depends on particular lens controller.
+    FOCUS_HW_SPEED,
+    /// Max hardware focus speed (write/read). Argument:
+    /// focus speed. Value depends on particular lens controller.
+    FOCUS_HW_MAX_SPEED,
+    /// Iris speed (write/read). Value:
+    /// iris speed 0 to 100 %.
+    IRIS_SPEED,
+    /// Hardware iris speed (write/read). Value:
+    /// iris speed. Value depends on particular lens controller.
+    IRIS_HW_SPEED,
+    /// Max hardware iris speed (write/read). Value:
+    /// iris speed. Value depends on particular lens controller.
+    IRIS_HW_MAX_SPEED,
+    /// Hardware zoom tele limit (write/read). Value:
+    /// hardware zoom position. Value depends on particular lens controller.
+    ZOOM_HW_TELE_LIMIT,
+    /// Hardware zoom wide limit (write/read). Value:
+    /// hardware zoom position. Value depends on particular lens controller.
+    ZOOM_HW_WIDE_LIMIT,
+    /// Hardware focus far limit (write/read). Value:
+    /// hardware focus position. Value depends on particular lens controller.
+    FOCUS_HW_FAR_LIMIT,
+    /// Hardware focus near limit (write/read). Value:
+    /// hardware focus position. Value depends on particular lens controller.
+    FOCUS_HW_NEAR_LIMIT,
+    /// Hardware iris open limit (write/read). Value:
+    /// hardware iris position. Value depends on particular lens controller.
+    IRIS_HW_OPEN_LIMIT,
+    /// Hardware iris close limit (write/read). Value:
+    /// hardware iris position. Value depends on particular lens controller.
+    IRIS_HW_CLOSE_LIMIT,
+    /// Focus factor value (read only). Value:
+    /// Value depends on particular lens controller.
+    FOCUS_FACTOR,
+    /// Connection status (read only). Value:
+    /// 0 - not connected, 1 - connected.
+    IS_CONNECTED,
+    /// Hardware focus speed in AF mode (write/read). Value:
+    /// hardware focus speed. Value depends on particular lens controller.
+    FOCUS_HW_AF_SPEED,
+    /// Threshold for focus factor to start refocus (write/read). Value:
+    /// threshold %: 0 - no check, 100 - changing x2.
+    FOCUS_FACTOR_THRESHOLD,
+    /// Refocus timeout, sec (write/read). Value:
+    /// 0 - no refocus, to 100000 sec.
+    REFOCUS_TIMEOUT_SEC,
+    /// AF process mode (read only). Value: 0 - not active, 1 - active.
+    AF_IS_ACTIVE,
+    /// Iris mode. (write/read). Value:
+    /// Value depends on particular lens controller.
+    IRIS_MODE,
+    /// Debug info in terminal mode (write/read). Value:
+    /// 0 - off,
+    /// 1 - only terminal,
+    /// 2 - only file,
+    /// 3 - file and terminal.
+    DEBUG_INFO_MODE,
+    /// Auto ROI width (write/read). Value: 0 to video frame size, pxl.
+    AUTO_AF_ROI_WIDTH,
+    /// Auto ROI height (write/read). Value: 0 to video frame size, pxl.
+    AUTO_AF_ROI_HEIGHT,
+    /// Auto ROI frame border in pixels (write/read). Value:
+    /// border size from 0 to video frame min(width/height) / 2.
+    AUTO_AF_ROI_BORDER,
+    /// AF ROI mode (write/read). Value:
+    /// 0 - Manual position, 1 - Auto position.
+    AF_ROI_MODE,
+    /// Optical extender mode (write/read). Value:
+    /// Value depends on particular lens controller. Default: 0 -Off, 1 -On.
+    EXTENDER_MODE,
+    /// Stabilizer mode (write/read). Value:
+    /// 0 - Off, 1 - On.
+    STABILIZER_MODE,
+    /// AF range (write/read). Value:
+    /// Value depends on particular lens controller.
+    AF_RANGE,
+    /// Zoom full wide field of view (write/read). Value: FOV degree * 1000.
+    ZOOM_FULL_WIDE_FOV_DEG,
+    /// Zoom full tele field of view (write/read). Value: FOV degree * 1000.
+    ZOOM_FULL_TELE_FOV_DEG,
+    /// Fiels of view, degree (write/read). Value: FOV degree * 1000.
+    FOV_DEG
 };
 ```
 
