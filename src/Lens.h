@@ -198,8 +198,8 @@ class Lens
 public:
 
     /**
-     * @brief Lens data structure.
-     * @return String of current class version.
+     * @brief Get lens class version.
+     * @return Lens class version string in format "Major.Minor.Patch".
      */
     static std::string getVersion();
 
@@ -208,18 +208,18 @@ public:
      * @param initString Init string. Format depends on lens controller.
      * @return TRUE if the lens controller is init or FALSE.
      */
-    virtual bool init(std::string initString) = 0;
+    virtual bool openLens(std::string initString) = 0;
 
     /**
      * @brief Close connection.
      */
-    virtual void close() = 0;
+    virtual void closeLens() = 0;
 
     /**
      * @brief Get lens connection status.
      * @return TRUE if the lens is open or FALSE.
      */
-    virtual bool isOpen() = 0;
+    virtual bool isLensOpen() = 0;
 
     /**
      * @brief Set the lens controller param.
@@ -227,14 +227,14 @@ public:
      * @param value Param value.
      * @return TRUE if the property set or FALSE.
      */
-    virtual bool setParam(LensParam id, int value) = 0;
+    virtual bool setParam(LensParam id, float value) = 0;
 
     /**
      * @brief Get the lens controller param.
      * @param id Param ID.
      * @return int Param value or -1 of the param not exists.
      */
-    virtual int getParam(LensParam id) = 0;
+    virtual float getParam(LensParam id) = 0;
 
     /**
      * @brief Execute command.
@@ -242,7 +242,7 @@ public:
      * @param arg Command argument.
      * @return TRUE if the command executed or FALSE.
      */
-    virtual bool executeCommand(LensCommand id, int arg = 0) = 0;
+    virtual bool executeCommand(LensCommand id, float arg = 0) = 0;
 
     /**
      * @brief Add video frame to calculate focus factor.

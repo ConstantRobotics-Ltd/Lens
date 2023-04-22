@@ -6,7 +6,7 @@
 
 # **Lens interface C++ library**
 
-**v2.0.0**
+**v3.0.0**
 
 ------
 
@@ -17,9 +17,9 @@
 - [Lens interface class description](#Lens-interface-class-description)
   - [Class declaration](#Class-declaration)
   - [getVersion method](#getVersion-method)
-  - [init method](#init-method)
-  - [close method](#close-method)
-  - [isOpen method](#isOpen-method)
+  - [openLens method](#openLens-method)
+  - [closeLens method](#closeLens-method)
+  - [isLensOpen method](#isLensOpen-method)
   - [setParam method](#setParam-method)
   - [getParam method](#getParam-method)
   - [executeCommand method](#executeCommand-method)
@@ -40,6 +40,7 @@
 | ------- | ------------ | ------------------------------------------------------------ |
 | 1.0.0   | 21.10.2022   | First version                                                |
 | 2.0.0   | 17.03.2023   | - Subrepository LensControllerDataStrctures excluded.<br />- Data structures moved to Lens.h file.<br />- New parameters IDs added.<br />- Description updated. |
+| 3.0.0   | 23.04.2023   | - Methods signatures changes.                                |
 
 # Lens interface class description
 
@@ -60,8 +61,8 @@ class Lens
 public:
 
     /**
-     * @brief Lens data structure.
-     * @return String of current class version.
+     * @brief Get lens class version.
+     * @return Lens class version string in format "Major.Minor.Patch".
      */
     static std::string getVersion();
 
@@ -70,18 +71,18 @@ public:
      * @param initString Init string. Format depends on lens controller.
      * @return TRUE if the lens controller is init or FALSE.
      */
-    virtual bool init(std::string initString) = 0;
+    virtual bool openLens(std::string initString) = 0;
 
     /**
      * @brief Close connection.
      */
-    virtual void close() = 0;
+    virtual void closeLens() = 0;
 
     /**
      * @brief Get lens connection status.
      * @return TRUE if the lens is open or FALSE.
      */
-    virtual bool isOpen() = 0;
+    virtual bool isLensOpen() = 0;
 
     /**
      * @brief Set the lens controller param.
@@ -89,14 +90,14 @@ public:
      * @param value Param value.
      * @return TRUE if the property set or FALSE.
      */
-    virtual bool setParam(LensParam id, int value) = 0;
+    virtual bool setParam(LensParam id, float value) = 0;
 
     /**
      * @brief Get the lens controller param.
      * @param id Param ID.
      * @return int Param value or -1 of the param not exists.
      */
-    virtual int getParam(LensParam id) = 0;
+    virtual float getParam(LensParam id) = 0;
 
     /**
      * @brief Execute command.
@@ -104,7 +105,7 @@ public:
      * @param arg Command argument.
      * @return TRUE if the command executed or FALSE.
      */
-    virtual bool executeCommand(LensCommand id, int arg = 0) = 0;
+    virtual bool executeCommand(LensCommand id, float arg = 0) = 0;
 
     /**
      * @brief Add video frame to calculate focus factor.
@@ -133,34 +134,34 @@ Method can be used without **Lens** class instance:
 std::cout << "Lens controller version: " << Lens::getVersion() << std::endl;
 ```
 
-## init method
+## openLens method
 
-**init(...)** method designed to initialize lens controller. Method declaration:
+**openLens(...)** method designed to initialize lens controller. Method declaration:
 
 ```cpp
-virtual bool init(std::string initString) = 0;
+virtual bool openLens(std::string initString) = 0;
 ```
 
 | Parameter  | Value                                                        |
 | ---------- | ------------------------------------------------------------ |
-| initString | Initialization string. Particular lens controller can have unique format. It is recommended to use ';' symbol to divide part of initialization string. Example of lens controller initialization which user serial port: "/dev/ttyUSB0;9600;100" ("/dev/ttyUSB0" - serial port name, "9600" - baudrate, "100" - serial port read timeout). |
+| initString | Initialization string. Particular lens controller can have unique format. It is recommended to use ';' symbol to divide part of initialization string. Example of lens controller initialization which uses serial port: "/dev/ttyUSB0;9600;100" ("/dev/ttyUSB0" - serial port name, "9600" - baudrate, "100" - serial port read timeout). |
 
 **Returns:** TRUE if the lens controller initialized or FALSE if not.
 
-## close method
+## closeLens method
 
-**close()** method designed to close connection to lens. Method declaration:
+**closeLens()** method designed to close connection to lens. Method declaration:
 
 ```cpp
-virtual void close() = 0;
+virtual void closeLens() = 0;
 ```
 
-## isOpen method
+## isLensOpen method
 
-**isOpen()** method designed to obtain lens connection status. Method declaration:
+**isLensOpen()** method designed to obtain lens connection status. Method declaration:
 
 ```cpp
-virtual bool isOpen() = 0;
+virtual bool isLensOpen() = 0;
 ```
 
 **Returns:** TRUE is the lens connected or FALSE if not.
@@ -170,7 +171,7 @@ virtual bool isOpen() = 0;
 **setParam(...)** method designed to set new lens controller parameters value. Method declaration:
 
 ```cpp
-virtual bool setParam(LensParam id, int value) = 0;
+virtual bool setParam(LensParam id, float value) = 0;
 ```
 
 | Parameter | Description                                                  |
@@ -185,7 +186,7 @@ virtual bool setParam(LensParam id, int value) = 0;
 **getParam(...)** method designed to obtain lens controller parameter value. Method declaration:
 
 ```cpp
-virtual int getParam(LensParam id) = 0;
+virtual float getParam(LensParam id) = 0;
 ```
 
 | Parameter | Description                                                  |
@@ -199,7 +200,7 @@ virtual int getParam(LensParam id) = 0;
 **executeCommand(...)** method designed to execute lens controller command. Method declaration:
 
 ```cpp
-virtual bool executeCommand(LensCommand id, int arg = 0) = 0;
+virtual bool executeCommand(LensCommand id, float arg = 0) = 0;
 ```
 
 | Parameter | Description                                                  |
