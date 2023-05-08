@@ -6,7 +6,7 @@
 
 # **Lens interface C++ library**
 
-**v3.0.0**
+**v3.1.0**
 
 ------
 
@@ -40,7 +40,8 @@
 | ------- | ------------ | ------------------------------------------------------------ |
 | 1.0.0   | 21.10.2022   | First version                                                |
 | 2.0.0   | 17.03.2023   | - Subrepository LensControllerDataStrctures excluded.<br />- Data structures moved to Lens.h file.<br />- New parameters IDs added.<br />- Description updated. |
-| 3.0.0   | 23.04.2023   | - Methods signatures changes.                                |
+| 3.0.0   | 23.04.2023   | - Methods signatures changed.                                |
+| 3.1.0   | 08.05.2023   | - Added new parameters.                                      |
 
 # Lens interface class description
 
@@ -301,6 +302,7 @@ enum class LensCommand
 Enum declaration:
 
 ```cpp
+/// Lens params.
 enum class LensParam
 {
     /// Zoom position (write/read). Value:
@@ -434,7 +436,18 @@ enum class LensParam
     /// Zoom full tele field of view (write/read). Value: FOV degree * 1000.
     ZOOM_FULL_TELE_FOV_DEG,
     /// Fiels of view, degree (write/read). Value: FOV degree * 1000.
-    FOV_DEG
+    FOV_DEG,
+    /// Logging mode.
+    /// Default values:
+    /// 0 - Disable.
+    /// 1 - Only file.
+    /// 2 - Only terminal.
+    /// 3 - File and terminal.
+    LOG_MODE,
+    /// Connection status. Value: 0 - no lens responses, 1 - connected.
+    CONNECTION_STATUS,
+    /// Lens temperature, degree.
+    TEMPERATURE,
 };
 ```
 
@@ -487,6 +500,9 @@ enum class LensParam
 | ZOOM_FULL_WIDE_FOV_GED | read / write | Lens field of view (degree) when zoom full wide. Depends on combination lens + camera (sensor size) the field of view value can be different from technical characteristics of lens. The lens should calculate FOV_DEG automatically when zoom changes according to values of ZOOM_FULL_WIDE_FOV_GED and ZOOM_FULL_TELE_FOV_DEG by linear approximation. |
 | ZOOM_FULL_TELE_FOV_DEG | read / write | Lens field of view (degree) when zoom full tele. Depends on combination lens + camera (sensor size) the field of view value can be different from technical characteristics of lens. The lens should calculate FOV_DEG automatically when zoom changes according to values of ZOOM_FULL_WIDE_FOV_GED and ZOOM_FULL_TELE_FOV_DEG by linear approximation. |
 | FOV_DEG                |              | Current field of view (degree) calculated according to values of ZOOM_FULL_WIDE_FOV_GED and ZOOM_FULL_TELE_FOV_DEG and ZOOM_HW_POS  by linear approximation. Particular lens controller can consider also FOCUS_HW_POS for more precise calculation. |
+| LOG_MODE               | read / write | Logging mode. Default values:<br/>0 - Disable.<br/>1 - Only file.<br/>2 - Only terminal.<br/>3 - File and terminal. |
+| CONNECTION_STATUS      | read only    | Connection status. Value: 0 - no lens responses, 1 - connected. |
+| TEMPERATURE            | read only    | Lens temperature, degree.                                    |
 
 
 

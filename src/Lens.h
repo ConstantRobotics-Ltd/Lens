@@ -185,7 +185,18 @@ enum class LensParam
     /// Zoom full tele field of view (write/read). Value: FOV degree * 1000.
     ZOOM_FULL_TELE_FOV_DEG,
     /// Fiels of view, degree (write/read). Value: FOV degree * 1000.
-    FOV_DEG
+    FOV_DEG,
+    /// Logging mode.
+    /// Default values:
+    /// 0 - Disable.
+    /// 1 - Only file.
+    /// 2 - Only terminal.
+    /// 3 - File and terminal.
+    LOG_MODE,
+    /// Connection status. Value: 0 - no lens responses, 1 - connected.
+    CONNECTION_STATUS,
+    /// Lens temperature, degree.
+    TEMPERATURE,
 };
 
 
