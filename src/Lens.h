@@ -155,12 +155,6 @@ enum class LensParam
     /// Iris mode. (write/read). Value:
     /// Value depends on particular lens controller.
     IRIS_MODE,
-    /// Debug info in terminal mode (write/read). Value:
-    /// 0 - off,
-    /// 1 - only terminal,
-    /// 2 - only file,
-    /// 3 - file and terminal.
-    DEBUG_INFO_MODE,
     /// Auto ROI width (write/read). Value: 0 to video frame size, pxl.
     AUTO_AF_ROI_WIDTH,
     /// Auto ROI height (write/read). Value: 0 to video frame size, pxl.
@@ -185,7 +179,16 @@ enum class LensParam
     /// Zoom full tele field of view (write/read). Value: FOV degree * 1000.
     ZOOM_FULL_TELE_FOV_DEG,
     /// Fiels of view, degree (write/read). Value: FOV degree * 1000.
-    FOV_DEG
+    FOV_DEG,
+    /// Logging mode.
+    /// Default values:
+    /// 0 - Disable.
+    /// 1 - Only file.
+    /// 2 - Only terminal.
+    /// 3 - File and terminal.
+    LOG_MODE,
+    /// Lens temperature, degree.
+    TEMPERATURE
 };
 
 
