@@ -486,7 +486,7 @@ enum class LensParam
 | AF_RANGE               | read / write | Autofocus range. Value depends on particular lens controller. |
 | ZOOM_FULL_WIDE_FOV_GED | read / write | Lens field of view (degree) when zoom full wide. Depends on combination lens + camera (sensor size) the field of view value can be different from technical characteristics of lens. The lens should calculate FOV_DEG automatically when zoom changes according to values of ZOOM_FULL_WIDE_FOV_GED and ZOOM_FULL_TELE_FOV_DEG by linear approximation. |
 | ZOOM_FULL_TELE_FOV_DEG | read / write | Lens field of view (degree) when zoom full tele. Depends on combination lens + camera (sensor size) the field of view value can be different from technical characteristics of lens. The lens should calculate FOV_DEG automatically when zoom changes according to values of ZOOM_FULL_WIDE_FOV_GED and ZOOM_FULL_TELE_FOV_DEG by linear approximation. |
-| FOV_DEG                |              | Current field of view (degree) calculated according to values of ZOOM_FULL_WIDE_FOV_GED and ZOOM_FULL_TELE_FOV_DEG and ZOOM_HW_POS  by linear approximation. Particular lens controller can consider also FOCUS_HW_POS for more precise calculation. |
+| FOV_DEG                | read / write | Current field of view (degree) calculated according to values of ZOOM_FULL_WIDE_FOV_GED and ZOOM_FULL_TELE_FOV_DEG and ZOOM_HW_POS  by linear approximation. Particular lens controller can consider also FOCUS_HW_POS for more precise calculation. |
 
 
 
