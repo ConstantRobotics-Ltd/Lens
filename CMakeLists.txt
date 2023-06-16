@@ -38,5 +38,6 @@ SET(${PARENT}_LENS                            ON CACHE BOOL "" ${REWRITE_FORCE})
 ## Adding subdirectories according to the project configuration
 ################################################################################
 if (${PARENT}_LENS)
+    add_subdirectory(3rdparty)
     add_subdirectory(src)
 endif()

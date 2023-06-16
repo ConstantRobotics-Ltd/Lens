@@ -1,6 +1,8 @@
 #pragma once
 #include <string>
 #include <cstdint>
+#include "Frame.h"
+#include "ConfigReader.h"
 
 
 
@@ -8,6 +10,236 @@ namespace cr
 {
 namespace lens
 {
+
+
+
+/// Field of view point class.
+class FovPoint
+{
+public:
+    /// Hardware zoom pos.
+    int hwZoomPos{0};
+    /// Horizontal field of view, degree.
+    float xFovDeg{0.0f};
+    /// Vertical field of view, degree.
+    float yFovDeg{0.0f};
+
+    JSON_READABLE(FovPoint,
+                  hwZoomPos,
+                  xFovDeg,
+                  yFovDeg);
+
+    /**
+     * @brief operator =
+     * @param src Source object.
+     * @return FovPoint obect.
+     */
+    FovPoint& operator= (const FovPoint& src);
+};
+
+
+
+/// Lens params structure.
+class LensParams
+{
+public:
+    /// Initialization string. Formats depends on implementation.
+    std::string initString{"/dev/ttyUSB0;9600;20"};
+    /// Zoom position (write/read). Value:
+    /// zoom position 0(full wide) - 65535(full tele).
+    int zoomPos{0};
+    /// Hardware zoom position (write/read). Argument:
+    /// zoom position. Value depends on particular lens controller.
+    int zoomHwPos{0};
+    /// Focus position (write/read). Value:
+    /// focus position 0(full near) - 65535(full far).
+    int focusPos{0};
+    /// Hardware focus position (write/read). Value:
+    /// focus position. Value depends on particular lens controller.
+    int focusHwPos{0};
+    /// Iris position (write/read). Value:
+    /// iris position 0(full close) - 65535(full open).
+    int irisPos{0};
+    /// Hardware iris position (write/read). Value:
+    /// iris position. Value depends on particular lens controller.
+    int irisHwPos{0};
+    /// Focus mode (write/read). Value:
+    /// Value depends on particular lens controller.
+    int focusMode{0};
+    /// Filter mode (write/read).  Value:
+    /// Value depends on particular lens controller.
+    int filterMode{0};
+    /// Auto focus ROI top-left coordinate (write/read). Value:
+    /// ROI top-left horizontal coordinate in pixels.
+    int afRoiX0{0};
+    /// Auto focus ROI top-left coordinate (write/read). Value:
+    /// ROI top-left vertical coordinate in pixels.
+    int afRoiY0{0};
+    /// Auto focus ROI bottom-right coordinate (write/read). Value:
+    /// ROI bottom-right horizontal coordinate in pixels.
+    int afRoiX1{0};
+    /// Auto focus ROI bottom-right coordinate (write/read). Value:
+    /// ROI bottom-right vertical coordinate in pixels.
+    int afRoiY1{0};
+    /// Zoom speed (write/read). Value:
+    /// zoom speed 0 to 100 %.
+    int zoomSpeed{50};
+    /// Hardware zoom speed (write/read). Value:
+    /// zoom speed. Value depends on particular lens controller.
+    int zoomHwSpeed{50};
+    /// Max hardware zoom speed (write/read). Value:
+    /// zoom speed. Value depends on particular lens controller.
+    int zoomHwMaxSpeed{50};
+    /// Focus speed (write/read). Value:
+    /// focus speed 0 to 100 %.
+    int focusSpeed{50};
+    /// Hardware focus speed (write/read). Value:
+    /// focus speed. Value depends on particular lens controller.
+    int focusHwSpeed{50};
+    /// Max hardware focus speed (write/read). Argument:
+    /// focus speed. Value depends on particular lens controller.
+    int focusHwMaxSpeed{50};
+    /// Iris speed (write/read). Value:
+    /// iris speed 0 to 100 %.
+    int irisSpeed{50};
+    /// Hardware iris speed (write/read). Value:
+    /// iris speed. Value depends on particular lens controller.
+    int irisHwSpeed{50};
+    /// Max hardware iris speed (write/read). Value:
+    /// iris speed. Value depends on particular lens controller.
+    int irisHwMaxSpeed{50};
+    /// Hardware zoom tele limit (write/read). Value:
+    /// hardware zoom position. Value depends on particular lens controller.
+    int zoomHwTeleLimit{65535};
+    /// Hardware zoom wide limit (write/read). Value:
+    /// hardware zoom position. Value depends on particular lens controller.
+    int zoomHwWideLimit{0};
+    /// Hardware focus far limit (write/read). Value:
+    /// hardware focus position. Value depends on particular lens controller.
+    int focusHwFarLimit{65535};
+    /// Hardware focus near limit (write/read). Value:
+    /// hardware focus position. Value depends on particular lens controller.
+    int focusHwNearLimit{0};
+    /// Hardware iris open limit (write/read). Value:
+    /// hardware iris position. Value depends on particular lens controller.
+    int irisHwOpenLimit{65535};
+    /// Hardware iris close limit (write/read). Value:
+    /// hardware iris position. Value depends on particular lens controller.
+    int irisHwCloseLimit{0};
+    /// Focus factor value (read only). Value:
+    /// Value depends on particular lens controller.
+    float focusFactor{0.0f};
+    /// Connection status (read only). Value:
+    /// 0 - not connected, 1 - connected.
+    bool isConnected{false};
+    /// Hardware focus speed in AF mode (write/read). Value:
+    /// hardware focus speed. Value depends on particular lens controller.
+    int afHwSpeed{50};
+    /// Threshold for focus factor to start refocus (write/read). Value:
+    /// threshold %: 0 - no check, 100 - changing x2.
+    float focusFactorThreshold{0.0f};
+    /// Refocus timeout, sec (write/read). Value:
+    /// 0 - no refocus, to 100000 sec.
+    int refocusTimeoutSec{0};
+    /// AF process mode (read only). Value: 0 - not active, 1 - active.
+    bool afIsActive{false};
+    /// Iris mode. (write/read). Value:
+    /// Value depends on particular lens controller.
+    int irisMode{0};
+    /// Auto ROI width (write/read). Value: 0 to video frame size, pxl.
+    int autoAfRoiWidth{150};
+    /// Auto ROI height (write/read). Value: 0 to video frame size, pxl.
+    int autoAfRoiHeight{150};
+    /// Auto ROI frame border in pixels (write/read). Value:
+    /// border size from 0 to video frame min(width/height) / 2.
+    int autoAfRoiBorder{100};
+    /// AF ROI mode (write/read). Value:
+    /// 0 - Manual position, 1 - Auto position.
+    int afRoiMode{0};
+    /// Optical extender mode (write/read). Value:
+    /// Value depends on particular lens controller. Default: 0 -Off, 1 -On.
+    int extenderMode{0};
+    /// Stabilizer mode (write/read). Value:
+    /// 0 - Off, 1 - On.
+    int stabiliserMode{0};
+    /// AF range (write/read). Value:
+    /// Value depends on particular lens controller.
+    int afRange{0};
+    /// Horizontal fiels of view, degree (read only).
+    float xFovDeg{1.0f};
+    /// Vertical fiels of view, degree (read only).
+    float yFovDeg{1.0f};
+    /// Logging mode.
+    /// Default values:
+    /// 0 - Disable.
+    /// 1 - Only file.
+    /// 2 - Only terminal.
+    /// 3 - File and terminal.
+    int logMode{0};
+    /// Lens temperature, degree (read only).
+    float temperature{0.0f};
+    /// Open status: 1 - lens control port open, 0 - not open.
+    bool isOpen{false};
+    /// Lens type service value (write/read). Value depends on implementation.
+    int type{0};
+    /// List of field of view points.
+    std::vector<FovPoint> fovPoints{std::vector<FovPoint>()};
+
+    JSON_READABLE(LensParams,
+                  initString,
+                  focusMode,
+                  filterMode,
+                  afRoiX0,
+                  afRoiY0,
+                  afRoiX1,
+                  afRoiY1,
+                  zoomHwMaxSpeed,
+                  focusHwMaxSpeed,
+                  irisHwMaxSpeed,
+                  zoomHwTeleLimit,
+                  zoomHwWideLimit,
+                  focusHwFarLimit,
+                  focusHwNearLimit,
+                  irisHwOpenLimit,
+                  irisHwCloseLimit,
+                  afHwSpeed,
+                  focusFactorThreshold,
+                  refocusTimeoutSec,
+                  irisMode,
+                  autoAfRoiWidth,
+                  autoAfRoiHeight,
+                  autoAfRoiBorder,
+                  afRoiMode,
+                  extenderMode,
+                  stabiliserMode,
+                  afRange,
+                  logMode,
+                  type,
+                  fovPoints);
+
+    /**
+     * @brief operator =
+     * @param src Source object.
+     * @return LensParams obect.
+     */
+    LensParams& operator= (const LensParams& src);
+
+    /**
+     * @brief Encode params. The method doesn't encode initString.
+     * @param data Pointer to data buffer.
+     * @param size Size of data.
+     */
+    void encode(uint8_t* data, int& size);
+
+    /**
+     * @brief Decode params. The method doesn't decode initString.
+     * @param data Pointer to data.
+     * @return TRUE is params decoded or FALSE if not.
+     */
+    bool decode(uint8_t* data, int& size);
+};
+
+
 
 /// Lens commands enum.
 enum class LensCommand
@@ -178,8 +410,10 @@ enum class LensParam
     ZOOM_FULL_WIDE_FOV_DEG,
     /// Zoom full tele field of view (write/read). Value: FOV degree * 1000.
     ZOOM_FULL_TELE_FOV_DEG,
-    /// Fiels of view, degree (write/read). Value: FOV degree * 1000.
-    FOV_DEG,
+    /// Horizontal Fiels of view, degree (read only).
+    X_FOV_DEG,
+    /// Vertical Fiels of view, degree (read only).
+    Y_FOV_DEG,
     /// Logging mode.
     /// Default values:
     /// 0 - Disable.
@@ -188,7 +422,11 @@ enum class LensParam
     /// 3 - File and terminal.
     LOG_MODE,
     /// Lens temperature, degree.
-    TEMPERATURE
+    TEMPERATURE,
+    /// Open status: 1 - lens control port open, 0 - not open.
+    IS_OPEN,
+    /// Lens type. Value depends on implementation.
+    TYPE
 };
 
 
@@ -207,11 +445,19 @@ public:
     static std::string getVersion();
 
     /**
-     * @brief Init lens controller.
+     * @brief Open lens controller. Can be used instead initLens(...) method.
      * @param initString Init string. Format depends on lens controller.
      * @return TRUE if the lens controller is init or FALSE.
      */
     virtual bool openLens(std::string initString) = 0;
+
+    /**
+     * @brief Init lens controller by structure. Can be used instead
+     * openLens(...) method.
+     * @param initString Init string. Format depends on lens controller.
+     * @return TRUE if the lens controller is init or FALSE.
+     */
+    virtual bool initLens(LensParams& params) = 0;
 
     /**
      * @brief Close connection.
@@ -219,10 +465,17 @@ public:
     virtual void closeLens() = 0;
 
     /**
-     * @brief Get lens connection status.
+     * @brief Get lens open status.
      * @return TRUE if the lens is open or FALSE.
      */
     virtual bool isLensOpen() = 0;
+
+    /**
+     * @brief Get lens connection status. Lens can be open but no response from
+     * lens hardware.
+     * @return TRUE if the lens is open or FALSE.
+     */
+    virtual bool isLensConnected() = 0;
 
     /**
      * @brief Set the lens controller param.
@@ -235,9 +488,16 @@ public:
     /**
      * @brief Get the lens controller param.
      * @param id Param ID.
-     * @return int Param value or -1 of the param not exists.
+     * @return float Param value or -1 of the param not exists.
      */
     virtual float getParam(LensParam id) = 0;
+
+    /**
+     * @brief Get the lens controller paramw.
+     * @param id Param ID.
+     * @return Lens params structure.
+     */
+    virtual LensParams getParams() = 0;
 
     /**
      * @brief Execute command.
@@ -248,13 +508,54 @@ public:
     virtual bool executeCommand(LensCommand id, float arg = 0) = 0;
 
     /**
-     * @brief Add video frame to calculate focus factor.
-     * @param frame Pointer to frame data in Mono8 format.
-     * @param width Frame width.
-     * @param height Frame height.
-     * @return TRUE If the video frame was added or FALSE.
+     * @brief Add video frame for auto focus purposes. Some lens controllers
+     * may not support this functions.
+     * @param frame Video frame object.
      */
-    virtual bool addVideoFrame(uint8_t* frame, int width, int height) = 0;
+    virtual void addVideoFrame(cr::video::Frame& frame) = 0;
+
+    /**
+     * @brief Encode set param command.
+     * @param data Pointer to data buffer. Must have size >= 11.
+     * @param size Size of encoded data.
+     * @param id Lens parameter id.
+     * @param value Lens parameter value.
+     */
+    static void encodeSetParamCommand(
+            uint8_t* data, int& size, LensParam id, float value);
+
+    /**
+     * @brief Encode command.
+     * @param data Pointer to data buffer. Must have size >= 11.
+     * @param size Size of encoded data.
+     * @param id Lens command ID.
+     * @param arg Lens command argument.
+     */
+    static void encodeCommand(
+            uint8_t* data, int& size, LensCommand id, float arg = 0.0f);
+
+    /**
+     * @brief Encode params.
+     * @param data Pointer to data buffer.
+     * @param size Size of encoded data,
+     * @param params Params structure.
+     */
+    static void encodeParams(uint8_t* data, int& size, LensParams& params);
+
+    /**
+     * @brief Decode command.
+     * @param data Pointer to command data.
+     * @param size Size of data.
+     * @param paramId Output command ID.
+     * @param commandId Output command ID.
+     * @param value Param or command value.
+     * @return 0 - command decoded, 1 - set param command decoded, -1 - error.
+     */
+    static int decodeCommand(uint8_t* data,
+                             int size,
+                             LensParam& paramId,
+                             LensCommand& commandId,
+                             float& value);
 };
 }
 }
