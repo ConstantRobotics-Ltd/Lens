@@ -12,8 +12,11 @@ using namespace std;
 // Copy test.
 bool copyTest();
 
-// Encode/decode test.
-bool encodeDecodeTest();
+// Encode/decode params test.
+bool encodeDecodeParamsTest();
+
+// Encode/decode commands test.
+bool encodeDecodeCommandsTest();
 
 
 
@@ -34,14 +37,19 @@ int main(void)
         cout << "ERROR" << endl;
     cout << endl;
 
-    cout << "Encode/Decode test:" << endl;
-    if (encodeDecodeTest())
+    cout << "Encode/Decode params test:" << endl;
+    if (encodeDecodeParamsTest())
         cout << "OK" << endl;
     else
         cout << "ERROR" << endl;
     cout << endl;
 
-
+    cout << "Encode/Decode commands test:" << endl;
+    if (encodeDecodeCommandsTest())
+        cout << "OK" << endl;
+    else
+        cout << "ERROR" << endl;
+    cout << endl;
 
     return 1;
 }
@@ -385,7 +393,7 @@ bool copyTest()
 
 
 // Encode/decode test.
-bool encodeDecodeTest()
+bool encodeDecodeParamsTest()
 {
     // Prepare random params.
     LensParams in;
@@ -705,6 +713,66 @@ bool encodeDecodeTest()
     }
 
     return result;
+}
+
+
+
+// Encode/decode commands test.
+bool encodeDecodeCommandsTest()
+{
+    // Encode command.
+    uint8_t data[1024];
+    int size = 0;
+    float outValue = (float)(rand() % 20);
+    Lens::encodeCommand(data, size, LensCommand::AF_STOP, outValue);
+
+    // Decode command.
+    LensCommand commandId;
+    LensParam paramId;
+    float value = 0.0f;
+    if (Lens::decodeCommand(data, size, paramId, commandId, value) != 0)
+    {
+        cout << "Command not decoded" << endl;
+        return false;
+    }
+
+    // Checkk ID and value.
+    if (commandId != LensCommand::AF_STOP)
+    {
+        cout << "not a LensCommand::AF_STOP" << endl;
+        return false;
+    }
+    if (value != outValue)
+    {
+        cout << "not equal value" << endl;
+        return false;
+    }
+
+    // Encode param.
+    outValue = (float)(rand() % 20);
+    Lens::encodeSetParamCommand(data, size, LensParam::AF_ROI_X0, outValue);
+
+    // Decode command.
+    value = 0.0f;
+    if (Lens::decodeCommand(data, size, paramId, commandId, value) != 1)
+    {
+        cout << "Set param command not decoded" << endl;
+        return false;
+    }
+
+    // Checkk ID and value.
+    if (paramId != LensParam::AF_ROI_X0)
+    {
+        cout << "not a LensParam::AF_ROI_X0" << endl;
+        return false;
+    }
+    if (value != outValue)
+    {
+        cout << "not equal value" << endl;
+        return false;
+    }
+
+    return true;
 }
 
 
