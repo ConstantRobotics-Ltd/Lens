@@ -88,7 +88,7 @@ void cr::lens::LensParams::encode(uint8_t* data, int& size)
 {
     // Encode version.
     int pos = 0;
-    data[pos] = 0x02;
+    data[pos] = 0x02; pos += 1;
     data[pos] = LENS_MAJOR_VERSION; pos += 1;
     data[pos] = LENS_MINOR_VERSION; pos += 1;
 
@@ -139,22 +139,18 @@ void cr::lens::LensParams::encode(uint8_t* data, int& size)
     memcpy(&data[pos], &logMode, 4); pos += 4;
     memcpy(&data[pos], &temperature, 4); pos += 4;
     data[pos] = isOpen == true ? 0x01 : 0x00; pos += 1;
-    memcpy(&data[pos], &type, 4); pos += 4;
-    memcpy(&data[pos], &fovPoints, 4); pos += 4;
+    memcpy(&data[pos], &type, 4);
+
     size = pos;
 }
 
 
 
 /// Decode params.
-bool cr::lens::LensParams::decode(uint8_t* data, int& size)
+bool cr::lens::LensParams::decode(uint8_t* data)
 {
-    // Check size.
-    if (size != 186)
-        return false;
-
     // Check header.
-    if (data[0] != 0x03)
+    if (data[0] != 0x02)
         return false;
 
     // Check version.
@@ -209,10 +205,10 @@ bool cr::lens::LensParams::decode(uint8_t* data, int& size)
     memcpy(&logMode, &data[pos], 4); pos += 4;
     memcpy(&temperature, &data[pos], 4); pos += 4;
     isOpen = data[pos] == 0x00 ? false : true; pos += 1;
-    memcpy(&type, &data[pos], 4); pos += 4;
-    memcpy(&fovPoints, &data[pos], 4);
+    memcpy(&type, &data[pos], 4);
 
     initString = "";
+    fovPoints.clear();
 
     return true;
 }

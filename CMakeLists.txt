@@ -29,7 +29,8 @@ endif()
 ## CONFIGURATION
 ## project configuration
 ################################################################################
-SET(${PARENT}_LENS                            ON CACHE BOOL "" ${REWRITE_FORCE})
+SET(${PARENT}_LENS                           ON  CACHE BOOL "" ${REWRITE_FORCE})
+SET(${PARENT}_LENS_TEST                      ON  CACHE BOOL "" ${REWRITE_FORCE})
 
 
 
@@ -40,4 +41,8 @@ SET(${PARENT}_LENS                            ON CACHE BOOL "" ${REWRITE_FORCE})
 if (${PARENT}_LENS)
     add_subdirectory(3rdparty)
     add_subdirectory(src)
+endif()
+
+if (${PARENT}_LENS_TEST)
+    add_subdirectory(test)
 endif()

@@ -225,18 +225,18 @@ public:
     LensParams& operator= (const LensParams& src);
 
     /**
-     * @brief Encode params. The method doesn't encode initString.
+     * @brief Encode params. The method doesn't encode initString and fovPoints.
      * @param data Pointer to data buffer.
      * @param size Size of data.
      */
     void encode(uint8_t* data, int& size);
 
     /**
-     * @brief Decode params. The method doesn't decode initString.
+     * @brief Decode params. The method doesn't decode initString and fovPoints.
      * @param data Pointer to data.
      * @return TRUE is params decoded or FALSE if not.
      */
-    bool decode(uint8_t* data, int& size);
+    bool decode(uint8_t* data);
 };
 
 
