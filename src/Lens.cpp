@@ -76,6 +76,9 @@ cr::lens::LensParams &cr::lens::LensParams::operator= (const cr::lens::LensParam
     temperature = src.temperature;
     isOpen = src.isOpen;
     type = src.type;
+    custom1 = src.custom1;
+    custom2 = src.custom2;
+    custom3 = src.custom3;
     fovPoints = src.fovPoints;
 
     return *this;
@@ -139,7 +142,10 @@ void cr::lens::LensParams::encode(uint8_t* data, int& size)
     memcpy(&data[pos], &logMode, 4); pos += 4;
     memcpy(&data[pos], &temperature, 4); pos += 4;
     data[pos] = isOpen == true ? 0x01 : 0x00; pos += 1;
-    memcpy(&data[pos], &type, 4);
+    memcpy(&data[pos], &type, 4); pos += 4;
+    memcpy(&data[pos], &custom1, 4); pos += 4;
+    memcpy(&data[pos], &custom2, 4); pos += 4;
+    memcpy(&data[pos], &custom3, 4); pos += 4;
 
     size = pos;
 }
@@ -205,7 +211,10 @@ bool cr::lens::LensParams::decode(uint8_t* data)
     memcpy(&logMode, &data[pos], 4); pos += 4;
     memcpy(&temperature, &data[pos], 4); pos += 4;
     isOpen = data[pos] == 0x00 ? false : true; pos += 1;
-    memcpy(&type, &data[pos], 4);
+    memcpy(&type, &data[pos], 4); pos += 4;
+    memcpy(&custom1, &data[pos], 4); pos += 4;
+    memcpy(&custom2, &data[pos], 4); pos += 4;
+    memcpy(&custom3, &data[pos], 4); pos += 4;
 
     initString = "";
     fovPoints.clear();
@@ -297,19 +306,6 @@ int cr::lens::Lens::decodeCommand(uint8_t* data,
 
     return -1;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

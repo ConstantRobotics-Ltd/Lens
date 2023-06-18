@@ -182,6 +182,12 @@ public:
     bool isOpen{false};
     /// Lens type service value (write/read). Value depends on implementation.
     int type{0};
+    /// Lens custom param 1. Value depends on implementation.
+    float custom1;
+    /// Lens custom param 2. Value depends on implementation.
+    float custom2;
+    /// Lens custom param 3. Value depends on implementation.
+    float custom3;
     /// List of field of view points.
     std::vector<FovPoint> fovPoints{std::vector<FovPoint>()};
 
@@ -215,6 +221,9 @@ public:
                   afRange,
                   logMode,
                   type,
+                  custom1,
+                  custom2,
+                  custom3,
                   fovPoints);
 
     /**
@@ -426,7 +435,13 @@ enum class LensParam
     /// Open status: 1 - lens control port open, 0 - not open.
     IS_OPEN,
     /// Lens type. Value depends on implementation.
-    TYPE
+    TYPE,
+    /// Lens custom param 1. Value depends on implementation.
+    CUSTOM_1,
+    /// Lens custom param 2. Value depends on implementation.
+    CUSTOM_2,
+    /// Lens custom param 3. Value depends on implementation.
+    CUSTOM_3
 };
 
 
