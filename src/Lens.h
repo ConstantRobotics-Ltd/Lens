@@ -415,13 +415,9 @@ enum class LensParam
     /// AF range (write/read). Value:
     /// Value depends on particular lens controller.
     AF_RANGE,
-    /// Zoom full wide field of view (write/read). Value: FOV degree * 1000.
-    ZOOM_FULL_WIDE_FOV_DEG,
-    /// Zoom full tele field of view (write/read). Value: FOV degree * 1000.
-    ZOOM_FULL_TELE_FOV_DEG,
-    /// Horizontal Fiels of view, degree (read only).
+    /// Horizontal Field of view, degree (read only).
     X_FOV_DEG,
-    /// Vertical Fiels of view, degree (read only).
+    /// Vertical Field of view, degree (read only).
     Y_FOV_DEG,
     /// Logging mode.
     /// Default values:
@@ -548,14 +544,6 @@ public:
      */
     static void encodeCommand(
             uint8_t* data, int& size, LensCommand id, float arg = 0.0f);
-
-    /**
-     * @brief Encode params.
-     * @param data Pointer to data buffer.
-     * @param size Size of encoded data,
-     * @param params Params structure.
-     */
-    static void encodeParams(uint8_t* data, int& size, LensParams& params);
 
     /**
      * @brief Decode command.
