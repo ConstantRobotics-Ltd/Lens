@@ -6,7 +6,7 @@
 
 # **Lens interface C++ library**
 
-**v4.0.1**
+**v4.0.2**
 
 ------
 
@@ -63,6 +63,7 @@
 | 3.2.0   | 10.05.2023   | - Parameters list changed.                                   |
 | 4.0.0   | 18.06.2023   | - Added **LensParams** class which contains lens controller parameters.<br/>- Added new methods to encode/decode lens control command.<br/>- Added new lens parameters.<br/>- Added tests. |
 | 4.0.1   | 28.06.2023   | - ConfigReader submodule updated.<br />- Frame submodule updated. |
+| 4.0.2   | 29.06.2023   | - Documentation updated.                                     |
 
 
 
@@ -206,7 +207,7 @@ std::cout << "Lens class version: " << Lens::getVersion() << std::endl;
 Console output:
 
 ```bash
-Lens class version: 4.0.1
+Lens class version: 4.0.2
 ```
 
 
@@ -1229,7 +1230,7 @@ Typical commands to build **Lens** library:
 
 ```bash
 git clone https://github.com/ConstantRobotics-Ltd/Lens.git
-cd ConfigReader
+cd Lens
 git submodule update --init --recursive
 mkdir build
 cd build
@@ -1251,7 +1252,7 @@ You can add repository **Lens** as submodule by commands:
 
 ```bash
 cd <your respository folder>
-git submodule add https://github.com/ConstantRobotics-Ltd/Lense.git 3rdparty/Lens
+git submodule add https://github.com/ConstantRobotics-Ltd/Lens.git 3rdparty/Lens
 git submodule update --init --recursive
 ```
 
