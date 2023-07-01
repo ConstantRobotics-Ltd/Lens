@@ -6,7 +6,7 @@
 
 # **Lens interface C++ library**
 
-**v4.0.2**
+**v4.0.3**
 
 ------
 
@@ -46,7 +46,7 @@
 
 # Overview
 
-**Lens** C++ library provides standard interface as well defines data structures and rules for different lens controllers. **Lens** interface class doesn't do anything, just provides interface, data structures and service functions to encode/decode parameter. Different lens controller classes inherit interface form **Lens** C++ class. **Lens.h** file contains list of data structures (**LensCommand** enum, **LensParam** enum and **LensParams** class) and **Lens** class declaration. **LensCommand** enum contains IDs of commands supported by **Lens** class. **LensParam** enum contains IDs of params supported by **Lens** class. **LensParams** class contains fields for lens parameters values and provides methods to encode/decode lens parameters and read/write lens parameters from JSON file. All lens controller should include params and commands listed in **Lens.h** file. Lens interface class depends on **Frame** class (describes video frame and video frame data structures, necessary for autofocus functions) and **ConfigReader** library (provides methods to read/write JSON config files).
+**Lens** C++ library provides standard interface as well defines data structures and rules for different lens controllers. **Lens** interface class doesn't do anything, just provides interface, data structures and service functions to encode/decode parameter. Different lens controller classes inherit interface form **Lens** C++ class. **Lens.h** file contains list of data structures (**LensCommand** enum, **LensParam** enum and **LensParams** class) and **Lens** class declaration. **LensCommand** enum contains IDs of commands supported by **Lens** class. **LensParam** enum contains IDs of params supported by **Lens** class. **LensParams** class contains fields for lens parameters values and provides methods to encode/decode and read/write lens parameters from JSON file. All lens controllers should include params and commands listed in **Lens.h** file. Lens interface class depends on **Frame** class (describes video frame and video frame data structures, necessary for autofocus functions) and **ConfigReader** library (provides methods to read/write JSON config files).
 
 
 
@@ -64,6 +64,7 @@
 | 4.0.0   | 18.06.2023   | - Added **LensParams** class which contains lens controller parameters.<br/>- Added new methods to encode/decode lens control command.<br/>- Added new lens parameters.<br/>- Added tests. |
 | 4.0.1   | 28.06.2023   | - ConfigReader submodule updated.<br />- Frame submodule updated. |
 | 4.0.2   | 29.06.2023   | - Documentation updated.                                     |
+| 4.0.3   | 01.07.2023   | - Documentation updated.<br />- Lens class comments in source code updated. |
 
 
 
@@ -192,7 +193,7 @@ public:
 
 ## getVersion method
 
-**getVersion()** method returns string of current version of **Lens** class. Particular lens controller can have it's own **getVersion()** method. Method declaration:
+**getVersion()** method returns string of current class version. Particular lens controller can have it's own **getVersion()** method. Method declaration:
 
 ```cpp
 static std::string getVersion();
@@ -222,7 +223,7 @@ virtual bool openLens(std::string initString) = 0;
 
 | Parameter  | Value                                                        |
 | ---------- | ------------------------------------------------------------ |
-| initString | Initialization string. Particular lens controller can have unique init string format. But it is recommended to use '**;**' symbol to divide part of initialization string. Recommended lens controller initialization string for controllers which uses serial port: **"/dev/ttyUSB0;9600;100"** ("/dev/ttyUSB0" - serial port name, "9600" - baudrate, "100" - serial port read timeout). |
+| initString | Initialization string. Particular lens controller can have unique init string format. But it is recommended to use '**;**' symbol to divide parts of initialization string. Recommended initialization string format for controllers which uses serial port: **"/dev/ttyUSB0;9600;100"** ("/dev/ttyUSB0" - serial port name, "9600" - baudrate, "100" - serial port read timeout). |
 
 **Returns:** TRUE if the lens controller initialized or FALSE if not.
 
@@ -230,7 +231,7 @@ virtual bool openLens(std::string initString) = 0;
 
 ## initLens method
 
-**initLens(...)** method designed to initialize lens controller by list of parameters. This method can be used instead of **openLens(...)** method (**LensParams** class includes **initString**) when you need initialize lens controller with not default parameters values. Method declaration:
+**initLens(...)** method designed to initialize lens controller by list of parameters. This method can be used instead of **openLens(...)** method (**LensParams** class includes **initString**) when you need initialize lens controller with not default parameters. Method declaration:
 
 ```cpp
 virtual bool initLens(LensParams& params) = 0;
@@ -268,7 +269,7 @@ virtual bool isLensOpen() = 0;
 
 ## isLensConnected method
 
-**isLensConnected()** method designed to obtain lens connection status. Connection status shows if the lens controller has data exchange with lens equipment. For example, if lens has serial port lens controller connects to serial port (opens serial port file in OS) but lens can be not active (no power). In this case connection status shows that lens controller doesn't have data exchange with lens equipment (methos will return FALSE). If lens controller has data exchange with lens equipment the method will return TRUE. If lens controller not initialize the connection status always FALSE. Method declaration:
+**isLensConnected()** method designed to obtain lens connection status. Connection status shows if the lens controller has data exchange with lens equipment. For example, if lens has serial port lens controller connects to serial port (opens serial port file in OS) but lens can be not active (no power). In this case connection status shows that lens controller doesn't have data exchange with lens equipment (method will return FALSE). If lens controller has data exchange with lens equipment the method will return TRUE. If lens controller not initialize the connection status always FALSE. Method declaration:
 
 ```cpp
 virtual bool isLensConnected() = 0;
@@ -288,7 +289,7 @@ virtual bool setParam(LensParam id, float value) = 0;
 
 | Parameter | Description                                                  |
 | --------- | ------------------------------------------------------------ |
-| id        | Lens parameter ID according to **LensParam** enum (see description of **LensParam** enum). |
+| id        | Lens parameter ID (see description of **LensParam** enum).   |
 | value     | Lens parameter value. Value depends on parameter ID (see description of **LensParam** enum). |
 
 **Returns:** TRUE if the parameter was set or FALSE if not.
@@ -303,9 +304,9 @@ virtual bool setParam(LensParam id, float value) = 0;
 virtual float getParam(LensParam id) = 0;
 ```
 
-| Parameter | Description                                                  |
-| --------- | ------------------------------------------------------------ |
-| id        | Lens parameter ID according to LensParam enum (see description of **LensParam** enum). |
+| Parameter | Description                                                |
+| --------- | ---------------------------------------------------------- |
+| id        | Lens parameter ID (see description of **LensParam** enum). |
 
 **Returns:** parameter value or -1 of the parameters doesn't exist (not supported) in particular lens controller.
 
@@ -333,10 +334,10 @@ virtual bool executeCommand(LensCommand id, float arg = 0) = 0;
 
 | Parameter | Description                                                  |
 | --------- | ------------------------------------------------------------ |
-| id        | Lens command ID according to **LensCommand** enum (see description of **LensCommand** enum). |
+| id        | Lens command ID (see description of **LensCommand** enum).   |
 | arg       | Lens command argument. Value depends on command ID (see description of **LensCommand** enum). |
 
-**Returns:** TRUE is the command was executed or FALSE if not.
+**Returns:** TRUE is the command was executed (accepted by lens controller) or FALSE if not.
 
 
 
@@ -358,7 +359,7 @@ virtual void addVideoFrame(cr::video::Frame& frame) = 0;
 
 ## encodeSetParamCommand method
 
-**encodeSetParamCommand(...)** static method designed to encode command to change any lens parameter value for remote lens controller. Sometimes there is a need to control a lens remotely. To do this, the developer has to develop his own protocol and according to it encode the command and deliver it over the communication channel to lens controller. To simplify this, the **Lens** interface class contains static methods for encoding the control command. The **Lens** class provides two types of commands: a parameter change command (SET_PARAM) and an action command (COMMAND). **encodeSetParamCommand(...)** designed to encode SET_PARAM command. Method declaration:
+**encodeSetParamCommand(...)** static method designed to encode command to change any remote lens parameter. To control a lens remotely, the developer has to develop his own protocol and according to it encode the command and deliver it over the communication channel. To simplify this, the **Lens** class contains static methods for encoding the control command. The **Lens** class provides two types of commands: a parameter change command (SET_PARAM) and an action command (COMMAND). **encodeSetParamCommand(...)** designed to encode SET_PARAM command. Method declaration:
 
 ```cpp
 static void encodeSetParamCommand(uint8_t* data, int& size, LensParam id, float value);
@@ -387,7 +388,7 @@ static void encodeSetParamCommand(uint8_t* data, int& size, LensParam id, float 
 | 9    | value | Parameter value **float** in Little-endian format. |
 | 10   | value | Parameter value **float** in Little-endian format. |
 
-**encodeSetParamCommand(...)** is static and used without **Lens** class instance. This method used on client side (remote control system). Command encoding example:
+**encodeSetParamCommand(...)** is static and used without **Lens** class instance. This method used on client side (control system). Example:
 
 ```cpp
 // Buffer for encoded data.
@@ -404,7 +405,7 @@ Lens::encodeSetParamCommand(data, size, LensParam::AF_ROI_X0, outValue);
 
 ## encodeCommand method
 
-**encodeCommand(...)** static method designed to encode command to check any lens parameter value for lens remote control. Sometimes there is a need to control a lens remotely. To do this, the developer has to develop his own protocol and according to it encode the command and deliver it over the communication channel to lens controller. To simplify this, the **Lens** interface class contains static methods for encoding the control command. The **Lens** class provides two types of commands: a parameter change command (SET_PARAM) and an action command (COMMAND). **encodeCommand(...)** designed to encode COMMAND command (action command). Method declaration:
+**encodeCommand(...)** static method designed to encode lens action command. To control a lens remotely, the developer has to develop his own protocol and according to it encode the command and deliver it over the communication channel. To simplify this, the **Lens** class contains static methods for encoding the control command. The **Lens** class provides two types of commands: a parameter change command (SET_PARAM) and an action command (COMMAND). **encodeCommand(...)** designed to encode COMMAND command (action command). Method declaration:
 
 ```cpp
 static void encodeCommand(uint8_t* data, int& size, LensCommand id, float arg = 0.0f);
@@ -414,8 +415,8 @@ static void encodeCommand(uint8_t* data, int& size, LensCommand id, float arg = 
 | --------- | ------------------------------------------------------------ |
 | data      | Pointer to data buffer for encoded command. Must have size >= 11. |
 | size      | Size of encoded data. Will be 11 bytes.                      |
-| id        | Command ID according to **LensParam** enum.                  |
-| arg       | Command argument value.                                      |
+| id        | Command ID according to **LensCommand** enum.                |
+| arg       | Command argument value (value depends on command ID).        |
 
 **COMMAND** format:
 
@@ -433,7 +434,7 @@ static void encodeCommand(uint8_t* data, int& size, LensCommand id, float arg = 
 | 9    | arg   | Command argument value **float** in Little-endian format. |
 | 10   | arg   | Command argument value **float** in Little-endian format. |
 
-**encodeCommand(...)** is static and used without **Lens** class instance. This method used on client side (remote control system). Command encoding example:
+**encodeCommand(...)** is static and used without **Lens** class instance. This method used on client side (control system). Encoding example:
 
 ```cpp
 // Buffer for encoded data.
@@ -450,7 +451,7 @@ Lens::encodeCommand(data, size, LensCommand::ZOOM_TO_POS, outValue);
 
 ## decodeCommand method
 
-**decodeCommand(...)** static method designed to decode command on lens controller side. Sometimes there is a need to control a lens remotely. To do this, the developer has to develop his own protocol and according to it decode the command on lens controller size. To simplify this, the **Lens** interface class contains static method to decode input command. The **Lens** class provides two types of commands: a parameter change command (SET_PARAM) and an action command (COMMAND). Method declaration:
+**decodeCommand(...)** static method designed to decode command on lens controller side. o control a lens remotely, the developer has to develop his own protocol and according to it decode the command on lens controller side. To simplify this, the **Lens** interface class contains static method to decode input command (commands should be encoded by methods **encodeSetParamsCommand(...)** or **encodeCommand(...)**). The **Lens** class provides two types of commands: a parameter change command (SET_PARAM) and an action command (COMMAND). Method declaration:
 
 ```cpp
 static int decodeCommand(uint8_t* data, int size, LensParam& paramId, LensCommand& commandId, float& value);
@@ -470,7 +471,7 @@ static int decodeCommand(uint8_t* data, int size, LensParam& paramId, LensComman
 
 # Data structures
 
-**Lens.h** file defines IDs for parameters (**LensParam** enum), IDs for commands (**LensCommand** enum) and **LensParams** class.
+**Lens.h** file defines IDs for parameters (**LensParam** enum), IDs for commands (**LensCommand** enum).
 
 
 
@@ -481,40 +482,65 @@ Enum declaration:
 ```cpp
 enum class LensCommand
 {
-    /// Zoom tele. No arguments.
+    /// Move zoom tele (in). Command doesn't have arguments. User should be able
+    /// to set zoom movement speed via lens parameters.
     ZOOM_TELE = 1,
-    /// Zoom wide. No arguments.
+    /// Move zoom wide (out). Command doesn't have arguments. User should be
+    /// able to set zoom movement speed via lens parameters.
     ZOOM_WIDE,
-    /// Zoom to position. Argument:
-    /// zoom position 0(full wide) - 65535(full tele).
+    /// Move zoom to position. Lens controller should have zoom range from
+    /// 0 (full wide) to 65535 (full tele) regardless of the hardware value of
+    /// the zoom position. If the minimum and maximum zoom position limits are
+    /// set by the user in the lens parameters, the range of the hardware zoom
+    /// position must be scaled to the user space 0-65535 range.
+    /// Command argument: zoom position 0-65535. User should be able to set zoom
+    /// movement speed via lens parameters.
     ZOOM_TO_POS,
-    /// Stop zoom. No arguments.
+    /// Stop zoom moving including stop zoom to position command.
     ZOOM_STOP,
-    /// Focus far. No arguments.
+    /// Move focus far. Command doesn't have arguments. User should be able to
+    /// set focus movement speed via lens parameters.
     FOCUS_FAR,
-    /// Focus near. No arguments.
+    /// Move focus near. Command doesn't have arguments. User should be able to
+    /// set focus movement speed via lens parameters.
     FOCUS_NEAR,
-    /// Focus to position. Argument:
-    /// focus position 0(full near) - 65535(full far).
+    /// Move focus to position. Lens controller should have focus range from 0
+    /// (full near) to 65535 (full far) regardless of the hardware value of the
+    /// focus position. If the minimum and maximum focus position limits are
+    /// set by the user in the lens parameters, the range of the hardware focus
+    /// position must be scaled to the 0-65535 user space range.
+    /// Command argument: focus position 0-65535. User should be able to set
+    /// focus movement speed via lens parameters.
     FOCUS_TO_POS,
-    /// Focus stop. No arguments.
+    /// Stop focus moving including stop focus to position command.
     FOCUS_STOP,
-    /// Iris open. No arguments.
+    /// Move iris open. Command doesn't have arguments. User should be able to
+    /// set iris movement speed via lens parameters.
     IRIS_OPEN,
-    /// Iris close. No arguments.
+    /// Move iris close. Command doesn't have arguments. User should be able
+    /// to set iris movement speed via lens parameters.
     IRIS_CLOSE,
-    /// Iris to position. Argument:
-    /// iris position 0(full close) - 65535(full open).
+    /// Move iris to position. Lens controller should have iris range
+    /// from 0 (full close) to 65535 (full far) regardless of the hardware
+    /// value of the iris position. If the minimum and maximum iris position
+    /// limits are set by the user in the lens parameters, the range of the
+    /// hardware iris position must be scaled to the 0-65535 user space range.
+    /// Command argument: iris position 0-65535. User should be able to set
+    /// iris movement speed via lens parameters.
     IRIS_TO_POS,
-    /// Iris stop. No arguments.
+    /// Stop iris moving including stop iris to position command.
+    /// Command doesn't have arguments.
     IRIS_STOP,
-    /// Autofocus start. No arguments.
+    /// Start autofocus.  Command doesn't have arguments.
     AF_START,
-    /// Autofocus stop. No arguments.
+    /// Stop autofocus.  Command doesn't have arguments.
     AF_STOP,
-    /// Restart lens controller. No arguments.
+    /// Restart lens controller.
     RESTART,
-    /// Do zoom and focus hardware range detection.
+    /// Detect zoom and focus hardware ranges. After execution this command the
+    /// lens controller should automatically set at least parameters
+    /// (LensParam enum): ZOOM_HW_TELE_LIMIT, ZOOM_HW_WIDE_LIMIT,
+    /// FOCUS_HW_FAR_LIMIT and FOCUS_HW_NEAR_LIMIT.
     DETECT_HW_RANGES
 };
 ```
@@ -538,7 +564,7 @@ enum class LensCommand
 | AF_START         | Start autofocus.  Command doesn't have arguments.            |
 | AF_STOP          | Stop autofocus.  Command doesn't have arguments.             |
 | RESTART          | Restart lens controller.                                     |
-| DETECT_HW_RANGES | Detect zoom and focus hardware ranges. After execution this command the lens controller should automatically set parameters (**LensParam** enum): ZOOM_HW_TELE_LIMIT, ZOOM_HW_WIDE_LIMIT, FOCUS_HW_FAR_LIMIT and FOCUS_HW_NEAR_LIMIT. |
+| DETECT_HW_RANGES | Detect zoom and focus hardware ranges. After execution this command the lens controller should automatically set at least parameters (**LensParam** enum): ZOOM_HW_TELE_LIMIT, ZOOM_HW_WIDE_LIMIT, FOCUS_HW_FAR_LIMIT and FOCUS_HW_NEAR_LIMIT. |
 
 
 
@@ -547,206 +573,290 @@ enum class LensCommand
 Enum declaration:
 
 ```cpp
-/// Lens params.
 enum class LensParam
 {
-    /// Zoom position (write/read). Value:
-    /// zoom position 0(full wide) - 65535(full tele).
+    /// Zoom position. Setting a parameter is equivalent to the command
+    /// ZOOM_TO_POS. Lens controller should have zoom range from 0 (full wide)
+    /// to 65535 (full tele) regardless of the hardware value of the zoom
+    /// position. If the minimum and maximum zoom position limits are set by
+    /// the user in the lens parameters, the range of the hardware zoom position
+    /// must be scaled to the user space 0-65535 range. Parameter value: zoom
+    /// position 0-65535. User should be able to set zoom movement speed via
+    /// lens parameters.
     ZOOM_POS = 1,
-    /// Hardware zoom position (write/read). Argument:
-    /// zoom position. Value depends on particular lens controller.
+    /// Hardware zoom position. Parameter value depends on implementation and
+    /// lens hardware.
     ZOOM_HW_POS,
-    /// Focus position (write/read). Value:
-    /// focus position 0(full near) - 65535(full far).
+    /// Focus position. Setting a parameter is equivalent to the command
+    /// FOCUS_TO_POS. Lens controller should have focus range from 0 (full near)
+    /// to 65535 (full far) regardless of the hardware value of the focus
+    /// position. If the minimum and maximum focus position limits are set by
+    /// the user in the lens parameters, the range of the hardware focus
+    /// position must be scaled to the 0-65535 user space range. Parameter
+    /// value: focus position 0-65535. User should be able to set focus movement
+    /// speed via lens parameters.
     FOCUS_POS,
-    /// Hardware focus position (write/read). Value:
-    /// focus position. Value depends on particular lens controller.
+    /// Hardware focus position. Parameter value depends on implementation and
+    /// lens hardware.
     FOCUS_HW_POS,
-    /// Iris position (write/read). Value:
-    /// iris position 0(full close) - 65535(full open).
+    /// Iris position. Setting a parameter is equivalent to the command
+    /// IRIS_TO_POS. Lens controller should have iris range from 0 (full close)
+    /// to 65535 (full far) regardless of the hardware value of the iris
+    /// position. If the minimum and maximum iris position limits are set by the
+    /// user in the lens parameters, the range of the hardware iris position
+    /// must be scaled to the 0-65535 user space range. Parameter value: iris
+    /// position 0-65535. User should be able to set iris movement speed via
+    /// lens parameters.
     IRIS_POS,
-    /// Hardware iris position (write/read). Value:
-    /// iris position. Value depends on particular lens controller.
+    /// Hardware iris position. Parameter value depends on particular lens
+    /// controller.
     IRIS_HW_POS,
-    /// Focus mode (write/read). Value:
-    /// Value depends on particular lens controller.
+    /// Focus mode. Parameter value depends on implementation but it is
+    /// recommended to keep default values: 0 - Manual focus control,
+    /// 1 - Auto focus control.
     FOCUS_MODE,
-    /// Filter mode (write/read).  Value:
-    /// Value depends on particular lens controller.
+    /// Filter mode. Parameter value depends on implementation but it is
+    /// recommended to keep default values: 0 - Filter on, 1 - Filter off.
     FILTER_MODE,
-    /// Auto focus ROI top-left coordinate (write/read). Value:
-    /// ROI top-left horizontal coordinate in pixels.
+    /// Autofocus ROI top-left corner horizontal position in pixels.
+    /// Autofocus ROI is rectangle.
     AF_ROI_X0,
-    /// Auto focus ROI top-left coordinate (write/read). Value:
-    /// ROI top-left vertical coordinate in pixels.
+    /// Autofocus ROI top-left corner vertical position in pixels.
+    /// Autofocus ROI is rectangle.
     AF_ROI_Y0,
-    /// Auto focus ROI bottom-right coordinate (write/read). Value:
-    /// ROI bottom-right horizontal coordinate in pixels.
+    /// Autofocus ROI bottom-right corner horizontal position in pixels.
+    /// Autofocus ROI is rectangle.
     AF_ROI_X1,
-    /// Auto focus ROI bottom-right coordinate (write/read). Value:
-    /// ROI bottom-right vertical coordinate in pixels.
+    /// Autofocus ROI bottom-right corner vertical position in pixels.
+    /// Autofocus ROI is rectangle.
     AF_ROI_Y1,
-    /// Zoom speed (write/read). Value:
-    /// zoom speed 0 to 100 %.
+    /// Zoom speed. Lens controller should have zoom speed range from 0 to
+    /// 100% of max hardware zoom speed (parameter ZOOM_HW_MAX_SPEED).
+    /// If the user sets a new parameter value of the ZOOM_HW_SPEED the
+    /// parameter ZOOM_SPEED must be updated automatically. Formula for
+    /// calculating speed:
+    /// ZOOM_SPEED = ( ZOOM_HW_SPEED / ZOOM_HW_MAX_SPEED) * 100.
     ZOOM_SPEED,
-    /// Hardware zoom speed (write/read). Value:
-    /// zoom speed. Value depends on particular lens controller.
+    /// Zoom hardware speed. Value depends on implementation and lens hardware.
+    /// The value of the parameters must be <= ZOOM_HW_MAX_SPEED parameter.
+    /// If the user sets a new parameter value of the ZOOM_SPEED parameter
+    /// the parameter ZOOM_HW_SPEED must be updated automatically.
+    /// Formula for calculating hardware speed:
+    /// ZOOM_HW_SPEED = ( ZOOM_SPEED / 100 ) * ZOOM_HW_MAX_SPEED.
     ZOOM_HW_SPEED,
-    /// Max hardware zoom speed (write/read). Value:
-    /// zoom speed. Value depends on particular lens controller.
+    /// Maximum zoom hardware speed. Value depends on implementation.
+    /// If user sets new ZOOM_HW_MAX_SPEED value the parameters
+    /// ZOOM_SPEED must be updated automatically. If new value of
+    /// ZOOM_HW_MAX_SPEED parameter will be less than ZOOM_HW_SPEED the
+    /// parameter ZOOM_HW_SPEED must be reduced automatically.
     ZOOM_HW_MAX_SPEED,
-    /// Focus speed (write/read). Value:
-    /// focus speed 0 to 100 %.
+    /// Focus speed. Lens controller should have focus speed range from 0 to
+    /// 100% of max hardware focus speed (parameter FOCUS_HW_MAX_SPEED).
+    /// If the user sets a new parameter value of the FOCUS_HW_SPEED the
+    /// parameter FOCUS_SPEED must be updated automatically. Formula for
+    /// calculating speed: FOCUS_SPEED = ( FOCUS_HW_SPEED / FOCUS_HW_MAX_SPEED)
+    /// * 100.
     FOCUS_SPEED,
-    /// Hardware focus speed (write/read). Value:
-    /// focus speed. Value depends on particular lens controller.
+    /// Focus hardware speed. Value depends on on implementation and lens
+    /// hardware. The value of the parameters must be <= FOCUS_HW_MAX_SPEED
+    /// parameter. If the user sets a new parameter value of the FOCUS_SPEED
+    /// parameter the parameter FOCUS_HW_SPEED must be updated automatically.
+    /// Formula for calculating hardware speed:
+    /// FOCUS_HW_SPEED = ( FOCUS_SPEED / 100 ) * FOCUS_HW_MAX_SPEED.
     FOCUS_HW_SPEED,
-    /// Max hardware focus speed (write/read). Argument:
-    /// focus speed. Value depends on particular lens controller.
+    /// Maximum focus hardware speed. Value depends on implementation.
+    /// If user sets new FOCUS_HW_MAX_SPEED value the parameters
+    /// FOCUS_SPEED and FOCUS_HW_SPEED must be updated by lens controller
+    /// automatically. If new value of FOCUS_HW_MAX_SPEED parameter will be
+    /// less than FOCUS_HW_SPEED the parameter FOCUS_HW_SPEED must be reduced
+    /// automatically.
     FOCUS_HW_MAX_SPEED,
-    /// Iris speed (write/read). Value:
-    /// iris speed 0 to 100 %.
+    /// Iris speed. Lens controller should have iris speed range from 0 to 100%
+    /// of max hardware iris speed (parameter IRIS_HW_MAX_SPEED). If the user
+    /// sets a new parameter value of the IRIS_HW_SPEED the parameter IRIS_SPEED
+    /// must be updated automatically. Formula for calculating speed:
+    /// IRIS_SPEED = ( IRIS_HW_SPEED / IRIS_HW_MAX_SPEED) * 100.
     IRIS_SPEED,
-    /// Hardware iris speed (write/read). Value:
-    /// iris speed. Value depends on particular lens controller.
+    /// Iris hardware speed. Value depends on implementation and les hardware.
+    /// The value of the parameters must be <= IRIS_HW_MAX_SPEED parameter.
+    /// If the user sets a new parameter value of the IRIS_SPEED parameter
+    /// the parameter IRIS_HW_SPEED must be updated automatically. Formula
+    /// for calculating hardware speed:
+    /// IRIS_HW_SPEED = ( IRIS_SPEED / 100 ) * IRIS_HW_MAX_SPEED.
     IRIS_HW_SPEED,
-    /// Max hardware iris speed (write/read). Value:
-    /// iris speed. Value depends on particular lens controller.
+    /// Maximum iris hardware speed. Value depends on implementation. If user
+    /// sets new IRIS_HW_MAX_SPEED value the parameters IRIS_SPEED and
+    /// IRIS_HW_SPEED must be updated automatically. If new value of
+    /// IRIS_HW_MAX_SPEED parameter will be less than IRIS_HW_SPEED the
+    /// parameter IRIS_HW_SPEED must be reduced automatically.
     IRIS_HW_MAX_SPEED,
-    /// Hardware zoom tele limit (write/read). Value:
-    /// hardware zoom position. Value depends on particular lens controller.
+    /// Zoom hardware tele limit. Value depends on implementation and lens
+    /// hardware. Lens controller should control zoom position. Lens controller
+    /// should stop zoom moving if hardware zoom position will be our of limits.
     ZOOM_HW_TELE_LIMIT,
-    /// Hardware zoom wide limit (write/read). Value:
-    /// hardware zoom position. Value depends on particular lens controller.
+    /// Zoom hardware wide limit. Value depends on implementation and lens
+    /// hardware. Lens controller should control zoom position. Lens controller
+    /// should stop zoom moving if hardware zoom position will be our of limits.
     ZOOM_HW_WIDE_LIMIT,
-    /// Hardware focus far limit (write/read). Value:
-    /// hardware focus position. Value depends on particular lens controller.
+    /// Focus hardware far limit. Value depends on on implementation and lens
+    /// hardware. Lens controller should control focus position. Lens controller
+    /// should stop focus moving if hardware focus position will be our of
+    /// limits.
     FOCUS_HW_FAR_LIMIT,
-    /// Hardware focus near limit (write/read). Value:
-    /// hardware focus position. Value depends on particular lens controller.
+    /// Focus hardware near limit. Value depends on implementation and lens
+    /// hardware. Lens controller should control focus position. Lens controller
+    /// should stop focus moving if hardware focus position will be our of
+    /// limits.
     FOCUS_HW_NEAR_LIMIT,
-    /// Hardware iris open limit (write/read). Value:
-    /// hardware iris position. Value depends on particular lens controller.
+    /// Iris hardware open limit. Value depends on implementation and lens
+    /// hardware. Lens controller should control iris position. Lens controller
+    /// should stop iris moving if hardware iris position will be our of limits.
     IRIS_HW_OPEN_LIMIT,
-    /// Hardware iris close limit (write/read). Value:
-    /// hardware iris position. Value depends on particular lens controller.
+    /// Iris hardware close limit. Value depends on implementation and lens
+    /// hardware. Lens controller should control iris position. Lens controller
+    /// should stop iris moving if hardware iris position will be our of limits.
     IRIS_HW_CLOSE_LIMIT,
-    /// Focus factor value (read only). Value:
+    /// Focus factor if it was calculated. If not calculated must be -1.
     /// Value depends on particular lens controller.
     FOCUS_FACTOR,
-    /// Connection status (read only). Value:
-    /// 0 - not connected, 1 - connected.
+    /// Lens connection status. Connection status shows if the lens controller
+    /// has data exchange with lens equipment. For example, if lens has serial
+    /// port lens controller connects to serial port
+    /// (opens serial port file in OS) but lens can be not active (no power).
+    /// In this case connection status shows that lens controller doesn't have
+    /// data exchange with lens equipment (methos will return 0). It lens
+    /// controller has data exchange with lens equipment the method will
+    /// return 1. If lens controller not initialize the connection status always
+    /// FALSE. Value: 0 - not connected. 1 - connected.
     IS_CONNECTED,
-    /// Hardware focus speed in AF mode (write/read). Value:
-    /// hardware focus speed. Value depends on particular lens controller.
+    /// Focus hardware speed in autofocus mode. Value depends on implementation
+    /// and lens hardware.
     FOCUS_HW_AF_SPEED,
-    /// Threshold for focus factor to start refocus (write/read). Value:
-    /// threshold %: 0 - no check, 100 - changing x2.
+    /// Threshold for changes of focus factor to start refocus. Value:
+    /// 0% - no check, 100% - changing x2.
     FOCUS_FACTOR_THRESHOLD,
-    /// Refocus timeout, sec (write/read). Value:
-    /// 0 - no refocus, to 100000 sec.
+    /// Timeout for automatic refocus in seconds. Value:
+    /// 0 - no automatic refocus, 100000 - maximum value.
     REFOCUS_TIMEOUT_SEC,
-    /// AF process mode (read only). Value: 0 - not active, 1 - active.
+    /// Flag about active autofocus algorithm. Value: 0 - autofocus not working,
+    /// 1 - working.
     AF_IS_ACTIVE,
-    /// Iris mode. (write/read). Value:
-    /// Value depends on particular lens controller.
+    /// Iris mode. Value depends on implementation but it is recommended to keep
+    /// default values: 0 - manual iris control, 1 - auto iris control.
     IRIS_MODE,
-    /// Auto ROI width (write/read). Value: 0 to video frame size, pxl.
+    /// ROI width (pixels) for autofocus algorithm when lens controller detects
+    /// ROI position automatically. Value: from 8 to (video frame width -
+    /// AUTO_AF_ROI_BORDER * 2).
     AUTO_AF_ROI_WIDTH,
-    /// Auto ROI height (write/read). Value: 0 to video frame size, pxl.
+    /// ROI height (pixels) for autofocus algorithm when lens controller
+    /// detects ROI position automatically. Value: from 8
+    /// (video frame width - AUTO_AF_ROI_BORDER * 2).
     AUTO_AF_ROI_HEIGHT,
-    /// Auto ROI frame border in pixels (write/read). Value:
-    /// border size from 0 to video frame min(width/height) / 2.
+    /// Video frame border size (along vertical and horizontal axes).
+    /// Value: border size from 0 to video frame
+    /// min(video frame width/height) / 2.
     AUTO_AF_ROI_BORDER,
-    /// AF ROI mode (write/read). Value:
-    /// 0 - Manual position, 1 - Auto position.
+    /// AF ROI mode (write/read). Value: 0 - Manual position, 1 - Auto position.
     AF_ROI_MODE,
-    /// Optical extender mode (write/read). Value:
-    /// Value depends on particular lens controller. Default: 0 -Off, 1 -On.
+    /// Lens extender mode. Value depends on implementation but it is
+    /// recommended to keep default values: 0 - no extender, 1 - x2 extender.
     EXTENDER_MODE,
-    /// Stabilizer mode (write/read). Value:
-    /// 0 - Off, 1 - On.
+    /// Lens stabilization mode. Value depends on implementation but it is
+    /// recommended to keep default values: 0 - no stabilization,
+    /// 1 - stabilization.
     STABILIZER_MODE,
-    /// AF range (write/read). Value:
-    /// Value depends on particular lens controller.
+    /// Autofocus range. Value depends on implementation.
     AF_RANGE,
-    /// Horizontal Field of view, degree (read only).
+    /// Current horizontal Field of view, degree. Field of view calculated by
+    /// lens controller according to initial params or by reading directly from
+    /// lens hardware.
     X_FOV_DEG,
-    /// Vertical Field of view, degree (read only).
+    /// Current vertical Field of view, degree. Field of view calculated by lens
+    /// controller according to initial params or by reading directly from lens
+    /// hardware.
     Y_FOV_DEG,
-    /// Logging mode.
-    /// Default values:
-    /// 0 - Disable.
-    /// 1 - Only file.
-    /// 2 - Only terminal.
+    /// Logging mode. Values: 0 - Disable, 1 - Only file, 2 - Only terminal,
     /// 3 - File and terminal.
     LOG_MODE,
     /// Lens temperature, degree.
     TEMPERATURE,
-    /// Open status: 1 - lens control port open, 0 - not open.
+    /// Lens controller initialization status. Open status shows if the lens
+    /// controller initialized or not but doesn't show if lens controller has
+    /// communication with lens equipment. For example, if lens has serial port
+    /// lens controller connects to serial port (opens serial port file in OS)
+    /// but lens can be not active (no power). In this case open status just
+    /// shows that lens controller has opened serial port. Values: 0 - not open
+    /// not initialized), 1 - open (initialized).
     IS_OPEN,
-    /// Lens type. Value depends on implementation.
+    /// Lens type. Value depends on implementation. Type allows to lens
+    /// initialize necessary parameters for particular lens hardware.
     TYPE,
-    /// Lens custom param 1. Value depends on implementation.
+    /// Lens custom parameter. Value depends on particular lens controller.
+    /// Custom parameters used when particular lens equipment has specific
+    /// unusual parameter.
     CUSTOM_1,
-    /// Lens custom param 2. Value depends on implementation.
+    /// Lens custom parameter. Value depends on particular lens controller.
+    /// Custom parameters used when particular lens equipment has specific
+    /// unusual parameter.
     CUSTOM_2,
-    /// Lens custom param 3. Value depends on implementation.
+    /// Lens custom parameter. Value depends on particular lens controller.
+    /// Custom parameters used when particular lens equipment has specific
+    /// unusual parameter.
     CUSTOM_3
 };
 ```
 
-**Table 3** - Lens params description. Some params maybe unsupported by particular lens controller.
+**Table 3** - Lens params description. Some params may be unsupported by particular lens controller.
 
 | Parameter              | Access       | Description                                                  |
 | ---------------------- | ------------ | ------------------------------------------------------------ |
-| ZOOM_POS               | read / write | Zoom position. Setting a parameter is equivalent to the command ZOOM_TO_POS. Lens controller should have zoom range from 0 (full wide) to 65535 (full tele) regardless of the hardware value of the zoom position. If the minimum (zoom full wide) and maximum (zoom full tele) hardware zoom position limits are set by the user in the lens parameters, the range of the hardware zoom position must be scaled to the user space 0-65535 range. Parameter value: zoom position 0-65535. User should be able to set zoom movement speed via lens parameters. |
-| ZOOM_HW_POS            | read / write | Hardware zoom position. Parameter value depends on particular lens controller. |
-| FOCUS_POS              | read / write | Focus position. Setting a parameter is equivalent to the command FOCUS_TO_POS. Lens controller should have focus range from 0 (focus full near) to 65535 (focus full far) regardless of the hardware value of the focus position. If the minimum (focus full near) and maximum (focus full far) hardware focus position limits are set by the user in the lens parameters, the range of the hardware focus position must be scaled to the user space 0-65535 range. Parameter value: focus position 0-65535. User should be able to set focus movement speed via lens parameters. |
-| FOCUS_HW_POS           | read / write | Hardware focus position. Parameter value depends on particular lens controller. |
-| IRIS_POS               | read / write | Iris position. Setting a parameter is equivalent to the command IRIS_TO_POS. Lens controller should have iris range from 0 (full close) to 65535 (full open) regardless of the hardware value of the iris position. If the minimum (iris full close) and maximum (iris full open) iris position limits are set by the user in the lens parameters, the range of the hardware iris position must be scaled to the user space 0-65535 range. Parameter value: iris position 0-65535. User should be able to set iris movement speed via lens parameters. |
+| ZOOM_POS               | read / write | Zoom position. Setting a parameter is equivalent to the command ZOOM_TO_POS. Lens controller should have zoom range from 0 (full wide) to 65535 (full tele) regardless of the hardware value of the zoom position. If the minimum and maximum zoom position limits are set by the user in the lens parameters, the range of the hardware zoom position must be scaled to the user space 0-65535 range. Parameter value: zoom position 0-65535. User should be able to set zoom movement speed via lens parameters. |
+| ZOOM_HW_POS            | read / write | Hardware zoom position. Parameter value depends on implementation and lens hardware. |
+| FOCUS_POS              | read / write | Focus position. Setting a parameter is equivalent to the command FOCUS_TO_POS. Lens controller should have focus range from 0 (full near) to 65535 (full far) regardless of the hardware value of the focus position. If the minimum and maximum focus position limits are set by the user in the lens parameters, the range of the hardware focus position must be scaled to the 0-65535 user space range. Parameter value: focus position 0-65535. User should be able to set focus movement speed via lens parameters. |
+| FOCUS_HW_POS           | read / write | Hardware focus position. Parameter value depends on implementation and lens hardware. |
+| IRIS_POS               | read / write | Iris position. Setting a parameter is equivalent to the command IRIS_TO_POS. Lens controller should have iris range from 0 (full close) to 65535 (full far) regardless of the hardware value of the iris position. If the minimum and maximum iris position limits are set by the user in the lens parameters, the range of the hardware iris position must be scaled to the 0-65535 user space range. Parameter value: iris position 0-65535. User should be able to set iris movement speed via lens parameters. |
 | IRIS_HW_POS            | read / write | Hardware iris position. Parameter value depends on particular lens controller. |
-| FOCUS_MODE             | read / write | Focus mode. Parameter value depends on particular lens controller. Default values: 0 - Manual focus control, 1 - Auto focus control. |
-| FILTER_MODE            | read / write | Filter mode. Parameter value depends on particular lens controller. Default values: 0 - Filter on, 1 - Filter off. |
+| FOCUS_MODE             | read / write | Focus mode. Parameter value depends on implementation but it is recommended to keep default values: 0 - Manual focus control, 1 - Auto focus control. |
+| FILTER_MODE            | read / write | Filter mode. Parameter value depends on implementation but it is recommended to keep default values: 0 - Filter on, 1 - Filter off. |
 | AF_ROI_X0              | read / write | Autofocus ROI top-left corner horizontal position in pixels. Autofocus ROI is rectangle. |
 | AF_ROI_Y0              | read / write | Autofocus ROI top-left corner vertical position in pixels. Autofocus ROI is rectangle. |
 | AF_ROI_X1              | read / write | Autofocus ROI bottom-right corner horizontal position in pixels. Autofocus ROI is rectangle. |
 | AF_ROI_Y1              | read / write | Autofocus ROI bottom-right corner vertical position in pixels. Autofocus ROI is rectangle. |
-| ZOOM_SPEED             | read / write | Zoom speed. Lens controller should have zoom speed range from 0 to 100% of max hardware zoom speed (parameter ZOOM_HW_MAX_SPEED). If the user sets a new parameter value of the ZOOM_HW_SPEED parameter the parameter ZOOM_SPEED must be updated automatically by lens controller. Formula for calculating speed: ZOOM_SPEED = ( ZOOM_HW_SPEED / ZOOM_HW_MAX_SPEED) * 100. |
-| ZOOM_HW_SPEED          | read / write | Zoom hardware speed. Value depends on particular lens controller. The value of the parameters must be <= ZOOM_HW_MAX_SPEED parameter. If the user sets a new parameter value of the ZOOM_SPEED parameter the parameter ZOOM_HW_SPEED must be updated automatically by lens controller. Formula for calculating hardware speed: ZOOM_HW_SPEED = ( ZOOM_SPEED / 100 ) * ZOOM_HW_MAX_SPEED. |
-| ZOOM_HW_MAX_SPEED      | read / write | Maximum zoom hardware speed. Value depends on particular lens controller. If user sets new ZOOM_HW_MAX_SPEED value the parameters ZOOM_SPEED and ZOOM_HW_SPEED must be updated by lens controller automatically. If new value of ZOOM_HW_MAX_SPEED parameter will be less than ZOOM_HW_SPEED the parameter ZOOM_HW_SPEED must be reduced automatically. |
-| FOCUS_SPEED            | read / write | Focus speed. Lens controller should have focus speed range from 0 to 100% of max hardware focus speed (parameter FOCUS_HW_MAX_SPEED). If the user sets a new parameter value of the FOCUS_HW_SPEED parameter the parameter FOCUS_SPEED must be updated automatically by lens controller. Formula for calculating speed: FOCUS_SPEED = ( FOCUS_HW_SPEED / FOCUS_HW_MAX_SPEED) * 100. |
-| FOCUS_HW_SPEED         | read / write | Focus hardware speed. Value depends on particular lens controller. The value of the parameters must be <= FOCUS_HW_MAX_SPEED parameter. If the user sets a new parameter value of the FOCUS_SPEED parameter the parameter FOCUS_HW_SPEED must be updated automatically by lens controller. Formula for calculating hardware speed: FOCUS_HW_SPEED = ( FOCUS_SPEED / 100 ) * FOCUS_HW_MAX_SPEED. |
-| FOCUS_HW_MAX_SPEED     | read / write | Maximum focus hardware speed. Value depends on particular lens controller. If user sets new FOCUS_HW_MAX_SPEED value the parameters FOCUS_SPEED and FOCUS_HW_SPEED must be updated by lens controller automatically. If new value of FOCUS_HW_MAX_SPEED parameter will be less than FOCUS_HW_SPEED the parameter FOCUS_HW_SPEED must be reduced automatically. |
-| IRIS_SPEED             | read / write | Iris speed. Lens controller should have iris speed range from 0 to 100% of max hardware iris speed (parameter IRIS_HW_MAX_SPEED). If the user sets a new parameter value of the IRIS_HW_SPEED parameter the parameter IRIS_SPEED must be updated automatically by lens controller. Formula for calculating speed: IRIS_SPEED = ( IRIS_HW_SPEED / IRIS_HW_MAX_SPEED) * 100. |
-| IRIS_HW_SPEED          | read / write | Iris hardware speed. Value depends on particular lens controller. The value of the parameters must be <= IRIS_HW_MAX_SPEED parameter. If the user sets a new parameter value of the IRIS_SPEED parameter the parameter IRIS_HW_SPEED must be updated automatically by lens controller. Formula for calculating hardware speed: IRIS_HW_SPEED = ( IRIS_SPEED / 100 ) * IRIS_HW_MAX_SPEED. |
-| IRIS_HW_MAX_SPEED      | read / write | Maximum iris hardware speed. Value depends on particular lens controller. If user sets new IRIS_HW_MAX_SPEED value the parameters IRIS_SPEED and IRIS_HW_SPEED must be updated by lens controller automatically. If new value of IRIS_HW_MAX_SPEED parameter will be less than IRIS_HW_SPEED the parameter IRIS_HW_SPEED must be reduced automatically. |
-| ZOOM_HW_TELE_LIMIT     | read / write | Zoom hardware tele limit. Value depends on particular lens controller. Lens controller should control zoom position. Lens controller should stop zoom moving if hardware zoom position will be our of limits. |
-| ZOOM_HW_WIDE_LIMIT     | read / write | Zoom hardware wide limit. Value depends on particular lens controller. Lens controller should control zoom position. Lens controller should stop zoom moving if hardware zoom position will be our of limits. |
-| FOCUS_HW_FAR_LIMIT     | read / write | Focus hardware far limit. Value depends on particular lens controller. Lens controller should control focus position. Lens controller should stop focus moving if hardware focus position will be our of limits. |
-| FOCUS_HW_NEAR_LIMIT    | read / write | Focus hardware near limit. Value depends on particular lens controller. Lens controller should control focus position. Lens controller should stop focus moving if hardware focus position will be our of limits. |
-| IRIS_HW_OPEN_LIMIT     | read / write | Iris hardware open limit. Value depends on particular lens controller. Lens controller should control iris position. Lens controller should stop iris moving if hardware iris position will be our of limits. |
-| IRIS_HW_CLOSE_LIMIT    | read / write | Iris hardware close limit. Value depends on particular lens controller. Lens controller should control iris position. Lens controller should stop iris moving if hardware iris position will be our of limits. |
+| ZOOM_SPEED             | read / write | Zoom speed. Lens controller should have zoom speed range from 0 to 100% of max hardware zoom speed (parameter ZOOM_HW_MAX_SPEED). If the user sets a new parameter value of the ZOOM_HW_SPEED the parameter ZOOM_SPEED must be updated automatically. Formula for calculating speed: ZOOM_SPEED = ( ZOOM_HW_SPEED / ZOOM_HW_MAX_SPEED) * 100. |
+| ZOOM_HW_SPEED          | read / write | Zoom hardware speed. Value depends on implementation and lens hardware. The value of the parameters must be <= ZOOM_HW_MAX_SPEED parameter. If the user sets a new parameter value of the ZOOM_SPEED parameter the parameter ZOOM_HW_SPEED must be updated automatically. Formula for calculating hardware speed: ZOOM_HW_SPEED = ( ZOOM_SPEED / 100 ) * ZOOM_HW_MAX_SPEED. |
+| ZOOM_HW_MAX_SPEED      | read / write | Maximum zoom hardware speed. Value depends on implementation. If user sets new ZOOM_HW_MAX_SPEED value the parameters ZOOM_SPEED must be updated automatically. If new value of ZOOM_HW_MAX_SPEED parameter will be less than ZOOM_HW_SPEED the parameter ZOOM_HW_SPEED must be reduced automatically. |
+| FOCUS_SPEED            | read / write | Focus speed. Lens controller should have focus speed range from 0 to 100% of max hardware focus speed (parameter FOCUS_HW_MAX_SPEED). If the user sets a new parameter value of the FOCUS_HW_SPEED the parameter FOCUS_SPEED must be updated automatically. Formula for calculating speed: FOCUS_SPEED = ( FOCUS_HW_SPEED / FOCUS_HW_MAX_SPEED) * 100. |
+| FOCUS_HW_SPEED         | read / write | Focus hardware speed. Value depends on on implementation and lens hardware. The value of the parameters must be <= FOCUS_HW_MAX_SPEED parameter. If the user sets a new parameter value of the FOCUS_SPEED parameter the parameter FOCUS_HW_SPEED must be updated automatically. Formula for calculating hardware speed: FOCUS_HW_SPEED = ( FOCUS_SPEED / 100 ) * FOCUS_HW_MAX_SPEED. |
+| FOCUS_HW_MAX_SPEED     | read / write | Maximum focus hardware speed. Value depends on implementation. If user sets new FOCUS_HW_MAX_SPEED value the parameters FOCUS_SPEED and FOCUS_HW_SPEED must be updated by lens controller automatically. If new value of FOCUS_HW_MAX_SPEED parameter will be less than FOCUS_HW_SPEED the parameter FOCUS_HW_SPEED must be reduced automatically. |
+| IRIS_SPEED             | read / write | Iris speed. Lens controller should have iris speed range from 0 to 100% of max hardware iris speed (parameter IRIS_HW_MAX_SPEED). If the user sets a new parameter value of the IRIS_HW_SPEED the parameter IRIS_SPEED must be updated automatically. Formula for calculating speed: IRIS_SPEED = ( IRIS_HW_SPEED / IRIS_HW_MAX_SPEED) * 100. |
+| IRIS_HW_SPEED          | read / write | Iris hardware speed. Value depends on implementation and les hardware. The value of the parameters must be <= IRIS_HW_MAX_SPEED parameter. If the user sets a new parameter value of the IRIS_SPEED parameter the parameter IRIS_HW_SPEED must be updated automatically. Formula for calculating hardware speed: IRIS_HW_SPEED = ( IRIS_SPEED / 100 ) * IRIS_HW_MAX_SPEED. |
+| IRIS_HW_MAX_SPEED      | read / write | Maximum iris hardware speed. Value depends on implementation. If user sets new IRIS_HW_MAX_SPEED value the parameters IRIS_SPEED and IRIS_HW_SPEED must be updated automatically. If new value of IRIS_HW_MAX_SPEED parameter will be less than IRIS_HW_SPEED the parameter IRIS_HW_SPEED must be reduced automatically. |
+| ZOOM_HW_TELE_LIMIT     | read / write | Zoom hardware tele limit. Value depends on implementation and lens hardware. Lens controller should control zoom position. Lens controller should stop zoom moving if hardware zoom position will be our of limits. |
+| ZOOM_HW_WIDE_LIMIT     | read / write | Zoom hardware wide limit. Value depends on implementation and lens hardware. Lens controller should control zoom position. Lens controller should stop zoom moving if hardware zoom position will be our of limits. |
+| FOCUS_HW_FAR_LIMIT     | read / write | Focus hardware far limit. Value depends on on implementation and lens hardware. Lens controller should control focus position. Lens controller should stop focus moving if hardware focus position will be our of limits. |
+| FOCUS_HW_NEAR_LIMIT    | read / write | Focus hardware near limit. Value depends on implementation and lens hardware. Lens controller should control focus position. Lens controller should stop focus moving if hardware focus position will be our of limits. |
+| IRIS_HW_OPEN_LIMIT     | read / write | Iris hardware open limit. Value depends on implementation and lens hardware. Lens controller should control iris position. Lens controller should stop iris moving if hardware iris position will be our of limits. |
+| IRIS_HW_CLOSE_LIMIT    | read / write | Iris hardware close limit. Value depends on implementation and lens hardware. Lens controller should control iris position. Lens controller should stop iris moving if hardware iris position will be our of limits. |
 | FOCUS_FACTOR           | read only    | Focus factor if it was calculated. If not calculated must be -1. Value depends on particular lens controller. |
 | IS_CONNECTED           | read only    | Lens connection status. Connection status shows if the lens controller has data exchange with lens equipment. For example, if lens has serial port lens controller connects to serial port (opens serial port file in OS) but lens can be not active (no power). In this case connection status shows that lens controller doesn't have data exchange with lens equipment (methos will return 0). It lens controller has data exchange with lens equipment the method will return 1. If lens controller not initialize the connection status always FALSE. Value: 0 - not connected. 1 - connected. |
-| FOCUS_HW_AF_SPEED      | read / write | Focus hardware speed in autofocus mode. Value depends on particular lens controller. |
-| FOCUS_FACTOR_THRESHOLD | read / write | Threshold for changes of focus factor to start refocus. Value: threshold %: 0 - no check, 100 - changing x2. |
+| FOCUS_HW_AF_SPEED      | read / write | Focus hardware speed in autofocus mode. Value depends on implementation and lens hardware. |
+| FOCUS_FACTOR_THRESHOLD | read / write | Threshold for changes of focus factor to start refocus. Value: 0% - no check, 100% - changing x2. |
 | REFOCUS_TIMEOUT_SEC    | read / write | Timeout for automatic refocus in seconds. Value: 0 - no automatic refocus, 100000 - maximum value. |
 | AF_IS_ACTIVE           | read only    | Flag about active autofocus algorithm. Value: 0 - autofocus not working, 1 - working. |
-| IRIS_MODE              | read / write | Iris mode. Value depends on particular lens controller. Default values: 0 - manual iris control, 1 - auto iris control. |
+| IRIS_MODE              | read / write | Iris mode. Value depends on implementation but it is recommended to keep default values: 0 - manual iris control, 1 - auto iris control. |
 | AUTO_AF_ROI_WIDTH      | read / write | ROI width (pixels) for autofocus algorithm when lens controller detects ROI position automatically. Value: from 8 to (video frame width - AUTO_AF_ROI_BORDER * 2). |
 | AUTO_AF_ROI_HEIGHT     | read / write | ROI height (pixels) for autofocus algorithm when lens controller detects ROI position automatically. Value: from 8 to (video frame width - AUTO_AF_ROI_BORDER * 2). |
 | AUTO_AF_ROI_BORDER     | read / write | Video frame border size (along vertical and horizontal axes). Value: border size from 0 to video frame min(video frame width/height) / 2. |
 | AF_ROI_MODE            | read / write | AF ROI mode (write/read). Value: 0 - Manual position, 1 - Auto position. |
-| EXTENDER_MODE          | read / write | Lens extender mode. Value depends on particular lens controller. Default values: 0 - no extender, 1 - x2 extender. |
-| STABILIZER_MODE        | read / write | Lens stabilization mode. Value depends on particular lens controller. Default values: 0 - no stabilization, 1 - stabilization. |
-| AF_RANGE               | read / write | Autofocus range. Value depends on particular lens controller. |
-| X_FOV_DEG              | read only    | Current horizontal Field of view, degree. Field of view calculated by lens controller according to initial params or by reading directly from lens equipment. |
-| Y_FOV_DEG              | read only    | Current vertical Field of view, degree. Field of view calculated by lens controller according to initial params or by reading directly from lens equipment. |
-| LOG_MODE               | read / write | Logging mode. Default values:<br/>0 - Disable.<br/>1 - Only file.<br/>2 - Only terminal.<br/>3 - File and terminal. |
+| EXTENDER_MODE          | read / write | Lens extender mode. Value depends on implementation but it is recommended to keep default values: 0 - no extender, 1 - x2 extender. |
+| STABILIZER_MODE        | read / write | Lens stabilization mode. Value depends on implementation but it is recommended to keep default values: 0 - no stabilization, 1 - stabilization. |
+| AF_RANGE               | read / write | Autofocus range. Value depends on implementation. |
+| X_FOV_DEG              | read only    | Current horizontal Field of view, degree. Field of view calculated by lens controller according to initial params or by reading directly from lens hardware. |
+| Y_FOV_DEG              | read only    | Current vertical Field of view, degree. Field of view calculated by lens controller according to initial params or by reading directly from lens hardware. |
+| LOG_MODE               | read / write | Logging mode. Values: 0 - Disable, 1 - Only file, 2 - Only terminal, 3 - File and terminal. |
 | TEMPERATURE            | read only    | Lens temperature, degree.                                    |
 | IS_OPEN | read only | Lens controller initialization status. Open status shows if the lens controller initialized or not but doesn't show if lens controller has communication with lens equipment. For example, if lens has serial port lens controller connects to serial port (opens serial port file in OS) but lens can be not active (no power). In this case open status just shows that lens controller has opened serial port. Values: 0 - not open (not initialized), 1 - open (initialized). |
-| TYPE | read / write | Lens type. Value depends on particular lens controller. Type allows to lens initialize necessary parameters for particular lens mode from one supplier. |
+| TYPE | read / write | Lens type. Value depends on implementation. Type allows to lens initialize necessary parameters for particular lens hardware. |
 | CUSTOM_1 | read / write | Lens custom parameter. Value depends on particular lens controller. Custom parameters used when particular lens equipment has specific unusual parameter. |
 | CUSTOM_2 | read / write | Lens custom parameter. Value depends on particular lens controller. Custom parameters used when particular lens equipment has specific unusual parameter. |
 | CUSTOM_3 | read / write | Lens custom parameter. Value depends on particular lens controller. Custom parameters used when particular lens equipment has specific unusual parameter. |
@@ -763,11 +873,6 @@ enum class LensParam
 **LensParams** interface class declared in **Lens.h** file. Class declaration:
 
 ```cpp
-namespace cr
-{
-namespace lens
-{
-
 /// Field of view point class.
 class FovPoint
 {
@@ -779,10 +884,7 @@ public:
     /// Vertical field of view, degree.
     float yFovDeg{0.0f};
 
-    JSON_READABLE(FovPoint,
-                  hwZoomPos,
-                  xFovDeg,
-                  yFovDeg);
+    JSON_READABLE(FovPoint, hwZoomPos, xFovDeg, yFovDeg);
 
     /**
      * @brief operator =
@@ -796,203 +898,262 @@ public:
 class LensParams
 {
 public:
-    /// Initialization string. Formats depends on implementation.
+    /// Initialization string. Particular lens controller can have unique init
+    /// string format. But it is recommended to use '**;**' symbol to divide
+    /// parts of initialization string. Recommended initialization string format
+    /// for controllers which uses serial port: "/dev/ttyUSB0;9600;100"
+    /// ("/dev/ttyUSB0" - serial port name, "9600" - baudrate, "100" - serial
+    /// port read timeout).
     std::string initString{"/dev/ttyUSB0;9600;20"};
-    /// Zoom position (write/read). Value:
-    /// zoom position 0(full wide) - 65535(full tele).
+    /// Zoom position. Setting a parameter is equivalent to the command
+    /// ZOOM_TO_POS. Lens controller should have zoom range from 0 (full wide)
+    /// to 65535 (full tele) regardless of the hardware value of the zoom
+    /// position. If the minimum and maximum zoom position limits are set by
+    /// the user in the lens parameters, the range of the hardware zoom position
+    /// must be scaled to the user space 0-65535 range. Parameter value: zoom
+    /// position 0-65535. User should be able to set zoom movement speed via
+    /// lens parameters.
     int zoomPos{0};
-    /// Hardware zoom position (write/read). Argument:
-    /// zoom position. Value depends on particular lens controller.
+    /// Hardware zoom position. Parameter value depends on implementation and
+    /// lens hardware.
     int zoomHwPos{0};
-    /// Focus position (write/read). Value:
-    /// focus position 0(full near) - 65535(full far).
+    /// Focus position. Setting a parameter is equivalent to the command
+    /// FOCUS_TO_POS. Lens controller should have focus range from 0 (full near)
+    /// to 65535 (full far) regardless of the hardware value of the focus
+    /// position. If the minimum and maximum focus position limits are set by
+    /// the user in the lens parameters, the range of the hardware focus
+    /// position must be scaled to the 0-65535 user space range. Parameter
+    /// value: focus position 0-65535. User should be able to set focus movement
+    /// speed via lens parameters.
     int focusPos{0};
-    /// Hardware focus position (write/read). Value:
-    /// focus position. Value depends on particular lens controller.
+    /// Hardware focus position. Parameter value depends on implementation and
+    /// lens hardware.
     int focusHwPos{0};
-    /// Iris position (write/read). Value:
-    /// iris position 0(full close) - 65535(full open).
+    /// Iris position. Setting a parameter is equivalent to the command
+    /// IRIS_TO_POS. Lens controller should have iris range from 0 (full close)
+    /// to 65535 (full far) regardless of the hardware value of the iris
+    /// position. If the minimum and maximum iris position limits are set by the
+    /// user in the lens parameters, the range of the hardware iris position
+    /// must be scaled to the 0-65535 user space range. Parameter value: iris
+    /// position 0-65535. User should be able to set iris movement speed via
+    /// lens parameters.
     int irisPos{0};
-    /// Hardware iris position (write/read). Value:
-    /// iris position. Value depends on particular lens controller.
+    /// Hardware iris position. Parameter value depends on inplementation.
     int irisHwPos{0};
-    /// Focus mode (write/read). Value:
-    /// Value depends on particular lens controller.
+    /// Focus mode. Parameter value depends on implementation but it is
+    /// recommended to keep default values: 0 - Manual focus control,
+    /// 1 - Auto focus control.
     int focusMode{0};
-    /// Filter mode (write/read).  Value:
-    /// Value depends on particular lens controller.
+    /// Filter mode. Parameter value depends on implementation but it is
+    /// recommended to keep default values: 0 - Filter on, 1 - Filter off.
     int filterMode{0};
-    /// Auto focus ROI top-left coordinate (write/read). Value:
-    /// ROI top-left horizontal coordinate in pixels.
+    /// Autofocus ROI top-left corner horizontal position in pixels.
+    /// Autofocus ROI is rectangle.
     int afRoiX0{0};
-    /// Auto focus ROI top-left coordinate (write/read). Value:
-    /// ROI top-left vertical coordinate in pixels.
+    /// Autofocus ROI top-left corner vertical position in pixels.
+    /// Autofocus ROI is rectangle.
     int afRoiY0{0};
-    /// Auto focus ROI bottom-right coordinate (write/read). Value:
-    /// ROI bottom-right horizontal coordinate in pixels.
+    /// Autofocus ROI bottom-right corner horizontal position in pixels.
+    /// Autofocus ROI is rectangle.
     int afRoiX1{0};
-    /// Auto focus ROI bottom-right coordinate (write/read). Value:
-    /// ROI bottom-right vertical coordinate in pixels.
+    /// Autofocus ROI bottom-right corner vertical position in pixels.
+    /// Autofocus ROI is rectangle.
     int afRoiY1{0};
-    /// Zoom speed (write/read). Value:
-    /// zoom speed 0 to 100 %.
+    /// Zoom speed. Lens controller should have zoom speed range from 0 to
+    /// 100% of max hardware zoom speed (parameter ZOOM_HW_MAX_SPEED). If the
+    /// user sets a new parameter value of the ZOOM_HW_SPEED the parameter
+    /// ZOOM_SPEED must be updated automatically. Formula for calculating speed:
+    /// ZOOM_SPEED = ( ZOOM_HW_SPEED / ZOOM_HW_MAX_SPEED) * 100.
     int zoomSpeed{50};
-    /// Hardware zoom speed (write/read). Value:
-    /// zoom speed. Value depends on particular lens controller.
+    /// Zoom hardware speed. Value depends on implementation and lens hardware.
+    /// The value of the parameters must be <= ZOOM_HW_MAX_SPEED parameter.
+    /// If the user sets a new parameter value of the ZOOM_SPEED parameter
+    /// the parameter ZOOM_HW_SPEED must be updated automatically. Formula for
+    /// calculating hardware speed:
+    /// ZOOM_HW_SPEED = ( ZOOM_SPEED / 100 ) * ZOOM_HW_MAX_SPEED.
     int zoomHwSpeed{50};
-    /// Max hardware zoom speed (write/read). Value:
-    /// zoom speed. Value depends on particular lens controller.
+    /// Maximum zoom hardware speed. Value depends on implementation. If user
+    /// sets new ZOOM_HW_MAX_SPEED value the parameters ZOOM_SPEED must be
+    /// updated automatically. If new value of ZOOM_HW_MAX_SPEED parameter will
+    /// be less than ZOOM_HW_SPEED the parameter ZOOM_HW_SPEED must be reduced
+    /// automatically.
     int zoomHwMaxSpeed{50};
-    /// Focus speed (write/read). Value:
-    /// focus speed 0 to 100 %.
+    /// Focus speed. Lens controller should have focus speed range from 0 to
+    /// 100% of max hardware focus speed (parameter FOCUS_HW_MAX_SPEED). If the
+    /// user sets a new parameter value of the FOCUS_HW_SPEED the parameter
+    /// FOCUS_SPEED must be updated automatically. Formula for calculating
+    /// speed: FOCUS_SPEED = ( FOCUS_HW_SPEED / FOCUS_HW_MAX_SPEED) * 100.
     int focusSpeed{50};
-    /// Hardware focus speed (write/read). Value:
-    /// focus speed. Value depends on particular lens controller.
+    /// Focus hardware speed. Value depends on on implementation and lens
+    /// hardware. The value of the parameters must be <= FOCUS_HW_MAX_SPEED
+    /// parameter. If the user sets a new parameter value of the FOCUS_SPEED
+    /// parameter the parameter FOCUS_HW_SPEED must be updated automatically.
+    /// Formula for calculating hardware speed:
+    /// FOCUS_HW_SPEED = ( FOCUS_SPEED / 100 ) * FOCUS_HW_MAX_SPEED.
     int focusHwSpeed{50};
-    /// Max hardware focus speed (write/read). Argument:
-    /// focus speed. Value depends on particular lens controller.
+    /// Maximum focus hardware speed. Value depends on implementation. If user
+    /// sets new FOCUS_HW_MAX_SPEED value the parameters FOCUS_SPEED and
+    /// FOCUS_HW_SPEED must be updated by lens controller automatically.
+    /// If new value of FOCUS_HW_MAX_SPEED parameter will be less than
+    /// FOCUS_HW_SPEED the parameter FOCUS_HW_SPEED must be reduced
+    /// automatically.
     int focusHwMaxSpeed{50};
-    /// Iris speed (write/read). Value:
-    /// iris speed 0 to 100 %.
+    /// Iris speed. Lens controller should have iris speed range from 0 to 100%
+    /// of max hardware iris speed (parameter IRIS_HW_MAX_SPEED). If the user
+    /// sets a new parameter value of the IRIS_HW_SPEED the parameter IRIS_SPEED
+    /// must be updated automatically. Formula for calculating speed:
+    /// IRIS_SPEED = ( IRIS_HW_SPEED / IRIS_HW_MAX_SPEED) * 100.
     int irisSpeed{50};
-    /// Hardware iris speed (write/read). Value:
-    /// iris speed. Value depends on particular lens controller.
+    /// Iris hardware speed. Value depends on implementation and les hardware.
+    /// The value of the parameters must be <= IRIS_HW_MAX_SPEED parameter.
+    /// If the user sets a new parameter value of the IRIS_SPEED parameter the
+    /// parameter IRIS_HW_SPEED must be updated automatically. Formula for
+    /// calculating hardware speed:
+    /// IRIS_HW_SPEED = ( IRIS_SPEED / 100 ) * IRIS_HW_MAX_SPEED.
     int irisHwSpeed{50};
-    /// Max hardware iris speed (write/read). Value:
-    /// iris speed. Value depends on particular lens controller.
+    /// Maximum iris hardware speed. Value depends on implementation. If user
+    /// sets new IRIS_HW_MAX_SPEED value the parameters IRIS_SPEED and
+    /// IRIS_HW_SPEED must be updated automatically. If new value of
+    /// IRIS_HW_MAX_SPEED parameter will be less than IRIS_HW_SPEED the
+    /// parameter IRIS_HW_SPEED must be reduced automatically.
     int irisHwMaxSpeed{50};
-    /// Hardware zoom tele limit (write/read). Value:
-    /// hardware zoom position. Value depends on particular lens controller.
+    /// Zoom hardware tele limit. Value depends on implementation and lens
+    /// hardware. Lens controller should control zoom position. Lens controller
+    /// should stop zoom moving if hardware zoom position will be our of limits.
     int zoomHwTeleLimit{65535};
-    /// Hardware zoom wide limit (write/read). Value:
-    /// hardware zoom position. Value depends on particular lens controller.
+    /// Zoom hardware wide limit. Value depends on implementation and lens
+    /// hardware. Lens controller should control zoom position. Lens controller
+    /// should stop zoom moving if hardware zoom position will be our of limits.
     int zoomHwWideLimit{0};
-    /// Hardware focus far limit (write/read). Value:
-    /// hardware focus position. Value depends on particular lens controller.
+    /// Focus hardware far limit. Value depends on on implementation and lens
+    /// hardware. Lens controller should control focus position. Lens controller
+    /// should stop focus moving if hardware focus position will be our of
+    /// limits.
     int focusHwFarLimit{65535};
-    /// Hardware focus near limit (write/read). Value:
-    /// hardware focus position. Value depends on particular lens controller.
+    /// Focus hardware near limit. Value depends on implementation and lens
+    /// hardware. Lens controller should control focus position. Lens controller
+    /// should stop focus moving if hardware focus position will be our of
+    /// limits.
     int focusHwNearLimit{0};
-    /// Hardware iris open limit (write/read). Value:
-    /// hardware iris position. Value depends on particular lens controller.
+    /// Iris hardware open limit. Value depends on implementation and lens
+    /// hardware. Lens controller should control iris position. Lens controller
+    /// should stop iris moving if hardware iris position will be our of limits.
     int irisHwOpenLimit{65535};
-    /// Hardware iris close limit (write/read). Value:
-    /// hardware iris position. Value depends on particular lens controller.
+    /// Iris hardware close limit. Value depends on implementation and lens
+    /// hardware. Lens controller should control iris position. Lens controller
+    /// should stop iris moving if hardware iris position will be our of limits.
     int irisHwCloseLimit{0};
-    /// Focus factor value (read only). Value:
+    /// Focus factor if it was calculated. If not calculated must be -1.
     /// Value depends on particular lens controller.
     float focusFactor{0.0f};
-    /// Connection status (read only). Value:
-    /// 0 - not connected, 1 - connected.
+    /// Lens connection status. Connection status shows if the lens controller
+    /// has data exchange with lens equipment. For example, if lens has serial
+    /// port lens controller connects to serial port (opens serial port file
+    /// in OS) but lens can be not active (no power). In this case connection
+    /// status shows that lens controller doesn't have data exchange with lens
+    /// equipment (methos will return 0). It lens controller has data exchange
+    /// with lens equipment the method will return 1. If lens controller not
+    /// initialize the connection status always FALSE. Value:
+    /// false - not connected. true - connected.
     bool isConnected{false};
-    /// Hardware focus speed in AF mode (write/read). Value:
-    /// hardware focus speed. Value depends on particular lens controller.
+    /// Focus hardware speed in autofocus mode. Value depends on implementation
+    /// and lens hardware.
     int afHwSpeed{50};
-    /// Threshold for focus factor to start refocus (write/read). Value:
-    /// threshold %: 0 - no check, 100 - changing x2.
+    /// Timeout for automatic refocus in seconds. Value: 0 - no automatic
+    /// refocus, 100000 - maximum value.
     float focusFactorThreshold{0.0f};
-    /// Refocus timeout, sec (write/read). Value:
-    /// 0 - no refocus, to 100000 sec.
+    /// Timeout for automatic refocus in seconds. Value:
+    /// 0 - no automatic refocus, 100000 - maximum value.
     int refocusTimeoutSec{0};
-    /// AF process mode (read only). Value: 0 - not active, 1 - active.
+    /// Flag about active autofocus algorithm. Value: 0 - autofocus not working,
+    /// 1 - working.
     bool afIsActive{false};
-    /// Iris mode. (write/read). Value:
-    /// Value depends on particular lens controller.
+    /// Iris mode. Value depends on implementation but it is recommended to keep
+    /// default values: 0 - manual iris control, 1 - auto iris control.
     int irisMode{0};
-    /// Auto ROI width (write/read). Value: 0 to video frame size, pxl.
+    /// ROI width (pixels) for autofocus algorithm when lens controller detects
+    /// ROI position automatically. Value: from 8 to (video frame width -
+    /// AUTO_AF_ROI_BORDER * 2).
     int autoAfRoiWidth{150};
-    /// Auto ROI height (write/read). Value: 0 to video frame size, pxl.
+    /// ROI height (pixels) for autofocus algorithm when lens controller detects
+    /// ROI position automatically. Value: from 8 to (video frame width -
+    /// AUTO_AF_ROI_BORDER * 2).
     int autoAfRoiHeight{150};
-    /// Auto ROI frame border in pixels (write/read). Value:
-    /// border size from 0 to video frame min(width/height) / 2.
+    /// Video frame border size (along vertical and horizontal axes).
+    /// Value: border size from 0 to video
+    /// frame min(video frame width/height) / 2.
     int autoAfRoiBorder{100};
-    /// AF ROI mode (write/read). Value:
-    /// 0 - Manual position, 1 - Auto position.
+    /// AF ROI mode (write/read). Value: 0 - Manual position, 1 - Auto position.
     int afRoiMode{0};
-    /// Optical extender mode (write/read). Value:
-    /// Value depends on particular lens controller. Default: 0 -Off, 1 -On.
+    /// Lens extender mode. Value depends on implementation but it is
+    /// recommended to keep default values: 0 - no extender, 1 - x2 extender.
     int extenderMode{0};
-    /// Stabilizer mode (write/read). Value:
-    /// 0 - Off, 1 - On.
+    /// Lens stabilization mode. Value depends on implementation but it is
+    /// recommended to keep default values: 0 - no stabilization,
+    /// 1 - stabilization.
     int stabiliserMode{0};
-    /// AF range (write/read). Value:
-    /// Value depends on particular lens controller.
+    /// Autofocus range. Value depends on implementation.
     int afRange{0};
-    /// Horizontal fiels of view, degree (read only).
+    /// Current horizontal Field of view, degree. Field of view calculated by
+    /// lens controller according to initial params or by reading directly from
+    /// lens hardware.
     float xFovDeg{1.0f};
-    /// Vertical fiels of view, degree (read only).
+    /// Current vertical Field of view, degree. Field of view calculated by lens
+    /// controller according to initial params or by reading directly from lens
+    /// hardware.
     float yFovDeg{1.0f};
-    /// Logging mode.
-    /// Default values:
-    /// 0 - Disable.
-    /// 1 - Only file.
-    /// 2 - Only terminal.
+    /// Logging mode. Values: 0 - Disable, 1 - Only file, 2 - Only terminal,
     /// 3 - File and terminal.
     int logMode{0};
     /// Lens temperature, degree (read only).
     float temperature{0.0f};
-    /// Open status: 1 - lens control port open, 0 - not open.
+    /// Lens controller initialization status. Open status shows if the lens
+    /// controller initialized or not but doesn't show if lens controller has
+    /// communication with lens equipment. For example, if lens has serial port
+    /// lens controller connects to serial port (opens serial port file in OS)
+    /// but lens can be not active (no power). In this case open status just
+    /// shows that lens controller has opened serial port.
+    /// Values: false - not open (not initialized), true - open (initialized).
     bool isOpen{false};
-    /// Lens type service value (write/read). Value depends on implementation.
+    /// Lens type. Value depends on implementation. Type allows to lens
+    /// initialize necessary parameters for particular lens hardware.
     int type{0};
-    /// Lens custom param 1. Value depends on implementation.
+    /// Lens custom parameter. Value depends on particular lens controller.
+    /// Custom parameters used when particular lens equipment has specific
+    /// unusual parameter.
     float custom1;
-    /// Lens custom param 2. Value depends on implementation.
+    /// Lens custom parameter. Value depends on particular lens controller.
+    /// Custom parameters used when particular lens equipment has specific
+    /// unusual parameter.
     float custom2;
-    /// Lens custom param 3. Value depends on implementation.
+    /// Lens custom parameter. Value depends on particular lens controller.
+    /// Custom parameters used when particular lens equipment has specific
+    /// unusual parameter.
     float custom3;
-    /// List of field of view points.
+    /// List of points to calculate fiend of view. Lens controller should
+    /// calculate FOV table according to given list f points using
+    /// approximation.
     std::vector<FovPoint> fovPoints{std::vector<FovPoint>()};
 
-    JSON_READABLE(LensParams,
-                  initString,
-                  focusMode,
-                  filterMode,
-                  afRoiX0,
-                  afRoiY0,
-                  afRoiX1,
-                  afRoiY1,
-                  zoomHwMaxSpeed,
-                  focusHwMaxSpeed,
-                  irisHwMaxSpeed,
-                  zoomHwTeleLimit,
-                  zoomHwWideLimit,
-                  focusHwFarLimit,
-                  focusHwNearLimit,
-                  irisHwOpenLimit,
-                  irisHwCloseLimit,
-                  afHwSpeed,
-                  focusFactorThreshold,
-                  refocusTimeoutSec,
-                  irisMode,
-                  autoAfRoiWidth,
-                  autoAfRoiHeight,
-                  autoAfRoiBorder,
-                  afRoiMode,
-                  extenderMode,
-                  stabiliserMode,
-                  afRange,
-                  logMode,
-                  type,
-                  custom1,
-                  custom2,
-                  custom3,
-                  fovPoints);
-
+    JSON_READABLE(LensParams, initString, focusMode, filterMode, afRoiX0, afRoiY0, afRoiX1,
+                  afRoiY1, zoomHwMaxSpeed, focusHwMaxSpeed, irisHwMaxSpeed, zoomHwTeleLimit,
+                  zoomHwWideLimit, focusHwFarLimit, focusHwNearLimit, irisHwOpenLimit,
+                  irisHwCloseLimit, afHwSpeed, focusFactorThreshold, refocusTimeoutSec,
+                  irisMode, autoAfRoiWidth, autoAfRoiHeight, autoAfRoiBorder, afRoiMode,
+                  extenderMode, stabiliserMode, afRange, logMode, type, custom1, custom2,
+                  custom3,fovPoints);
     /**
      * @brief operator =
      * @param src Source object.
      * @return LensParams obect.
      */
     LensParams& operator= (const LensParams& src);
-
     /**
      * @brief Encode params. The method doesn't encode initString and fovPoints.
      * @param data Pointer to data buffer.
      * @param size Size of data.
      */
     void encode(uint8_t* data, int& size);
-
     /**
      * @brief Decode params. The method doesn't decode initString and fovPoints.
      * @param data Pointer to data.
@@ -1000,68 +1161,66 @@ public:
      */
     bool decode(uint8_t* data);
 };
-}
-}
 ```
 
 **Table 4** - LensParams class fields description is equivalent to **LensParam** enum description.
 
 | Field                | type     | Description                                                  |
 | -------------------- | -------- | ------------------------------------------------------------ |
-| initString           | string   | Initialization string. Particular lens controller can have unique init string format. It is recommended to use '**;**' symbol to divide part of initialization string. Example of lens controller initialization which uses serial port: "/dev/ttyUSB0;9600;100" ("/dev/ttyUSB0" - serial port name, "9600" - baudrate, "100" - serial port read timeout). |
-| zoomPos              | int      | Zoom position. Setting a parameter is equivalent to the command ZOOM_TO_POS. Lens controller should have zoom range from 0 (full wide) to 65535 (full tele) regardless of the hardware value of the zoom position. If the minimum (zoom full wide) and maximum (zoom full tele) hardware zoom position limits are set by the user in the lens parameters, the range of the hardware zoom position must be scaled to the user space 0-65535 range. Parameter value: zoom position 0-65535. User should be able to set zoom movement speed via lens parameters. |
-| zoomHwPos            | int      | Hardware zoom position. Parameter value depends on particular lens controller. |
-| focusPos             | int      | Focus position. Setting a parameter is equivalent to the command FOCUS_TO_POS. Lens controller should have focus range from 0 (focus full near) to 65535 (focus full far) regardless of the hardware value of the focus position. If the minimum (focus full near) and maximum (focus full far) hardware focus position limits are set by the user in the lens parameters, the range of the hardware focus position must be scaled to the user space 0-65535 range. Parameter value: focus position 0-65535. User should be able to set focus movement speed via lens parameters. |
-| focusHwPos           | int      | Hardware focus position. Parameter value depends on particular lens controller. |
-| irisPos              | int      | Iris position. Setting a parameter is equivalent to the command IRIS_TO_POS. Lens controller should have iris range from 0 (full close) to 65535 (full open) regardless of the hardware value of the iris position. If the minimum (iris full close) and maximum (iris full open) iris position limits are set by the user in the lens parameters, the range of the hardware iris position must be scaled to the user space 0-65535 range. Parameter value: iris position 0-65535. User should be able to set iris movement speed via lens parameters. |
-| irisHwPos            | int      | Hardware iris position. Parameter value depends on particular lens controller. |
-| focusMode            | int      | Focus mode. Parameter value depends on particular lens controller. Default values: 0 - Manual focus control, 1 - Auto focus control. |
-| filterMode           | int      | Filter mode. Parameter value depends on particular lens controller. Default values: 0 - Filter on, 1 - Filter off. |
+| initString           | string   | Initialization string. Particular lens controller can have unique init string format. But it is recommended to use '**;**' symbol to divide parts of initialization string. Recommended initialization string format for controllers which uses serial port: **"/dev/ttyUSB0;9600;100"** ("/dev/ttyUSB0" - serial port name, "9600" - baudrate, "100" - serial port read timeout). |
+| zoomPos              | int      | Zoom position. Setting a parameter is equivalent to the command ZOOM_TO_POS. Lens controller should have zoom range from 0 (full wide) to 65535 (full tele) regardless of the hardware value of the zoom position. If the minimum and maximum zoom position limits are set by the user in the lens parameters, the range of the hardware zoom position must be scaled to the user space 0-65535 range. Parameter value: zoom position 0-65535. User should be able to set zoom movement speed via lens parameters. |
+| zoomHwPos            | int      | Hardware zoom position. Parameter value depends on implementation and lens hardware. |
+| focusPos             | int      | Focus position. Setting a parameter is equivalent to the command FOCUS_TO_POS. Lens controller should have focus range from 0 (full near) to 65535 (full far) regardless of the hardware value of the focus position. If the minimum and maximum focus position limits are set by the user in the lens parameters, the range of the hardware focus position must be scaled to the 0-65535 user space range. Parameter value: focus position 0-65535. User should be able to set focus movement speed via lens parameters. |
+| focusHwPos           | int      | Hardware focus position. Parameter value depends on implementation and lens hardware. |
+| irisPos              | int      | Iris position. Setting a parameter is equivalent to the command IRIS_TO_POS. Lens controller should have iris range from 0 (full close) to 65535 (full far) regardless of the hardware value of the iris position. If the minimum and maximum iris position limits are set by the user in the lens parameters, the range of the hardware iris position must be scaled to the 0-65535 user space range. Parameter value: iris position 0-65535. User should be able to set iris movement speed via lens parameters. |
+| irisHwPos            | int      | Hardware iris position. Parameter value depends on implementation. |
+| focusMode            | int      | Focus mode. Parameter value depends on implementation but it is recommended to keep default values: 0 - Manual focus control, 1 - Auto focus control. |
+| filterMode           | int      | Filter mode. Parameter value depends on implementation but it is recommended to keep default values: 0 - Filter on, 1 - Filter off. |
 | afRoiX0              | int      | Autofocus ROI top-left corner horizontal position in pixels. Autofocus ROI is rectangle. |
 | afRoiY0              | int      | Autofocus ROI top-left corner vertical position in pixels. Autofocus ROI is rectangle. |
 | afRoiX1              | int      | Autofocus ROI bottom-right corner horizontal position in pixels. Autofocus ROI is rectangle. |
 | afRoiY1              | int      | Autofocus ROI bottom-right corner vertical position in pixels. Autofocus ROI is rectangle. |
-| zoomSpeed            | int      | Zoom speed. Lens controller should have zoom speed range from 0 to 100% of max hardware zoom speed (parameter zoomHwMaxSpeed). |
-| zoomHwSpeed          | int      | Zoom hardware speed. Value depends on particular lens controller. |
-| zoomHwMaxSpeed       | int      | Maximum zoom hardware speed. Value depends on particular lens controller. |
-| focusSpeed           | int      | Focus speed. Lens controller should have focus speed range from 0 to 100% of max hardware focus speed (parameter focusHwMaxSpeed). |
-| focusHwSpeed         | int      | Focus hardware speed. Value depends on particular lens controller. |
-| focusHwMaxSpeed      | int      | Maximum focus hardware speed. Value depends on particular lens controller. |
-| irisSpeed            | int      | Iris speed. Lens controller should have iris speed range from 0 to 100% of max hardware iris speed (parameter irisHwMaxSpeed). |
-| irisHwSpeed          | int      | Iris hardware speed. Value depends on particular lens controller. |
-| irisHwMaxSpeed       | int      | Maximum iris hardware speed. Value depends on particular lens controller. |
-| zoomHwTeleLimit      | int      | Zoom hardware tele limit. Value depends on particular lens controller. Lens controller should control zoom position. Lens controller should stop zoom moving if hardware zoom position will be our of limits. |
-| zoomHwWideLimit      | int      | Zoom hardware wide limit. Value depends on particular lens controller. Lens controller should control zoom position. Lens controller should stop zoom moving if hardware zoom position will be our of limits. |
-| focusHwFarLimit      | int      | Focus hardware far limit. Value depends on particular lens controller. Lens controller should control focus position. Lens controller should stop focus moving if hardware focus position will be our of limits. |
-| focusHwNearLimit     | int      | Focus hardware near limit. Value depends on particular lens controller. Lens controller should control focus position. Lens controller should stop focus moving if hardware focus position will be our of limits. |
-| irisHwOpenLimit      | int      | Iris hardware open limit. Value depends on particular lens controller. Lens controller should control iris position. Lens controller should stop iris moving if hardware iris position will be our of limits. |
-| irisHwCloseLimit     | int      | Iris hardware close limit. Value depends on particular lens controller. Lens controller should control iris position. Lens controller should stop iris moving if hardware iris position will be our of limits. |
+| zoomSpeed            | int      | Zoom speed. Lens controller should have zoom speed range from 0 to 100% of max hardware zoom speed (parameter ZOOM_HW_MAX_SPEED). If the user sets a new parameter value of the ZOOM_HW_SPEED the parameter ZOOM_SPEED must be updated automatically. Formula for calculating speed: ZOOM_SPEED = ( ZOOM_HW_SPEED / ZOOM_HW_MAX_SPEED) * 100. |
+| zoomHwSpeed          | int      | Zoom hardware speed. Value depends on implementation and lens hardware. The value of the parameters must be <= ZOOM_HW_MAX_SPEED parameter. If the user sets a new parameter value of the ZOOM_SPEED parameter the parameter ZOOM_HW_SPEED must be updated automatically. Formula for calculating hardware speed: ZOOM_HW_SPEED = ( ZOOM_SPEED / 100 ) * ZOOM_HW_MAX_SPEED. |
+| zoomHwMaxSpeed       | int      | Maximum zoom hardware speed. Value depends on implementation. If user sets new ZOOM_HW_MAX_SPEED value the parameters ZOOM_SPEED must be updated automatically. If new value of ZOOM_HW_MAX_SPEED parameter will be less than ZOOM_HW_SPEED the parameter ZOOM_HW_SPEED must be reduced automatically. |
+| focusSpeed           | int      | Focus speed. Lens controller should have focus speed range from 0 to 100% of max hardware focus speed (parameter FOCUS_HW_MAX_SPEED). If the user sets a new parameter value of the FOCUS_HW_SPEED the parameter FOCUS_SPEED must be updated automatically. Formula for calculating speed: FOCUS_SPEED = ( FOCUS_HW_SPEED / FOCUS_HW_MAX_SPEED) * 100. |
+| focusHwSpeed         | int      | Focus hardware speed. Value depends on on implementation and lens hardware. The value of the parameters must be <= FOCUS_HW_MAX_SPEED parameter. If the user sets a new parameter value of the FOCUS_SPEED parameter the parameter FOCUS_HW_SPEED must be updated automatically. Formula for calculating hardware speed: FOCUS_HW_SPEED = ( FOCUS_SPEED / 100 ) * FOCUS_HW_MAX_SPEED. |
+| focusHwMaxSpeed      | int      | Maximum focus hardware speed. Value depends on implementation. If user sets new FOCUS_HW_MAX_SPEED value the parameters FOCUS_SPEED and FOCUS_HW_SPEED must be updated by lens controller automatically. If new value of FOCUS_HW_MAX_SPEED parameter will be less than FOCUS_HW_SPEED the parameter FOCUS_HW_SPEED must be reduced automatically. |
+| irisSpeed            | int      | Iris speed. Lens controller should have iris speed range from 0 to 100% of max hardware iris speed (parameter IRIS_HW_MAX_SPEED). If the user sets a new parameter value of the IRIS_HW_SPEED the parameter IRIS_SPEED must be updated automatically. Formula for calculating speed: IRIS_SPEED = ( IRIS_HW_SPEED / IRIS_HW_MAX_SPEED) * 100. |
+| irisHwSpeed          | int      | Iris hardware speed. Value depends on implementation and les hardware. The value of the parameters must be <= IRIS_HW_MAX_SPEED parameter. If the user sets a new parameter value of the IRIS_SPEED parameter the parameter IRIS_HW_SPEED must be updated automatically. Formula for calculating hardware speed: IRIS_HW_SPEED = ( IRIS_SPEED / 100 ) * IRIS_HW_MAX_SPEED. |
+| irisHwMaxSpeed       | int      | Maximum iris hardware speed. Value depends on implementation. If user sets new IRIS_HW_MAX_SPEED value the parameters IRIS_SPEED and IRIS_HW_SPEED must be updated automatically. If new value of IRIS_HW_MAX_SPEED parameter will be less than IRIS_HW_SPEED the parameter IRIS_HW_SPEED must be reduced automatically. |
+| zoomHwTeleLimit      | int      | Zoom hardware tele limit. Value depends on implementation and lens hardware. Lens controller should control zoom position. Lens controller should stop zoom moving if hardware zoom position will be our of limits. |
+| zoomHwWideLimit      | int      | Zoom hardware wide limit. Value depends on implementation and lens hardware. Lens controller should control zoom position. Lens controller should stop zoom moving if hardware zoom position will be our of limits. |
+| focusHwFarLimit      | int      | Focus hardware far limit. Value depends on on implementation and lens hardware. Lens controller should control focus position. Lens controller should stop focus moving if hardware focus position will be our of limits. |
+| focusHwNearLimit     | int      | Focus hardware near limit. Value depends on implementation and lens hardware. Lens controller should control focus position. Lens controller should stop focus moving if hardware focus position will be our of limits. |
+| irisHwOpenLimit      | int      | Iris hardware open limit. Value depends on implementation and lens hardware. Lens controller should control iris position. Lens controller should stop iris moving if hardware iris position will be our of limits. |
+| irisHwCloseLimit     | int      | Iris hardware close limit. Value depends on implementation and lens hardware. Lens controller should control iris position. Lens controller should stop iris moving if hardware iris position will be our of limits. |
 | focusFactor          | float    | Focus factor if it was calculated. If not calculated must be -1. Value depends on particular lens controller. |
-| isConnected          | bool     | Lens connection status. Connection status shows if the lens controller has data exchange with lens equipment. |
-| afHwSpeed            | int      | Focus hardware speed in autofocus mode. Value depends on particular lens controller. |
-| focusFactorThreshold | float    | Threshold for changes of focus factor to start refocus. Value: threshold %: 0 - no check, 100 - changing x2. |
+| isConnected          | bool     | Lens connection status. Connection status shows if the lens controller has data exchange with lens equipment. For example, if lens has serial port lens controller connects to serial port (opens serial port file in OS) but lens can be not active (no power). In this case connection status shows that lens controller doesn't have data exchange with lens equipment (methos will return 0). It lens controller has data exchange with lens equipment the method will return 1. If lens controller not initialize the connection status always FALSE. Value: false - not connected. true - connected. |
+| afHwSpeed            | int      | Focus hardware speed in autofocus mode. Value depends on implementation and lens hardware. |
+| focusFactorThreshold | float    | Timeout for automatic refocus in seconds. Value: 0 - no automatic refocus, 100000 - maximum value. |
 | refocusTimeoutSec    | int      | Timeout for automatic refocus in seconds. Value: 0 - no automatic refocus, 100000 - maximum value. |
-| afIsActive           | bool     | Flag about active autofocus algorithm. Value: FALSE - autofocus not working, TRUE - working. |
-| irisMode             | int      | Iris mode. Value depends on particular lens controller. Default values: 0 - manual iris control, 1 - auto iris control. |
+| afIsActive           | bool     | Flag about active autofocus algorithm. Value: 0 - autofocus not working, 1 - working. |
+| irisMode             | int      | Iris mode. Value depends on implementation but it is recommended to keep default values: 0 - manual iris control, 1 - auto iris control. |
 | autoAfRoiWidth       | int      | ROI width (pixels) for autofocus algorithm when lens controller detects ROI position automatically. Value: from 8 to (video frame width - AUTO_AF_ROI_BORDER * 2). |
 | autoAfRoiHeight      | int      | ROI height (pixels) for autofocus algorithm when lens controller detects ROI position automatically. Value: from 8 to (video frame width - AUTO_AF_ROI_BORDER * 2). |
 | autoAfRoiBorder      | int      | Video frame border size (along vertical and horizontal axes). Value: border size from 0 to video frame min(video frame width/height) / 2. |
 | afRoiMode            | int      | AF ROI mode (write/read). Value: 0 - Manual position, 1 - Auto position. |
-| extenderMode         | int      | Lens extender mode. Value depends on particular lens controller. Default values: 0 - no extender, 1 - x2 extender. |
-| stabiliserMode       | int      | Lens stabilization mode. Value depends on particular lens controller. Default values: 0 - no stabilization, 1 - stabilization. |
-| afRange              | int      | Autofocus range. Value depends on particular lens controller. |
-| xFovDeg              | float    | Current horizontal Field of view, degree. Field of view calculated by lens controller according to initial params or by reading directly from lens equipment. |
-| yFovDeg              | float    | Current vertical Field of view, degree. Field of view calculated by lens controller according to initial params or by reading directly from lens equipment. |
-| logMode              | int      | Logging mode. Default values:<br/>0 - Disable.<br/>1 - Only file.<br/>2 - Only terminal.<br/>3 - File and terminal. |
+| extenderMode         | int      | Lens extender mode. Value depends on implementation but it is recommended to keep default values: 0 - no extender, 1 - x2 extender. |
+| stabiliserMode       | int      | Lens stabilization mode. Value depends on implementation but it is recommended to keep default values: 0 - no stabilization, 1 - stabilization. |
+| afRange              | int      | Autofocus range. Value depends on implementation.            |
+| xFovDeg              | float    | Current horizontal Field of view, degree. Field of view calculated by lens controller according to initial params or by reading directly from lens hardware. |
+| yFovDeg              | float    | Current vertical Field of view, degree. Field of view calculated by lens controller according to initial params or by reading directly from lens hardware. |
+| logMode              | int      | Logging mode. Values: 0 - Disable, 1 - Only file, 2 - Only terminal, 3 - File and terminal. |
 | temperature          | float    | Lens temperature, degree.                                    |
-| isOpen               | bool     | Lens controller initialization status. Open status shows if the lens controller initialized or not but doesn't show if lens controller has communication with lens equipment. |
-| type                 | int      | Lens type. Value depends on particular lens controller. Type allows to lens initialize necessary parameters for particular lens mode from one supplier. |
+| isOpen               | bool     | Lens controller initialization status. Open status shows if the lens controller initialized or not but doesn't show if lens controller has communication with lens equipment. For example, if lens has serial port lens controller connects to serial port (opens serial port file in OS) but lens can be not active (no power). In this case open status just shows that lens controller has opened serial port. Values: false - not open (not initialized), true - open (initialized). |
+| type                 | int      | Lens type. Value depends on implementation. Type allows to lens initialize necessary parameters for particular lens hardware. |
 | custom1              | float    | Lens custom parameter. Value depends on particular lens controller. Custom parameters used when particular lens equipment has specific unusual parameter. |
 | custom2              | float    | Lens custom parameter. Value depends on particular lens controller. Custom parameters used when particular lens equipment has specific unusual parameter. |
 | custom3              | float    | Lens custom parameter. Value depends on particular lens controller. Custom parameters used when particular lens equipment has specific unusual parameter. |
 | fovPoints            | FovPoint | List of points to calculate fiend of view. Lens controller should calculate FOV table according to given list f points using approximation. Each point includes (**FovPoint** class):<br />- **hwZoomPos** - hardware zoom position.<br />- **xFovDeg** - horizontal FOV, degree for hwZoomPos.<br />- **yFovDeg** - vertical FOV, degree for hwZoomPos. |
 
-**None:** *LensParams class fiellds listed in Table 4 **must** reflect params set/get by methods setParam(...) and getParam(...).* 
+**None:** *LensParams class fiellds listed in Table 4 **must** reflect params set/get by methods setParam(...) and getParam(...).*
 
 
 
@@ -1096,13 +1255,12 @@ cout << "Encoded data size: " << size << " bytes" << endl;
 **LensParams** class provides method **decode(...)** to deserialize lens params (fields of LensParams class, see Table 4). Deserialization of lens params necessary in case when you need to receive lens params via communication channels. Method doesn't decode fields: **initString** and **fovPoints**. Method declaration:
 
 ```cpp
-bool decode(uint8_t* data, int size);
+bool decode(uint8_t* data);
 ```
 
 | Parameter | Value                   |
 | --------- | ----------------------- |
 | data      | Pointer to data buffer. |
-| size      | Size of encoded data.   |
 
 **Returns:** TRUE if data decoded (deserialized) or FALSE if not.
 
@@ -1118,7 +1276,7 @@ cout << "Encoded data size: " << size << " bytes" << endl;
 
 // Decode data.
 LensParams out;
-if (!out.decode(data, size))
+if (!out.decode(data))
     cout << "Can't decode data" << endl;
 ```
 

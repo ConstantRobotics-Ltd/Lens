@@ -3,8 +3,13 @@
 
 
 
+// Link namesapces.
+using namespace cr::lens;
+
+
+
 /// Copy operator.
-cr::lens::FovPoint &cr::lens::FovPoint::operator= (const cr::lens::FovPoint &src)
+FovPoint &FovPoint::operator= (const FovPoint &src)
 {
     // Check yourself.
     if (this == &src)
