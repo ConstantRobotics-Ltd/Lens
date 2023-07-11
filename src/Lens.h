@@ -40,6 +40,63 @@ public:
 
 
 /// Lens params structure.
+typedef struct LensParamsMask
+{
+    bool zoomPos{true};
+    bool zoomHwPos{true};
+    bool focusPos{true};
+    bool focusHwPos{true};
+    bool irisPos{true};
+    bool irisHwPos{true};
+    bool focusMode{true};
+    bool filterMode{true};
+    bool afRoiX0{true};
+    bool afRoiY0{true};
+    bool afRoiX1{true};
+    bool afRoiY1{true};
+    bool zoomSpeed{true};
+    bool zoomHwSpeed{true};
+    bool zoomHwMaxSpeed{true};
+    bool focusSpeed{true};
+    bool focusHwSpeed{true};
+    bool focusHwMaxSpeed{true};
+    bool irisSpeed{true};
+    bool irisHwSpeed{true};
+    bool irisHwMaxSpeed{true};
+    bool zoomHwTeleLimit{true};
+    bool zoomHwWideLimit{true};
+    bool focusHwFarLimit{true};
+    bool focusHwNearLimit{true};
+    bool irisHwOpenLimit{true};
+    bool irisHwCloseLimit{true};
+    bool focusFactor{true};
+    bool isConnected{true};
+    bool afHwSpeed{true};
+    bool focusFactorThreshold{true};
+    bool refocusTimeoutSec{true};
+    bool afIsActive{true};
+    bool irisMode{true};
+    bool autoAfRoiWidth{true};
+    bool autoAfRoiHeight{true};
+    bool autoAfRoiBorder{true};
+    bool afRoiMode{true};
+    bool extenderMode{true};
+    bool stabiliserMode{true};
+    bool afRange{true};
+    bool xFovDeg{true};
+    bool yFovDeg{true};
+    bool logMode{true};
+    bool temperature{true};
+    bool isOpen{false};
+    bool type{true};
+    bool custom1{true};
+    bool custom2{true};
+    bool custom3{true};
+} LensParamsMask;
+
+
+
+/// Lens params structure.
 class LensParams
 {
 public:
@@ -266,15 +323,15 @@ public:
     /// Lens custom parameter. Value depends on particular lens controller.
     /// Custom parameters used when particular lens equipment has specific
     /// unusual parameter.
-    float custom1;
+    float custom1{0.0f};
     /// Lens custom parameter. Value depends on particular lens controller.
     /// Custom parameters used when particular lens equipment has specific
     /// unusual parameter.
-    float custom2;
+    float custom2{0.0f};
     /// Lens custom parameter. Value depends on particular lens controller.
     /// Custom parameters used when particular lens equipment has specific
     /// unusual parameter.
-    float custom3;
+    float custom3{0.0f};
     /// List of points to calculate fiend of view. Lens controller should
     /// calculate FOV table according to given list f points using
     /// approximation.
@@ -326,8 +383,9 @@ public:
      * @brief Encode params. The method doesn't encode initString and fovPoints.
      * @param data Pointer to data buffer.
      * @param size Size of data.
+     * @param mask Pointer to params mask.
      */
-    void encode(uint8_t* data, int& size);
+    void encode(uint8_t* data, int& size, LensParamsMask* mask = nullptr);
 
     /**
      * @brief Decode params. The method doesn't decode initString and fovPoints.

@@ -1,12 +1,10 @@
 
 
-
-
 ![logo](_static/lens_logo.png)
 
 # **Lens interface C++ library**
 
-**v4.0.3**
+**v4.1.0**
 
 ------
 
@@ -17,7 +15,7 @@
 - [Overview](#Overview)
 - [Versions](#Versions)
 - [Lens interface class description](#Lens-interface-class-description)
-  - [Class declaration](#Class-declaration)
+  - [Class declaration](#Lens-class-declaration)
   - [getVersion method](#getVersion-method)
   - [openLens method](#openLens-method)
   - [initLens method](#initLens-method)
@@ -36,7 +34,7 @@
   - [LensCommand enum](#LensCommand-enum)
   - [LensParam enum](#LensParam-enum)
 - [LensParams class description](#LensParams-class-description)
-  - [Class declaration](#Class-declaration)
+  - [LensParams class declaration](#LensParams-class-declaration)
   - [Serialize lens params](#Serialize-lens-params)
   - [Deserialize lens params](#Deserialize-lens-params)
   - [Read params from JSON file and write to JSON file](#Read-params-from-JSON-file-and-write-to-JSON-file)
@@ -46,7 +44,7 @@
 
 # Overview
 
-**Lens** C++ library provides standard interface as well defines data structures and rules for different lens controllers. **Lens** interface class doesn't do anything, just provides interface, data structures and service functions to encode/decode parameter. Different lens controller classes inherit interface form **Lens** C++ class. **Lens.h** file contains list of data structures (**LensCommand** enum, **LensParam** enum and **LensParams** class) and **Lens** class declaration. **LensCommand** enum contains IDs of commands supported by **Lens** class. **LensParam** enum contains IDs of params supported by **Lens** class. **LensParams** class contains fields for lens parameters values and provides methods to encode/decode and read/write lens parameters from JSON file. All lens controllers should include params and commands listed in **Lens.h** file. Lens interface class depends on **Frame** class (describes video frame and video frame data structures, necessary for autofocus functions) and **ConfigReader** library (provides methods to read/write JSON config files).
+**Lens** C++ library provides standard interface as well defines data structures and rules for different lens controllers. **Lens** interface class doesn't do anything, just provides interface, data structures and service functions to encode/decode parameter and commands. Different lens controller classes inherit interface form **Lens** C++ class. **Lens.h** file contains list of data structures (**LensCommand** enum, **LensParam** enum and **LensParams** class) and **Lens** class declaration. **LensCommand** enum contains IDs of commands supported by **Lens** class. **LensParam** enum contains IDs of params supported by **Lens** class. **LensParams** class contains fields for lens parameters values and provides methods to encode/decode and read/write lens parameters from JSON file. All lens controllers should include params and commands listed in **Lens.h** file. Lens interface class depends on [**Frame**](https://github.com/ConstantRobotics-Ltd/Frame) class (describes video frame and video frame data structures, necessary for autofocus functions) and [**ConfigReader**](https://github.com/ConstantRobotics-Ltd/ConfigReader) library (provides methods to read/write JSON config files).
 
 
 
@@ -65,6 +63,7 @@
 | 4.0.1   | 28.06.2023   | - ConfigReader submodule updated.<br />- Frame submodule updated. |
 | 4.0.2   | 29.06.2023   | - Documentation updated.                                     |
 | 4.0.3   | 01.07.2023   | - Documentation updated.<br />- Lens class comments in source code updated. |
+| 4.1.0   | 11.07.2023   | - Added LensParamsMask for lens params masking.<br />- encode(...) method of LensParams class updated.<br />- Documentation updated. |
 
 
 
@@ -72,7 +71,7 @@
 
 
 
-## Class declaration
+## Lens class declaration
 
 **Lens** interface class declared in **Lens.h** file. Class declaration:
 
@@ -208,7 +207,7 @@ std::cout << "Lens class version: " << Lens::getVersion() << std::endl;
 Console output:
 
 ```bash
-Lens class version: 4.0.2
+Lens class version: 4.1.0
 ```
 
 
@@ -378,7 +377,7 @@ static void encodeSetParamCommand(uint8_t* data, int& size, LensParam id, float 
 | ---- | ----- | -------------------------------------------------- |
 | 0    | 0x01  | SET_PARAM command header value.                    |
 | 1    | 0x04  | Major version of Lens class.                       |
-| 2    | 0x00  | Minor version of Lens class.                       |
+| 2    | 0x01  | Minor version of Lens class.                       |
 | 3    | id    | Parameter ID **int32_t** in Little-endian format.  |
 | 4    | id    | Parameter ID **int32_t** in Little-endian format.  |
 | 5    | id    | Parameter ID **int32_t** in Little-endian format.  |
@@ -424,7 +423,7 @@ static void encodeCommand(uint8_t* data, int& size, LensCommand id, float arg = 
 | ---- | ----- | --------------------------------------------------------- |
 | 0    | 0x00  | SET_PARAM command header value.                           |
 | 1    | 0x04  | Major version of Lens class.                              |
-| 2    | 0x00  | Minor version of Lens class.                              |
+| 2    | 0x01  | Minor version of Lens class.                              |
 | 3    | id    | Command ID **int32_t** in Little-endian format.           |
 | 4    | id    | Command ID **int32_t** in Little-endian format.           |
 | 5    | id    | Command ID **int32_t** in Little-endian format.           |
@@ -463,7 +462,7 @@ static int decodeCommand(uint8_t* data, int size, LensParam& paramId, LensComman
 | size      | Size of command. Should be 11 bytes.                         |
 | paramId   | Lens parameter ID according to **LensParam** enum. After decoding SET_PARAM command the method will return parameter ID. |
 | commandId | Lens command ID according to **LensCommand** enum. After decoding COMMAND the method will return command ID. |
-| value     | Len parameter value (after decoding SET_PARAM command) or lens command argument (after decoding COMMAND). |
+| value     | Lens parameter value (after decoding SET_PARAM command) or lens command argument (after decoding COMMAND). |
 
 **Returns:** **0** - in case decoding COMMAND, **1** - in case decoding SET_PARAM command or **-1** in case errors.
 
@@ -864,11 +863,11 @@ enum class LensParam
 
 # LensParams class description
 
-**LensParams** class used for lens controller initialization (**initLens(...)** method) or to get all actual params (**getParams()** method). Also **LensParams** provide structure to write/read params from JSON files (**JSON_READABLE** macro) and provide methos to encode and decode params.
+**LensParams** class used for lens controller initialization (**initLens(...)** method) or to get all actual params (**getParams()** method). Also **LensParams** provides structure to write/read params from JSON files (**JSON_READABLE** macro) and provides methos to encode and decode params.
 
 
 
-## Class declaration
+## LensParams class declaration
 
 **LensParams** interface class declared in **Lens.h** file. Class declaration:
 
@@ -885,7 +884,6 @@ public:
     float yFovDeg{0.0f};
 
     JSON_READABLE(FovPoint, hwZoomPos, xFovDeg, yFovDeg);
-
     /**
      * @brief operator =
      * @param src Source object.
@@ -1121,27 +1119,29 @@ public:
     /// Lens custom parameter. Value depends on particular lens controller.
     /// Custom parameters used when particular lens equipment has specific
     /// unusual parameter.
-    float custom1;
+    float custom1{0.0f};
     /// Lens custom parameter. Value depends on particular lens controller.
     /// Custom parameters used when particular lens equipment has specific
     /// unusual parameter.
-    float custom2;
+    float custom2{0.0f};
     /// Lens custom parameter. Value depends on particular lens controller.
     /// Custom parameters used when particular lens equipment has specific
     /// unusual parameter.
-    float custom3;
+    float custom3{0.0f};
     /// List of points to calculate fiend of view. Lens controller should
     /// calculate FOV table according to given list f points using
     /// approximation.
     std::vector<FovPoint> fovPoints{std::vector<FovPoint>()};
 
-    JSON_READABLE(LensParams, initString, focusMode, filterMode, afRoiX0, afRoiY0, afRoiX1,
-                  afRoiY1, zoomHwMaxSpeed, focusHwMaxSpeed, irisHwMaxSpeed, zoomHwTeleLimit,
-                  zoomHwWideLimit, focusHwFarLimit, focusHwNearLimit, irisHwOpenLimit,
-                  irisHwCloseLimit, afHwSpeed, focusFactorThreshold, refocusTimeoutSec,
-                  irisMode, autoAfRoiWidth, autoAfRoiHeight, autoAfRoiBorder, afRoiMode,
-                  extenderMode, stabiliserMode, afRange, logMode, type, custom1, custom2,
-                  custom3,fovPoints);
+    JSON_READABLE(LensParams, initString, focusMode, filterMode, afRoiX0,
+                  afRoiY0, afRoiX1, afRoiY1, zoomHwMaxSpeed, focusHwMaxSpeed,
+                  irisHwMaxSpeed, zoomHwTeleLimit, zoomHwWideLimit,
+                  focusHwFarLimit, focusHwNearLimit, irisHwOpenLimit,
+                  irisHwCloseLimit, afHwSpeed, focusFactorThreshold,
+                  refocusTimeoutSec, irisMode, autoAfRoiWidth, autoAfRoiHeight,
+                  autoAfRoiBorder, afRoiMode, extenderMode, stabiliserMode,
+                  afRange, logMode, type, custom1, custom2, custom3, fovPoints);
+
     /**
      * @brief operator =
      * @param src Source object.
@@ -1152,8 +1152,9 @@ public:
      * @brief Encode params. The method doesn't encode initString and fovPoints.
      * @param data Pointer to data buffer.
      * @param size Size of data.
+     * @param mask Pointer to params mask.
      */
-    void encode(uint8_t* data, int& size);
+    void encode(uint8_t* data, int& size, LensParamsMask* mask = nullptr);
     /**
      * @brief Decode params. The method doesn't decode initString and fovPoints.
      * @param data Pointer to data.
@@ -1226,25 +1227,103 @@ public:
 
 ## Serialize lens params
 
-**LensParams** class provides method **encode(...)** to serialize lens params (fields of LensParams class, see Table 4). Serialization of lens params necessary in case when you need to send lens params via communication channels. Method doesn't encode **initString** string field and **fovPoints**. Method declaration:
+**LensParams** class provides method **encode(...)** to serialize lens params (fields of LensParams class, see Table 4). Serialization of lens params necessary in case when you need to send lens params via communication channels. Method doesn't encode **initString** string field and **fovPoints**. Method provides options to exclude particular parameters from serialization. To do this method inserts binary mask (7 bytes) where each bit represents particular parameter and **decode(...)** method recognizes it. Method declaration:
 
 ```cpp
-void encode(uint8_t* data, int& size);
+void encode(uint8_t* data, int& size, LensParamsMask* mask = nullptr);
 ```
 
-| Parameter | Value                   |
-| --------- | ----------------------- |
-| data      | Pointer to data buffer. |
-| size      | Size of encoded data.   |
+| Parameter | Value                                                        |
+| --------- | ------------------------------------------------------------ |
+| data      | Pointer to data buffer.                                      |
+| size      | Size of encoded data.                                        |
+| mask      | Parameters mask - pointer to **LensParamsMask** structure. **LensParamsMask** (declared in Lens.h file) determines flags for each field (parameter) declared in **LensParams** class. If the user wants to exclude any parameters from serialization, he can put a pointer to the mask. If the user wants to exclude a particular parameter from serialization, he should set the corresponding flag in the LensParamsMask structure. |
 
-Example:
+**LensParamsMask** structure declaration:
+
+```cpp
+typedef struct LensParamsMask
+{
+    bool zoomPos{true};
+    bool zoomHwPos{true};
+    bool focusPos{true};
+    bool focusHwPos{true};
+    bool irisPos{true};
+    bool irisHwPos{true};
+    bool focusMode{true};
+    bool filterMode{true};
+    bool afRoiX0{true};
+    bool afRoiY0{true};
+    bool afRoiX1{true};
+    bool afRoiY1{true};
+    bool zoomSpeed{true};
+    bool zoomHwSpeed{true};
+    bool zoomHwMaxSpeed{true};
+    bool focusSpeed{true};
+    bool focusHwSpeed{true};
+    bool focusHwMaxSpeed{true};
+    bool irisSpeed{true};
+    bool irisHwSpeed{true};
+    bool irisHwMaxSpeed{true};
+    bool zoomHwTeleLimit{true};
+    bool zoomHwWideLimit{true};
+    bool focusHwFarLimit{true};
+    bool focusHwNearLimit{true};
+    bool irisHwOpenLimit{true};
+    bool irisHwCloseLimit{true};
+    bool focusFactor{true};
+    bool isConnected{true};
+    bool afHwSpeed{true};
+    bool focusFactorThreshold{true};
+    bool refocusTimeoutSec{true};
+    bool afIsActive{true};
+    bool irisMode{true};
+    bool autoAfRoiWidth{true};
+    bool autoAfRoiHeight{true};
+    bool autoAfRoiBorder{true};
+    bool afRoiMode{true};
+    bool extenderMode{true};
+    bool stabiliserMode{true};
+    bool afRange{true};
+    bool xFovDeg{true};
+    bool yFovDeg{true};
+    bool logMode{true};
+    bool temperature{true};
+    bool isOpen{false};
+    bool type{true};
+    bool custom1{true};
+    bool custom2{true};
+    bool custom3{true};
+} LensParamsMask;
+```
+
+Example without parameters mask:
 
 ```cpp
 // Encode data.
 LensParams in;
+in.logMode = 3;
 uint8_t data[1024];
 int size = 0;
 in.encode(data, size);
+cout << "Encoded data size: " << size << " bytes" << endl;
+```
+
+Example with parameters mask:
+
+```cpp
+// Prepare params.
+LensParams in;
+in.logMode = 3;
+
+// Prepare mask.
+LensParamsMask mask;
+mask.logMode = false; // Exclude logMode. Others by default.
+
+// Encode.
+uint8_t data[1024];
+int size = 0;
+in.encode(data, size, &mask);
 cout << "Encoded data size: " << size << " bytes" << endl;
 ```
 
@@ -1252,7 +1331,7 @@ cout << "Encoded data size: " << size << " bytes" << endl;
 
 ## Deserialize lens params
 
-**LensParams** class provides method **decode(...)** to deserialize lens params (fields of LensParams class, see Table 4). Deserialization of lens params necessary in case when you need to receive lens params via communication channels. Method doesn't decode fields: **initString** and **fovPoints**. Method declaration:
+**LensParams** class provides method **decode(...)** to deserialize lens params (fields of LensParams class, see Table 4). Deserialization of lens params necessary in case when you need to receive lens params via communication channels. Method automatically recognizes which parameters were serialized by **encode(...)** method. Method doesn't decode fields: **initString** and **fovPoints**. Method declaration:
 
 ```cpp
 bool decode(uint8_t* data);
