@@ -31,6 +31,7 @@ endif()
 ################################################################################
 SET(${PARENT}_LENS                           ON  CACHE BOOL "" ${REWRITE_FORCE})
 SET(${PARENT}_LENS_TEST                      ON  CACHE BOOL "" ${REWRITE_FORCE})
+SET(${PARENT}_LENS_EXAMPLE                   ON  CACHE BOOL "" ${REWRITE_FORCE})
 
 
 
@@ -45,4 +46,8 @@ endif()
 
 if (${PARENT}_LENS_TEST)
     add_subdirectory(test)
+endif()
+
+if (${PARENT}_LENS_EXAMPLE)
+    add_subdirectory(example)
 endif()

@@ -32,14 +32,14 @@ public:
     /**
      * @brief operator =
      * @param src Source object.
-     * @return FovPoint obect.
+     * @return FovPoint object.
      */
     FovPoint& operator= (const FovPoint& src);
 };
 
 
 
-/// Lens params structure.
+/// Lens params mask structure.
 typedef struct LensParamsMask
 {
     bool zoomPos{true};
@@ -96,7 +96,7 @@ typedef struct LensParamsMask
 
 
 
-/// Lens params structure.
+/// Lens params class.
 class LensParams
 {
 public:
@@ -384,15 +384,18 @@ public:
      * @param data Pointer to data buffer.
      * @param size Size of data.
      * @param mask Pointer to params mask.
+     * @return TRUE if params encoded or FALSE if not.
      */
-    void encode(uint8_t* data, int& size, LensParamsMask* mask = nullptr);
+    bool encode(uint8_t* data, int bufferSize, int& size,
+                LensParamsMask* mask = nullptr);
 
     /**
      * @brief Decode params. The method doesn't decode initString and fovPoints.
      * @param data Pointer to data.
+     * @brief dataSize Size of data.
      * @return TRUE is params decoded or FALSE if not.
      */
-    bool decode(uint8_t* data);
+    bool decode(uint8_t* data, int dataSize);
 };
 
 
@@ -761,7 +764,7 @@ public:
     virtual float getParam(LensParam id) = 0;
 
     /**
-     * @brief Get the lens controller paramw.
+     * @brief Get the lens controller params.
      * @param id Param ID.
      * @return Lens params structure.
      */
@@ -816,6 +819,14 @@ public:
                              LensParam& paramId,
                              LensCommand& commandId,
                              float& value);
+
+    /**
+     * @brief Decode and execute command.
+     * @param data Pointer to command data.
+     * @param size Size of data.
+     * @return TRUE if command decoded and executed or FALSE if not.
+     */
+    virtual bool decodeAndExecuteCommand(uint8_t* data, int size) = 0;
 };
 }
 }

@@ -3,13 +3,7 @@
 
 
 
-// Link namesapces.
-using namespace cr::lens;
-
-
-
-/// Copy operator.
-FovPoint &FovPoint::operator= (const FovPoint &src)
+cr::lens::FovPoint &cr::lens::FovPoint::operator= (const FovPoint &src)
 {
     // Check yourself.
     if (this == &src)
@@ -25,7 +19,6 @@ FovPoint &FovPoint::operator= (const FovPoint &src)
 
 
 
-/// Copy operator.
 cr::lens::LensParams &cr::lens::LensParams::operator= (const cr::lens::LensParams &src)
 {
     // Check yourself.
@@ -91,9 +84,13 @@ cr::lens::LensParams &cr::lens::LensParams::operator= (const cr::lens::LensParam
 
 
 
-/// Encode params.
-void cr::lens::LensParams::encode(uint8_t* data, int& size,LensParamsMask* mask)
+bool cr::lens::LensParams::encode(uint8_t* data, int bufferSize, int& size,
+                                  cr::lens::LensParamsMask* mask)
 {
+    // Check buffer size.
+    if (bufferSize < 201)
+        return false;
+
     // Encode version.
     int pos = 0;
     data[pos] = 0x02; pos += 1;
@@ -165,7 +162,7 @@ void cr::lens::LensParams::encode(uint8_t* data, int& size,LensParamsMask* mask)
 
         size = pos;
 
-        return;
+        return true;
     }
 
     // Prepare mask.
@@ -433,15 +430,22 @@ void cr::lens::LensParams::encode(uint8_t* data, int& size,LensParamsMask* mask)
     }
     if (mask->custom3)
     {
-        memcpy(&data[pos], &custom3, 4);
+        memcpy(&data[pos], &custom3, 4); pos += 4;
     }
+
+    size = pos;
+
+    return true;
 }
 
 
 
-/// Decode params.
-bool cr::lens::LensParams::decode(uint8_t* data)
+bool cr::lens::LensParams::decode(uint8_t* data, int dataSize)
 {
+    // Check data size.
+    if (dataSize < 11)
+        return false;
+
     // Check header.
     if (data[0] != 0x02)
         return false;
@@ -454,6 +458,8 @@ bool cr::lens::LensParams::decode(uint8_t* data)
     int pos = 10;
     if ((data[3] & (uint8_t)128) == (uint8_t)128)
     {
+        if (dataSize < pos + 4)
+            return false;
         memcpy(&zoomPos, &data[pos], 4); pos += 4;
     }
     else
@@ -462,6 +468,8 @@ bool cr::lens::LensParams::decode(uint8_t* data)
     }
     if ((data[3] & (uint8_t)64) == (uint8_t)64)
     {
+        if (dataSize < pos + 4)
+            return false;
         memcpy(&zoomHwPos, &data[pos], 4); pos += 4;
     }
     else
@@ -470,6 +478,8 @@ bool cr::lens::LensParams::decode(uint8_t* data)
     }
     if ((data[3] & (uint8_t)32) == (uint8_t)32)
     {
+        if (dataSize < pos + 4)
+            return false;
         memcpy(&focusPos, &data[pos], 4); pos += 4;
     }
     else
@@ -478,6 +488,8 @@ bool cr::lens::LensParams::decode(uint8_t* data)
     }
     if ((data[3] & (uint8_t)16) == (uint8_t)16)
     {
+        if (dataSize < pos + 4)
+            return false;
         memcpy(&focusHwPos, &data[pos], 4); pos += 4;
     }
     else
@@ -486,6 +498,8 @@ bool cr::lens::LensParams::decode(uint8_t* data)
     }
     if ((data[3] & (uint8_t)8) == (uint8_t)8)
     {
+        if (dataSize < pos + 4)
+            return false;
         memcpy(&irisPos, &data[pos], 4); pos += 4;
     }
     else
@@ -494,6 +508,8 @@ bool cr::lens::LensParams::decode(uint8_t* data)
     }
     if ((data[3] & (uint8_t)4) == (uint8_t)4)
     {
+        if (dataSize < pos + 4)
+            return false;
         memcpy(&irisHwPos, &data[pos], 4); pos += 4;
     }
     else
@@ -502,6 +518,8 @@ bool cr::lens::LensParams::decode(uint8_t* data)
     }
     if ((data[3] & (uint8_t)2) == (uint8_t)2)
     {
+        if (dataSize < pos + 4)
+            return false;
         memcpy(&focusMode, &data[pos], 4); pos += 4;
     }
     else
@@ -510,6 +528,8 @@ bool cr::lens::LensParams::decode(uint8_t* data)
     }
     if ((data[3] & (uint8_t)1) == (uint8_t)1)
     {
+        if (dataSize < pos + 4)
+            return false;
         memcpy(&filterMode, &data[pos], 4); pos += 4;
     }
     else
@@ -520,6 +540,8 @@ bool cr::lens::LensParams::decode(uint8_t* data)
 
     if ((data[4] & (uint8_t)128) == (uint8_t)128)
     {
+        if (dataSize < pos + 4)
+            return false;
         memcpy(&afRoiX0, &data[pos], 4); pos += 4;
     }
     else
@@ -528,6 +550,8 @@ bool cr::lens::LensParams::decode(uint8_t* data)
     }
     if ((data[4] & (uint8_t)64) == (uint8_t)64)
     {
+        if (dataSize < pos + 4)
+            return false;
         memcpy(&afRoiY0, &data[pos], 4); pos += 4;
     }
     else
@@ -536,6 +560,8 @@ bool cr::lens::LensParams::decode(uint8_t* data)
     }
     if ((data[4] & (uint8_t)32) == (uint8_t)32)
     {
+        if (dataSize < pos + 4)
+            return false;
         memcpy(&afRoiX1, &data[pos], 4); pos += 4;
     }
     else
@@ -544,6 +570,8 @@ bool cr::lens::LensParams::decode(uint8_t* data)
     }
     if ((data[4] & (uint8_t)16) == (uint8_t)16)
     {
+        if (dataSize < pos + 4)
+            return false;
         memcpy(&afRoiY1, &data[pos], 4); pos += 4;
     }
     else
@@ -552,6 +580,8 @@ bool cr::lens::LensParams::decode(uint8_t* data)
     }
     if ((data[4] & (uint8_t)8) == (uint8_t)8)
     {
+        if (dataSize < pos + 4)
+            return false;
         memcpy(&zoomSpeed, &data[pos], 4); pos += 4;
     }
     else
@@ -560,6 +590,8 @@ bool cr::lens::LensParams::decode(uint8_t* data)
     }
     if ((data[4] & (uint8_t)4) == (uint8_t)4)
     {
+        if (dataSize < pos + 4)
+            return false;
         memcpy(&zoomHwSpeed, &data[pos], 4); pos += 4;
     }
     else
@@ -568,6 +600,8 @@ bool cr::lens::LensParams::decode(uint8_t* data)
     }
     if ((data[4] & (uint8_t)2) == (uint8_t)2)
     {
+        if (dataSize < pos + 4)
+            return false;
         memcpy(&zoomHwMaxSpeed, &data[pos], 4); pos += 4;
     }
     else
@@ -576,6 +610,8 @@ bool cr::lens::LensParams::decode(uint8_t* data)
     }
     if ((data[4] & (uint8_t)1) == (uint8_t)1)
     {
+        if (dataSize < pos + 4)
+            return false;
         memcpy(&focusSpeed, &data[pos], 4); pos += 4;
     }
     else
@@ -587,6 +623,8 @@ bool cr::lens::LensParams::decode(uint8_t* data)
 
     if ((data[5] & (uint8_t)128) == (uint8_t)128)
     {
+        if (dataSize < pos + 4)
+            return false;
         memcpy(&focusHwSpeed, &data[pos], 4); pos += 4;
     }
     else
@@ -595,6 +633,8 @@ bool cr::lens::LensParams::decode(uint8_t* data)
     }
     if ((data[5] & (uint8_t)64) == (uint8_t)64)
     {
+        if (dataSize < pos + 4)
+            return false;
         memcpy(&focusHwMaxSpeed, &data[pos], 4); pos += 4;
     }
     else
@@ -603,6 +643,8 @@ bool cr::lens::LensParams::decode(uint8_t* data)
     }
     if ((data[5] & (uint8_t)32) == (uint8_t)32)
     {
+        if (dataSize < pos + 4)
+            return false;
         memcpy(&irisSpeed, &data[pos], 4); pos += 4;
     }
     else
@@ -611,6 +653,8 @@ bool cr::lens::LensParams::decode(uint8_t* data)
     }
     if ((data[5] & (uint8_t)16) == (uint8_t)16)
     {
+        if (dataSize < pos + 4)
+            return false;
         memcpy(&irisHwSpeed, &data[pos], 4); pos += 4;
     }
     else
@@ -619,6 +663,8 @@ bool cr::lens::LensParams::decode(uint8_t* data)
     }
     if ((data[5] & (uint8_t)8) == (uint8_t)8)
     {
+        if (dataSize < pos + 4)
+            return false;
         memcpy(&irisHwMaxSpeed, &data[pos], 4); pos += 4;
     }
     else
@@ -627,6 +673,8 @@ bool cr::lens::LensParams::decode(uint8_t* data)
     }
     if ((data[5] & (uint8_t)4) == (uint8_t)4)
     {
+        if (dataSize < pos + 4)
+            return false;
         memcpy(&zoomHwTeleLimit, &data[pos], 4); pos += 4;
     }
     else
@@ -635,6 +683,8 @@ bool cr::lens::LensParams::decode(uint8_t* data)
     }
     if ((data[5] & (uint8_t)2) == (uint8_t)2)
     {
+        if (dataSize < pos + 4)
+            return false;
         memcpy(&zoomHwWideLimit, &data[pos], 4); pos += 4;
     }
     else
@@ -643,6 +693,8 @@ bool cr::lens::LensParams::decode(uint8_t* data)
     }
     if ((data[5] & (uint8_t)1) == (uint8_t)1)
     {
+        if (dataSize < pos + 4)
+            return false;
         memcpy(&focusHwFarLimit, &data[pos], 4); pos += 4;
     }
     else
@@ -654,6 +706,8 @@ bool cr::lens::LensParams::decode(uint8_t* data)
 
     if ((data[6] & (uint8_t)128) == (uint8_t)128)
     {
+        if (dataSize < pos + 4)
+            return false;
         memcpy(&focusHwNearLimit, &data[pos], 4); pos += 4;
     }
     else
@@ -662,6 +716,8 @@ bool cr::lens::LensParams::decode(uint8_t* data)
     }
     if ((data[6] & (uint8_t)64) == (uint8_t)64)
     {
+        if (dataSize < pos + 4)
+            return false;
         memcpy(&irisHwOpenLimit, &data[pos], 4); pos += 4;
     }
     else
@@ -670,6 +726,8 @@ bool cr::lens::LensParams::decode(uint8_t* data)
     }
     if ((data[6] & (uint8_t)32) == (uint8_t)32)
     {
+        if (dataSize < pos + 4)
+            return false;
         memcpy(&irisHwCloseLimit, &data[pos], 4); pos += 4;
     }
     else
@@ -678,6 +736,8 @@ bool cr::lens::LensParams::decode(uint8_t* data)
     }
     if ((data[6] & (uint8_t)16) == (uint8_t)16)
     {
+        if (dataSize < pos + 4)
+            return false;
         memcpy(&focusFactor, &data[pos], 4); pos += 4;
     }
     else
@@ -686,6 +746,8 @@ bool cr::lens::LensParams::decode(uint8_t* data)
     }
     if ((data[6] & (uint8_t)8) == (uint8_t)8)
     {
+        if (dataSize < pos + 1)
+            return false;
         isConnected = data[pos] == 0x00 ? false : true; pos += 1;
     }
     else
@@ -694,6 +756,8 @@ bool cr::lens::LensParams::decode(uint8_t* data)
     }
     if ((data[6] & (uint8_t)4) == (uint8_t)4)
     {
+        if (dataSize < pos + 4)
+            return false;
         memcpy(&afHwSpeed, &data[pos], 4); pos += 4;
     }
     else
@@ -702,6 +766,8 @@ bool cr::lens::LensParams::decode(uint8_t* data)
     }
     if ((data[6] & (uint8_t)2) == (uint8_t)2)
     {
+        if (dataSize < pos + 4)
+            return false;
         memcpy(&focusFactorThreshold, &data[pos], 4); pos += 4;
     }
     else
@@ -710,6 +776,8 @@ bool cr::lens::LensParams::decode(uint8_t* data)
     }
     if ((data[6] & (uint8_t)1) == (uint8_t)1)
     {
+        if (dataSize < pos + 4)
+            return false;
         memcpy(&refocusTimeoutSec, &data[pos], 4); pos += 4;
     }
     else
@@ -721,6 +789,8 @@ bool cr::lens::LensParams::decode(uint8_t* data)
 
     if ((data[7] & (uint8_t)128) == (uint8_t)128)
     {
+        if (dataSize < pos + 1)
+            return false;
         afIsActive = data[pos] == 0x00 ? false : true; pos += 1;
     }
     else
@@ -729,6 +799,8 @@ bool cr::lens::LensParams::decode(uint8_t* data)
     }
     if ((data[7] & (uint8_t)64) == (uint8_t)64)
     {
+        if (dataSize < pos + 4)
+            return false;
         memcpy(&irisMode, &data[pos], 4); pos += 4;
     }
     else
@@ -737,6 +809,8 @@ bool cr::lens::LensParams::decode(uint8_t* data)
     }
     if ((data[7] & (uint8_t)32) == (uint8_t)32)
     {
+        if (dataSize < pos + 4)
+            return false;
         memcpy(&autoAfRoiWidth, &data[pos], 4); pos += 4;
     }
     else
@@ -745,6 +819,8 @@ bool cr::lens::LensParams::decode(uint8_t* data)
     }
     if ((data[7] & (uint8_t)16) == (uint8_t)16)
     {
+        if (dataSize < pos + 4)
+            return false;
         memcpy(&autoAfRoiHeight, &data[pos], 4); pos += 4;
     }
     else
@@ -753,6 +829,8 @@ bool cr::lens::LensParams::decode(uint8_t* data)
     }
     if ((data[7] & (uint8_t)8) == (uint8_t)8)
     {
+        if (dataSize < pos + 4)
+            return false;
         memcpy(&autoAfRoiBorder, &data[pos], 4); pos += 4;
     }
     else
@@ -761,6 +839,8 @@ bool cr::lens::LensParams::decode(uint8_t* data)
     }
     if ((data[7] & (uint8_t)4) == (uint8_t)4)
     {
+        if (dataSize < pos + 4)
+            return false;
         memcpy(&afRoiMode, &data[pos], 4); pos += 4;
     }
     else
@@ -769,6 +849,8 @@ bool cr::lens::LensParams::decode(uint8_t* data)
     }
     if ((data[7] & (uint8_t)2) == (uint8_t)2)
     {
+        if (dataSize < pos + 4)
+            return false;
         memcpy(&extenderMode, &data[pos], 4); pos += 4;
     }
     else
@@ -777,6 +859,8 @@ bool cr::lens::LensParams::decode(uint8_t* data)
     }
     if ((data[7] & (uint8_t)1) == (uint8_t)1)
     {
+        if (dataSize < pos + 4)
+            return false;
         memcpy(&stabiliserMode, &data[pos], 4); pos += 4;
     }
     else
@@ -787,6 +871,8 @@ bool cr::lens::LensParams::decode(uint8_t* data)
 
     if ((data[8] & (uint8_t)128) == (uint8_t)128)
     {
+        if (dataSize < pos + 4)
+            return false;
         memcpy(&afRange, &data[pos], 4); pos += 4;
     }
     else
@@ -795,6 +881,8 @@ bool cr::lens::LensParams::decode(uint8_t* data)
     }
     if ((data[8] & (uint8_t)64) == (uint8_t)64)
     {
+        if (dataSize < pos + 4)
+            return false;
         memcpy(&xFovDeg, &data[pos], 4); pos += 4;
     }
     else
@@ -803,6 +891,8 @@ bool cr::lens::LensParams::decode(uint8_t* data)
     }
     if ((data[8] & (uint8_t)32) == (uint8_t)32)
     {
+        if (dataSize < pos + 4)
+            return false;
         memcpy(&yFovDeg, &data[pos], 4); pos += 4;
     }
     else
@@ -811,6 +901,8 @@ bool cr::lens::LensParams::decode(uint8_t* data)
     }
     if ((data[8] & (uint8_t)16) == (uint8_t)16)
     {
+        if (dataSize < pos + 4)
+            return false;
         memcpy(&logMode, &data[pos], 4); pos += 4;
     }
     else
@@ -819,6 +911,8 @@ bool cr::lens::LensParams::decode(uint8_t* data)
     }
     if ((data[8] & (uint8_t)8) == (uint8_t)8)
     {
+        if (dataSize < pos + 4)
+            return false;
         memcpy(&temperature, &data[pos], 4); pos += 4;
     }
     else
@@ -827,6 +921,8 @@ bool cr::lens::LensParams::decode(uint8_t* data)
     }
     if ((data[8] & (uint8_t)4) == (uint8_t)4)
     {
+        if (dataSize < pos + 1)
+            return false;
         isOpen = data[pos] == 0x00 ? false : true; pos += 1;
     }
     else
@@ -835,6 +931,8 @@ bool cr::lens::LensParams::decode(uint8_t* data)
     }
     if ((data[8] & (uint8_t)2) == (uint8_t)2)
     {
+        if (dataSize < pos + 4)
+            return false;
         memcpy(&type, &data[pos], 4); pos += 4;
     }
     else
@@ -843,6 +941,8 @@ bool cr::lens::LensParams::decode(uint8_t* data)
     }
     if ((data[8] & (uint8_t)1) == (uint8_t)1)
     {
+        if (dataSize < pos + 4)
+            return false;
         memcpy(&custom1, &data[pos], 4); pos += 4;
     }
     else
@@ -853,6 +953,8 @@ bool cr::lens::LensParams::decode(uint8_t* data)
 
     if ((data[9] & (uint8_t)128) == (uint8_t)128)
     {
+        if (dataSize < pos + 4)
+            return false;
         memcpy(&custom2, &data[pos], 4); pos += 4;
     }
     else
@@ -861,6 +963,8 @@ bool cr::lens::LensParams::decode(uint8_t* data)
     }
     if ((data[9] & (uint8_t)64) == (uint8_t)64)
     {
+        if (dataSize < pos + 4)
+            return false;
         memcpy(&custom3, &data[pos], 4);
     }
     else
@@ -876,7 +980,6 @@ bool cr::lens::LensParams::decode(uint8_t* data)
 
 
 
-/// Get controller version.
 std::string cr::lens::Lens::getVersion()
 {
     return LENS_VERSION;
@@ -884,7 +987,6 @@ std::string cr::lens::Lens::getVersion()
 
 
 
-/// Encode set param command.
 void cr::lens::Lens::encodeSetParamCommand(uint8_t* data,
                                            int& size,
                                            cr::lens::LensParam id,
@@ -904,7 +1006,6 @@ void cr::lens::Lens::encodeSetParamCommand(uint8_t* data,
 
 
 
-/// Encode command.
 void cr::lens::Lens::encodeCommand(uint8_t* data,
                                    int& size,
                                    cr::lens::LensCommand id,
@@ -924,7 +1025,6 @@ void cr::lens::Lens::encodeCommand(uint8_t* data,
 
 
 
-/// Decode command.
 int cr::lens::Lens::decodeCommand(uint8_t* data,
                                   int size,
                                   cr::lens::LensParam& paramId,
@@ -958,6 +1058,3 @@ int cr::lens::Lens::decodeCommand(uint8_t* data,
 
     return -1;
 }
-
-
-
