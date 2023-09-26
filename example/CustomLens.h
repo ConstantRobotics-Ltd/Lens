@@ -82,10 +82,9 @@ public:
 
     /**
      * @brief Get the lens controller params.
-     * @param id Param ID.
-     * @return Lens params structure.
+     * @param params Reference to LensParams object.
      */
-    LensParams getParams();
+    void getParams(LensParams& params);
 
     /**
      * @brief Execute command.

@@ -599,9 +599,9 @@ float cr::lens::CustomLens::getParam(cr::lens::LensParam id)
 
 
 
-cr::lens::LensParams cr::lens::CustomLens::getParams()
+void cr::lens::CustomLens::getParams(cr::lens::LensParams& params)
 {
-    return m_params;
+    params = m_params;
 }
 
 
