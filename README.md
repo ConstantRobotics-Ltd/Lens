@@ -4,7 +4,7 @@
 
 # **Lens interface C++ library**
 
-**v4.2.0**
+**v4.3.0**
 
 
 
@@ -66,6 +66,7 @@
 | 4.0.3   | 01.07.2023   | - Documentation updated.<br />- Lens class comments in source code updated. |
 | 4.1.0   | 11.07.2023   | - Added LensParamsMask for lens params masking.<br />- encode(...) method of LensParams class updated.<br />- Documentation updated. |
 | 4.2.0   | 22.09.2023   | - Updated encode(...) and decode(...) methods of LensParams.<br />- Added decodeAndExecuteCommand(...) method.<br />- Added example of lens controller implementation. |
+| 4.3.0   | 26.09.2023   | - Updated getParams methode. |
 
 
 
@@ -135,7 +136,7 @@ public:
     virtual float getParam(LensParam id) = 0;
 
     /// Get the lens controller params.
-    virtual LensParams getParams() = 0;
+    virtual void getParams(LensParams& params) = 0;
 
     /// Execute command.
     virtual bool executeCommand(LensCommand id, float arg = 0) = 0;
@@ -182,7 +183,7 @@ std::cout << "Lens class version: " << Lens::getVersion() << std::endl;
 Console output:
 
 ```bash
-Lens class version: 4.2.0
+Lens class version: 4.3.0
 ```
 
 
@@ -291,10 +292,12 @@ virtual float getParam(LensParam id) = 0;
 **getParams(...)** method designed to obtain lens parameters. The particular implementation of the lens controller must provide thread-safe **getParams(...)** method call. This means that the **getParams(...)** method can be safely called from any thread. Method declaration:
 
 ```cpp
-virtual LensParams getParams() = 0;
+    virtual void getParams(LensParams& params) = 0;
 ```
 
-**Returns:** [**LensParams class**](#LensParams-class-description) class which contains all current lens params.
+| Parameter | Description                                                |
+| --------- | ---------------------------------------------------------- |
+| params    | Reference to LensParams object to store params. |
 
 
 
@@ -352,7 +355,7 @@ static void encodeSetParamCommand(uint8_t* data, int& size, LensParam id, float 
 | ---- | ----- | -------------------------------------------------- |
 | 0    | 0x01  | SET_PARAM command header value.                    |
 | 1    | 0x04  | Major version of Lens class.                       |
-| 2    | 0x02  | Minor version of Lens class.                       |
+| 2    | 0x03  | Minor version of Lens class.                       |
 | 3    | id    | Parameter ID **int32_t** in Little-endian format.  |
 | 4    | id    | Parameter ID **int32_t** in Little-endian format.  |
 | 5    | id    | Parameter ID **int32_t** in Little-endian format.  |
@@ -398,7 +401,7 @@ static void encodeCommand(uint8_t* data, int& size, LensCommand id, float arg = 
 | ---- | ----- | --------------------------------------------------------- |
 | 0    | 0x00  | SET_PARAM command header value.                           |
 | 1    | 0x04  | Major version of Lens class.                              |
-| 2    | 0x02  | Minor version of Lens class.                              |
+| 2    | 0x03  | Minor version of Lens class.                              |
 | 3    | id    | Command ID **int32_t** in Little-endian format.           |
 | 4    | id    | Command ID **int32_t** in Little-endian format.           |
 | 5    | id    | Command ID **int32_t** in Little-endian format.           |

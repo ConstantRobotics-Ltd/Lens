@@ -765,10 +765,9 @@ public:
 
     /**
      * @brief Get the lens controller params.
-     * @param id Param ID.
-     * @return Lens params structure.
+     * @param params Reference to LensParams object.
      */
-    virtual LensParams getParams() = 0;
+    virtual void getParams(LensParams& params) = 0;
 
     /**
      * @brief Execute command.
