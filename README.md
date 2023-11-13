@@ -4,7 +4,7 @@
 
 # **Lens interface C++ library**
 
-**v4.3.0**
+**v4.3.1**
 
 
 
@@ -66,7 +66,8 @@
 | 4.0.3   | 01.07.2023   | - Documentation updated.<br />- Lens class comments in source code updated. |
 | 4.1.0   | 11.07.2023   | - Added LensParamsMask for lens params masking.<br />- encode(...) method of LensParams class updated.<br />- Documentation updated. |
 | 4.2.0   | 22.09.2023   | - Updated encode(...) and decode(...) methods of LensParams.<br />- Added decodeAndExecuteCommand(...) method.<br />- Added example of lens controller implementation. |
-| 4.3.0   | 26.09.2023   | - Updated getParams methode. |
+| 4.3.0   | 26.09.2023   | - Updated getParams methode.                                 |
+| 4.3.1   | 13.11.2023   | - Frame class updated.                                       |
 
 
 
