@@ -68,7 +68,7 @@
 | 4.2.0   | 22.09.2023   | - Updated encode(...) and decode(...) methods of LensParams.<br />- Added decodeAndExecuteCommand(...) method.<br />- Added example of lens controller implementation. |
 | 4.3.0   | 26.09.2023   | - Updated getParams methode.                                 |
 | 4.3.1   | 13.11.2023   | - Frame class updated.                                       |
-| 4.4.1   | 13.12.2023   | - Virtual destructor added.                                       |
+| 4.4.1   | 13.12.2023   | - Virtual destructor added.<br />- Frame class updated.      |
 
 
 
