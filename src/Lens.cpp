@@ -980,6 +980,13 @@ bool cr::lens::LensParams::decode(uint8_t* data, int dataSize)
 
 
 
+cr::lens::Lens::~Lens()
+{
+    
+}
+
+
+
 std::string cr::lens::Lens::getVersion()
 {
     return LENS_VERSION;

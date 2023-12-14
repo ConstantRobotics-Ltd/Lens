@@ -710,6 +710,11 @@ class Lens
 public:
 
     /**
+     * @brief Class destructor.
+     */
+    virtual ~Lens();
+
+    /**
      * @brief Get lens class version.
      * @return Lens class version string in format "Major.Minor.Patch".
      */
