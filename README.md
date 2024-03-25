@@ -1,51 +1,51 @@
-![logo](_static/lens_web_logo.png)
+![lens_web_logo](_static/lens_web_logo.png)
 
 
 
 # **Lens interface C++ library**
 
-**v4.4.1**
+**v4.4.2**
 
 
 
 # Table of contents
 
-- [Overview](#Overview)
-- [Versions](#Versions)
-- [Library files](#Library-files)
-- [Lens interface class description](#Lens-interface-class-description)
-  - [Class declaration](#Lens-class-declaration)
-  - [getVersion method](#getVersion-method)
-  - [openLens method](#openLens-method)
-  - [initLens method](#initLens-method)
-  - [closeLens method](#closeLens-method)
-  - [isLensOpen method](#isLensOpen-method)
-  - [isLensConnected method](#isLensConnected-method)
-  - [setParam method](#setParam-method)
-  - [getParam method](#getParam-method)
-  - [getParams method](#getParams-method)
-  - [executeCommand method](#executeCommand-method)
-  - [addVideoFrame method](#addVideoFrame-method)
-  - [encodeSetParamCommand method](#encodeSetParamCommand-method)
-  - [encodeCommand method](#encodeCommand-method)
-  - [decodeCommand method](#decodeCommand-method)
-  - [decodeAndExecuteCommand method](#decodeAndExecuteCommand-method)
-- [Data structures](#Data-structures)
-  - [LensCommand enum](#LensCommand-enum)
-  - [LensParam enum](#LensParam-enum)
-- [LensParams class description](#LensParams-class-description)
-  - [LensParams class declaration](#LensParams-class-declaration)
-  - [Serialize lens params](#Serialize-lens-params)
-  - [Deserialize lens params](#Deserialize-lens-params)
-  - [Read params from JSON file and write to JSON file](#Read-params-from-JSON-file-and-write-to-JSON-file)
-- [Build and connect to your project](#Build-and-connect-to-your-project)
-- [How to make custom implementation](#How-to-make-custom-implementation)
+- [Overview](#overview)
+- [Versions](#versions)
+- [Library files](#library-files)
+- [Lens interface class description](#lens-interface-class-description)
+  - [Class declaration](#lens-class-declaration)
+  - [getVersion method](#getversion-method)
+  - [openLens method](#openlens-method)
+  - [initLens method](#initlens-method)
+  - [closeLens method](#closelens-method)
+  - [isLensOpen method](#islensopen-method)
+  - [isLensConnected method](#islensconnected-method)
+  - [setParam method](#setparam-method)
+  - [getParam method](#getparam-method)
+  - [getParams method](#getparams-method)
+  - [executeCommand method](#executecommand-method)
+  - [addVideoFrame method](#addvideoframe-method)
+  - [encodeSetParamCommand method](#encodesetparamcommand-method)
+  - [encodeCommand method](#encodecommand-method)
+  - [decodeCommand method](#decodecommand-method)
+  - [decodeAndExecuteCommand method](#decodeandexecutecommand-method)
+- [Data structures](#data-structures)
+  - [LensCommand enum](#lenscommand-enum)
+  - [LensParam enum](#lensparam-enum)
+- [LensParams class description](#lensparams-class-description)
+  - [LensParams class declaration](#lensparams-class-declaration)
+  - [Serialize lens params](#serialize-lens-params)
+  - [Deserialize lens params](#deserialize-lens-params)
+  - [Read params from JSON file and write to JSON file](#read-params-from-json-file-and-write-to-json-file)
+- [Build and connect to your project](#build-and-connect-to-your-project)
+- [How to make custom implementation](#how-to-make-custom-implementation)
 
 
 
 # Overview
 
-**Lens** C++ library provides standard interface as well defines data structures and rules for different lens controllers. **Lens** interface class doesn't do anything, just provides interface and provides methods to encode/decode commands and encode/decode params. Different lens controller classes inherit interface form **Lens** C++ class. **Lens.h** file contains list of data structures ([**LensCommand enum**](#LensCommand-enum), [**LensParam enum**](#LensParam-enum) enum and [**LensParams class**](#LensParams-class-description) class) and **Lens** class declaration. [**LensCommand enum**](#LensCommand-enum) enum contains IDs of commands supported by **Lens** class. **LensParam** enum contains IDs of params supported by **Lens** class. [**LensParam enum**](#LensParam-enum) class contains fields for lens parameters values and provides methods to encode/decode and read/write lens parameters from JSON file. All lens controllers should include params and commands listed in **Lens.h** file. Lens interface class depends on [**Frame**](https://github.com/ConstantRobotics-Ltd/Frame) class (describes video frame and video frame data structures, necessary for autofocus functions) and [**ConfigReader**](https://github.com/ConstantRobotics-Ltd/ConfigReader) library (provides methods to read/write JSON config files).
+**Lens** C++ library provides standard interface as well defines data structures and rules for different lens controllers. **Lens** interface class doesn't do anything, just provides interface and provides methods to encode/decode commands and encode/decode params. Different lens controller classes inherit interface form **Lens** C++ class. **Lens.h** file contains list of data structures ([LensCommand](#lenscommand-enum) enum, [LensParam](#lensparam-enum) enum and [LensParams](#lensparams-class-description) class) and **Lens** class declaration. [LensCommand](#lenscommand-enum) enum contains IDs of commands supported by **Lens** class. [LensParam](#lensparam-enum) enum contains IDs of params supported by **Lens** class. [LensParams](#lensparam-enum) class contains fields for lens parameters values and provides methods to encode/decode and read/write lens parameters from JSON file. All lens controllers should include params and commands listed in **Lens.h** file. Lens interface class depends on [Frame](https://github.com/ConstantRobotics-Ltd/Frame) class (describes video frame and video frame data structures, necessary for autofocus functions, source code included, Apache 2.0 license) and [ConfigReader](https://github.com/ConstantRobotics-Ltd/ConfigReader) library (provides methods to read/write JSON config files, source code included, Apache 2.0 license). It uses C++17 standard. The library is licensed under the **Apache 2.0** license.
 
 
 
@@ -66,37 +66,38 @@
 | 4.0.3   | 01.07.2023   | - Documentation updated.<br />- Lens class comments in source code updated. |
 | 4.1.0   | 11.07.2023   | - Added LensParamsMask for lens params masking.<br />- encode(...) method of LensParams class updated.<br />- Documentation updated. |
 | 4.2.0   | 22.09.2023   | - Updated encode(...) and decode(...) methods of LensParams.<br />- Added decodeAndExecuteCommand(...) method.<br />- Added example of lens controller implementation. |
-| 4.3.0   | 26.09.2023   | - Updated getParams methode.                                 |
+| 4.3.0   | 26.09.2023   | - getParams method updated.                                  |
 | 4.3.1   | 13.11.2023   | - Frame class updated.                                       |
 | 4.4.1   | 13.12.2023   | - Virtual destructor added.<br />- Frame class updated.      |
+| 4.4.2   | 25.03.2024   | - Frame class updated.<br />- ConfigReader class updated.<br />- Documentation updated. |
 
 
 
 # Library files
 
-The **Lens** library is a CMake project. Library files:
+The library supplied by source code only. The user would be given a set of files in the form of a CMake project (repository). The repository structure is shown below:
 
 ```xml
-CMakeLists.txt ------------------- Main CMake file of the library.
-3rdparty ------------------------- Folder with third-party libraries.
-    CMakeLists.txt --------------- CMake file which includes third-party libraries.
-    ConfigReader ----------------- Source code of the ConfigReader library.
-    Frame ------------------------ Source code of the Frame library.
-example -------------------------- Folder with simple example of VCodecImsdk usage.
-    CMakeLists.txt --------------- CMake file for example custom lens class.
-    CustomLens.cpp --------------- Source code file of the CustomLens class.
-    CustomLens.h ----------------- Header with CustomLens class declaration.
-    CustomLensVersion.h ---------- Header file which includes CustomLens class version.
-    CustomLensVersion.h.in ------- CMake service file to generate version file.
-test ----------------------------- Folder with codec test application.
-    CMakeLists.txt --------------- CMake file for codec test application.
-    main.cpp --------------------- Source code file of Lens class test application.
-src ------------------------------ Folder with source code of the library.
-    CMakeLists.txt --------------- CMake file of the library.
-    Lens.cpp --------------------- Source code file of the library.
-    Lens.h ----------------------- Header file which includes Lens class declaration.
-    LensVersion.h ---------------- Header file which includes version of the library.
-    LensVersion.h.in ------------- CMake service file to generate version file.
+CMakeLists.txt --------------- Main CMake file of the library.
+3rdparty --------------------- Folder with third-party libraries.
+    CMakeLists.txt ----------- CMake file to include third-party libraries.
+    ConfigReader ------------- Source code of the ConfigReader library.
+    Frame -------------------- Source code of the Frame library.
+example ---------------------- Folder with an example lens controller.
+    CMakeLists.txt ----------- CMake file for example of lens controller.
+    CustomLens.cpp ----------- C++ implementation file.
+    CustomLens.h ------------- Header with class declaration.
+    CustomLensVersion.h ------ Header file which includes class version.
+    CustomLensVersion.h.in --- CMake service file to generate version file.
+test ------------------------- Folder with test application.
+    CMakeLists.txt ----------- CMake file for test application.
+    main.cpp ----------------- Source code file of test application.
+src -------------------------- Folder with source code of the library.
+    CMakeLists.txt ----------- CMake file of the library.
+    Lens.cpp ----------------- C++ implementation file.
+    Lens.h ------------------- Header file which includes Lens class declaration.
+    LensVersion.h ------------ Header file which includes version of the library.
+    LensVersion.h.in --------- CMake service file to generate version file.
 ```
 
 
@@ -174,7 +175,7 @@ public:
 
 ## getVersion method
 
-**getVersion()** method returns string of current class version. Particular lens controller can have it's own **getVersion()** method. Method declaration:
+The **getVersion()** method returns string of current class version. Particular lens controller can have it's own **getVersion()** method. Method declaration:
 
 ```cpp
 static std::string getVersion();
@@ -189,14 +190,14 @@ std::cout << "Lens class version: " << Lens::getVersion() << std::endl;
 Console output:
 
 ```bash
-Lens class version: 4.4.1
+Lens class version: 4.4.2
 ```
 
 
 
 ## openLens method
 
-**openLens(...)** method initializes lens controller. This method can be used instead of **initLens(...)** method. Method declaration:
+The **openLens(...)** method initializes lens controller. This method can be used instead of **initLens(...)** method. Method declaration:
 
 ```cpp
 virtual bool openLens(std::string initString) = 0;
@@ -212,7 +213,7 @@ virtual bool openLens(std::string initString) = 0;
 
 ## initLens method
 
-**initLens(...)** method initializes lens controller by list of parameters. This method can be used instead of **openLens(...)** method ([**LensParams class**](#LensParams-class-description) includes **initString**) when you need initialize lens controller with not default parameters. Method declaration:
+The **initLens(...)** method initializes lens controller by list of parameters. This method can be used instead of **openLens(...)** method ([LensParams](#lensparams-class-description) class includes **initString**) when you need initialize lens controller with not default parameters. Method declaration:
 
 ```cpp
 virtual bool initLens(LensParams& params) = 0;
@@ -220,7 +221,7 @@ virtual bool initLens(LensParams& params) = 0;
 
 | Parameter | Value                                                        |
 | --------- | ------------------------------------------------------------ |
-| params    | Parameters ([**LensParams class**](#LensParams-class-description)). LensParams class includes initString wich used in **openLens(...)** method. See description of [**LensParams class**](#LensParams-class-description) class. |
+| params    | Parameters ([LensParams class](#lensparams-class-description)). LensParams class includes initString which used in **openLens(...)** method. See description of [LensParams](#lensparams-class-description) class. |
 
 **Returns:** TRUE if the lens controller initialized or FALSE if not.
 
@@ -228,7 +229,7 @@ virtual bool initLens(LensParams& params) = 0;
 
 ## closeLens method
 
-**closeLens()** method closes connection to lens. Method declaration:
+The **closeLens()** method closes connection to lens. Method declaration:
 
 ```cpp
 virtual void closeLens() = 0;
@@ -238,7 +239,7 @@ virtual void closeLens() = 0;
 
 ## isLensOpen method
 
-**isLensOpen()** method returns lens initialization status. Open status shows if the lens controller initialized but doesn't show if lens controller has communication with lens equipment. For example, if lens has serial port lens controller connects to serial port (opens serial port file in OS) but lens can be not active (no power). In this case open status just shows that lens controller has opened serial port. Method declaration:
+The **isLensOpen()** method returns lens initialization status. Open status shows if the lens controller initialized but doesn't show if lens controller has communication with lens equipment. For example, if lens has serial port lens controller connects to serial port (opens serial port file in OS) but lens can be not active (no power). In this case open status just shows that lens controller has opened serial port. Method declaration:
 
 ```cpp
 virtual bool isLensOpen() = 0;
@@ -250,7 +251,7 @@ virtual bool isLensOpen() = 0;
 
 ## isLensConnected method
 
-**isLensConnected()** method returns lens connection status. Connection status shows if the lens controller has data exchange with lens equipment. For example, if lens has serial port lens controller connects to serial port (opens serial port file in OS) but lens can be not active (no power). In this case connection status shows that lens controller doesn't have data exchange with lens equipment (method will return FALSE). If lens controller has data exchange with lens equipment the method will return TRUE. If lens controller not initialize the connection status always FALSE. Method declaration:
+The **isLensConnected()** method returns lens connection status. Connection status shows if the lens controller has data exchange with lens equipment. For example, if lens has serial port lens controller connects to serial port (opens serial port file in OS) but lens can be not active (no power). In this case connection status shows that lens controller doesn't have data exchange with lens equipment (method will return FALSE). If lens controller has data exchange with lens equipment the method will return TRUE. If lens controller not initialize the connection status always FALSE. Method declaration:
 
 ```cpp
 virtual bool isLensConnected() = 0;
@@ -262,7 +263,7 @@ virtual bool isLensConnected() = 0;
 
 ## setParam method
 
-**setParam(...)** method sets new lens parameters value. The particular implementation of the lens controller must provide thread-safe **setParam(...)** method call. This means that the **setParam(...)** method can be safely called from any thread. Method declaration:
+The **setParam(...)** method sets new lens parameters value. The particular implementation of the lens controller must provide thread-safe **setParam(...)** method call. This means that the **setParam(...)** method can be safely called from any thread. Method declaration:
 
 ```cpp
 virtual bool setParam(LensParam id, float value) = 0;
@@ -270,7 +271,7 @@ virtual bool setParam(LensParam id, float value) = 0;
 
 | Parameter | Description                                                  |
 | --------- | ------------------------------------------------------------ |
-| id        | Lens parameter ID (see description of [**LensParam enum**](#LensParam-enum)). |
+| id        | Lens parameter ID (see description of [LensParam](#lensparam-enum) enum). |
 | value     | Lens parameter value. Value depends on parameter ID (see description of [**LensParam enum**](#LensParam-enum)). |
 
 **Returns:** TRUE if the parameter was set or FALSE if not.
@@ -279,7 +280,7 @@ virtual bool setParam(LensParam id, float value) = 0;
 
 ## getParam method
 
-**getParam(...)** method returns lens parameter value. The particular implementation of the lens controller must provide thread-safe **getParam(...)** method call. This means that the **getParam(...)** method can be safely called from any thread. Method declaration:
+The **getParam(...)** method returns lens parameter value. The particular implementation of the lens controller must provide thread-safe **getParam(...)** method call. This means that the **getParam(...)** method can be safely called from any thread. Method declaration:
 
 ```cpp
 virtual float getParam(LensParam id) = 0;
@@ -295,7 +296,7 @@ virtual float getParam(LensParam id) = 0;
 
 ## getParams method
 
-**getParams(...)** method designed to obtain lens parameters. The particular implementation of the lens controller must provide thread-safe **getParams(...)** method call. This means that the **getParams(...)** method can be safely called from any thread. Method declaration:
+The **getParams(...)** method designed to obtain lens parameters. The particular implementation of the lens controller must provide thread-safe **getParams(...)** method call. This means that the **getParams(...)** method can be safely called from any thread. Method declaration:
 
 ```cpp
     virtual void getParams(LensParams& params) = 0;
@@ -309,7 +310,7 @@ virtual float getParam(LensParam id) = 0;
 
 ## executeCommand method
 
-**executeCommand(...)** method designed to execute lens command. The particular implementation of the lens controller must provide thread-safe **executeCommand(...)** method call. This means that the **executeCommand(...)** method can be safely called from any thread. Method declaration:
+The **executeCommand(...)** method designed to execute lens command. The particular implementation of the lens controller must provide thread-safe **executeCommand(...)** method call. This means that the **executeCommand(...)** method can be safely called from any thread. Method declaration:
 
 ```cpp
 virtual bool executeCommand(LensCommand id, float arg = 0) = 0;
@@ -317,8 +318,8 @@ virtual bool executeCommand(LensCommand id, float arg = 0) = 0;
 
 | Parameter | Description                                                  |
 | --------- | ------------------------------------------------------------ |
-| id        | Lens command ID (see description of [**LensCommand enum**](#LensCommand-enum)). |
-| arg       | Lens command argument. Value depends on command ID (see description of [**LensCommand enum**](#LensCommand-enum)). |
+| id        | Lens command ID (see description of [LensCommand](#lenscommand-enum) enum). |
+| arg       | Lens command argument. Value depends on command ID (see description of [LensCommand](#lenscommand-enum) enum). |
 
 **Returns:** TRUE is the command was executed (accepted by lens controller) or FALSE if not.
 
@@ -326,7 +327,7 @@ virtual bool executeCommand(LensCommand id, float arg = 0) = 0;
 
 ## addVideoFrame method
 
-**addVideoFrame(...)** method designed to copy video frame data to lens controller to perform autofocus algorithm. Particular lens controller may not support autofocus algorithms. To perform autofocus lens controller calculates focus factor in autofocus ROI (focus factor can be obtained with methos **getParam(...)** and parameters **FOCUS_FACTOR**). To calculate focus factor lens controller needs video frame. If particular lens controller supports autofocus algorithms the method **addVideoFrame(...)** should be called for each captured video frame. Method declaration:
+The **addVideoFrame(...)** method designed to copy video frame data to lens controller to perform autofocus algorithm. Particular lens controller may not support autofocus algorithms. To perform autofocus lens controller calculates focus factor in autofocus ROI (focus factor can be obtained with **getParam(...)** method and parameters **FOCUS_FACTOR**). To calculate focus factor lens controller needs video frame. If particular lens controller supports autofocus algorithms the method **addVideoFrame(...)** should be called for each captured video frame. Method declaration:
 
 ```cpp
 virtual void addVideoFrame(cr::video::Frame& frame) = 0;
@@ -334,7 +335,7 @@ virtual void addVideoFrame(cr::video::Frame& frame) = 0;
 
 | Parameter | Description                                                  |
 | --------- | ------------------------------------------------------------ |
-| frame     | Video frame object (see [**Frame**](https://github.com/ConstantRobotics-Ltd/Frame) class description). |
+| frame     | Video frame object (see [Frame](https://github.com/ConstantRobotics-Ltd/Frame) class description). |
 
 **Returns:** TRUE is the video frame accepted or FALSE if not. **Note:** if particular lens controller doesn't support this function it should return **TRUE** (recommended).
 
@@ -342,7 +343,7 @@ virtual void addVideoFrame(cr::video::Frame& frame) = 0;
 
 ## encodeSetParamCommand method
 
-**encodeSetParamCommand(...)** static method designed to encode command to change any remote lens parameter. To control a lens remotely, the developer has to develop his own protocol and according to it encode the command and deliver it over the communication channel. To simplify this, the **Lens** class contains static methods for encoding the control command. The **Lens** class provides two types of commands: a parameter change command (SET_PARAM) and an action command (COMMAND). **encodeSetParamCommand(...)** designed to encode SET_PARAM command. Method declaration:
+The **encodeSetParamCommand(...)** static method designed to encode command to change any remote lens parameter. To control a lens remotely, the developer has to develop his own protocol and according to it encode the command and deliver it over the communication channel. To simplify this, the **Lens** class contains static methods for encoding the control command. The **Lens** class provides two types of commands: a parameter change command (SET_PARAM) and an action command (COMMAND). **encodeSetParamCommand(...)** designed to encode SET_PARAM command. Method declaration:
 
 ```cpp
 static void encodeSetParamCommand(uint8_t* data, int& size, LensParam id, float value);
@@ -352,24 +353,8 @@ static void encodeSetParamCommand(uint8_t* data, int& size, LensParam id, float 
 | --------- | ------------------------------------------------------------ |
 | data      | Pointer to data buffer for encoded command. Must have size >= 11. |
 | size      | Size of encoded data. Will be 11 bytes.                      |
-| id        | Parameter ID according to [**LensParam enum**](#LensParam-enum). |
+| id        | Parameter ID according to [LensParam](#lensparam-enum) enum. |
 | value     | Parameter value.                                             |
-
-**SET_PARAM** command format:
-
-| Byte | Value | Description                                        |
-| ---- | ----- | -------------------------------------------------- |
-| 0    | 0x01  | SET_PARAM command header value.                    |
-| 1    | 0x04  | Major version of Lens class.                       |
-| 2    | 0x03  | Minor version of Lens class.                       |
-| 3    | id    | Parameter ID **int32_t** in Little-endian format.  |
-| 4    | id    | Parameter ID **int32_t** in Little-endian format.  |
-| 5    | id    | Parameter ID **int32_t** in Little-endian format.  |
-| 6    | id    | Parameter ID **int32_t** in Little-endian format.  |
-| 7    | value | Parameter value **float** in Little-endian format. |
-| 8    | value | Parameter value **float** in Little-endian format. |
-| 9    | value | Parameter value **float** in Little-endian format. |
-| 10   | value | Parameter value **float** in Little-endian format. |
 
 **encodeSetParamCommand(...)** is static and used without **Lens** class instance. This method used on client side (control system). Example:
 
@@ -388,7 +373,7 @@ Lens::encodeSetParamCommand(data, size, LensParam::AF_ROI_X0, outValue);
 
 ## encodeCommand method
 
-**encodeCommand(...)** static method designed to encode lens action command. To control a lens remotely, the developer has to develop his own protocol and according to it encode the command and deliver it over the communication channel. To simplify this, the **Lens** class contains static methods for encoding the control command. The **Lens** class provides two types of commands: a parameter change command (SET_PARAM) and an action command (COMMAND). **encodeCommand(...)** designed to encode COMMAND command (action command). Method declaration:
+The **encodeCommand(...)** static method designed to encode lens action command. To control a lens remotely, the developer has to develop his own protocol and according to it encode the command and deliver it over the communication channel. To simplify this, the **Lens** class contains static methods for encoding the control command. The **Lens** class provides two types of commands: a parameter change command (SET_PARAM) and an action command (COMMAND). **encodeCommand(...)** designed to encode COMMAND command (action command). Method declaration:
 
 ```cpp
 static void encodeCommand(uint8_t* data, int& size, LensCommand id, float arg = 0.0f);
@@ -398,24 +383,8 @@ static void encodeCommand(uint8_t* data, int& size, LensCommand id, float arg = 
 | --------- | ------------------------------------------------------------ |
 | data      | Pointer to data buffer for encoded command. Must have size >= 11. |
 | size      | Size of encoded data. Will be 11 bytes.                      |
-| id        | Command ID according to [**LensCommand enum**](#LensCommand-enum). |
+| id        | Command ID according to [LensCommand](#lenscommand-enum) enum. |
 | arg       | Command argument value (value depends on command ID).        |
-
-**COMMAND** format:
-
-| Byte | Value | Description                                               |
-| ---- | ----- | --------------------------------------------------------- |
-| 0    | 0x00  | SET_PARAM command header value.                           |
-| 1    | 0x04  | Major version of Lens class.                              |
-| 2    | 0x03  | Minor version of Lens class.                              |
-| 3    | id    | Command ID **int32_t** in Little-endian format.           |
-| 4    | id    | Command ID **int32_t** in Little-endian format.           |
-| 5    | id    | Command ID **int32_t** in Little-endian format.           |
-| 6    | id    | Command ID **int32_t** in Little-endian format.           |
-| 7    | arg   | Command argument value **float** in Little-endian format. |
-| 8    | arg   | Command argument value **float** in Little-endian format. |
-| 9    | arg   | Command argument value **float** in Little-endian format. |
-| 10   | arg   | Command argument value **float** in Little-endian format. |
 
 **encodeCommand(...)** is static and used without **Lens** class instance. This method used on client side (control system). Encoding example:
 
@@ -434,7 +403,7 @@ Lens::encodeCommand(data, size, LensCommand::ZOOM_TO_POS, outValue);
 
 ## decodeCommand method
 
-**decodeCommand(...)** static method designed to decode command on lens controller side. o control a lens remotely, the developer has to develop his own protocol and according to it decode the command on lens controller side. To simplify this, the **Lens** interface class contains static method to decode input command (commands should be encoded by methods **encodeSetParamsCommand(...)** or **encodeCommand(...)**). The **Lens** class provides two types of commands: a parameter change command (SET_PARAM) and an action command (COMMAND). Method declaration:
+The **decodeCommand(...)** static method designed to decode command on lens controller side. o control a lens remotely, the developer has to develop his own protocol and according to it decode the command on lens controller side. To simplify this, the **Lens** interface class contains static method to decode input command (commands should be encoded by methods [encodeSetParamCommand(...)](#encodesetparamcommand-method) or [encodeCommand(...)](#encodecommand-method) methods). The **Lens** class provides two types of commands: a parameter change command (SET_PARAM) and an action command (COMMAND). Method declaration:
 
 ```cpp
 static int decodeCommand(uint8_t* data, int size, LensParam& paramId, LensCommand& commandId, float& value);
@@ -444,8 +413,8 @@ static int decodeCommand(uint8_t* data, int size, LensParam& paramId, LensComman
 | --------- | ------------------------------------------------------------ |
 | data      | Pointer to input command.                                    |
 | size      | Size of command. Should be 11 bytes.                         |
-| paramId   | Lens parameter ID according to [**LensParam enum**](#LensParam-enum). After decoding SET_PARAM command the method will return parameter ID. |
-| commandId | Lens command ID according to [**LensCommand enum**](#LensCommand-enum). After decoding COMMAND the method will return command ID. |
+| paramId   | Lens parameter ID according to [LensParam](#lensparam-enum) enum. After decoding SET_PARAM command the method will return parameter ID. |
+| commandId | Lens command ID according to [LensCommand](#lenscommand-enum) enum. After decoding COMMAND the method will return command ID. |
 | value     | Lens parameter value (after decoding SET_PARAM command) or lens command argument (after decoding COMMAND). |
 
 **Returns:** **0** - in case decoding COMMAND, **1** - in case decoding SET_PARAM command or **-1** in case errors.
@@ -454,7 +423,7 @@ static int decodeCommand(uint8_t* data, int size, LensParam& paramId, LensComman
 
 ## decodeAndExecuteCommand method
 
-**decodeAndExecuteCommand(...)** method decodes and executes command on lens controller side. The particular implementation of the lens controller must provide thread-safe **decodeAndExecuteCommand(...)** method call. This means that the **decodeAndExecuteCommand(...)** method can be safely called from any thread. Method declaration:
+The **decodeAndExecuteCommand(...)** method decodes and executes command on lens controller side encoded by [encodeSetParamCommand(...)](#encodesetparamcommand-method) or [encodeCommand(...)](#encodecommand-method) methods. The particular implementation of the lens controller must provide thread-safe **decodeAndExecuteCommand(...)** method call. This means that the **decodeAndExecuteCommand(...)** method can be safely called from any thread. Method declaration:
 
 ```cpp
 virtual bool decodeAndExecuteCommand(uint8_t* data, int size) = 0;
@@ -836,7 +805,7 @@ enum class LensParam
 | IRIS_HW_OPEN_LIMIT     | read / write | Iris hardware open limit. Value depends on implementation and lens hardware. Lens controller should control iris position. Lens controller should stop iris moving if hardware iris position will be our of limits. |
 | IRIS_HW_CLOSE_LIMIT    | read / write | Iris hardware close limit. Value depends on implementation and lens hardware. Lens controller should control iris position. Lens controller should stop iris moving if hardware iris position will be our of limits. |
 | FOCUS_FACTOR           | read only    | Focus factor if it was calculated. If not calculated must be -1. Value depends on particular lens controller. |
-| IS_CONNECTED           | read only    | Lens connection status. Connection status shows if the lens controller has data exchange with lens equipment. For example, if lens has serial port lens controller connects to serial port (opens serial port file in OS) but lens can be not active (no power). In this case connection status shows that lens controller doesn't have data exchange with lens equipment (methos will return 0). It lens controller has data exchange with lens equipment the method will return 1. If lens controller not initialize the connection status always FALSE. Value: 0 - not connected. 1 - connected. |
+| IS_CONNECTED           | read only    | Lens connection status. Connection status shows if the lens controller has data exchange with lens equipment. For example, if lens has serial port lens controller connects to serial port (opens serial port file in OS) but lens can be not active (no power). In this case connection status shows that lens controller doesn't have data exchange with lens equipment (method will return 0). It lens controller has data exchange with lens equipment the method will return 1. If lens controller not initialize the connection status always FALSE. Value: 0 - not connected. 1 - connected. |
 | FOCUS_HW_AF_SPEED      | read / write | Focus hardware speed in autofocus mode. Value depends on implementation and lens hardware. |
 | FOCUS_FACTOR_THRESHOLD | read / write | Threshold for changes of focus factor to start refocus. Value: 0% - no check, 100% - changing x2. |
 | REFOCUS_TIMEOUT_SEC    | read / write | Timeout for automatic refocus in seconds. Value: 0 - no automatic refocus, 100000 - maximum value. |
@@ -863,7 +832,7 @@ enum class LensParam
 
 # LensParams class description
 
-**LensParams** class used for lens controller initialization (**initLens(...)** method) or to get all actual params (**getParams()** method). Also **LensParams** provides structure to write/read params from JSON files (**JSON_READABLE** macro) and provides methos to encode and decode params.
+**LensParams** class used for lens controller initialization ([initLens(...)](#initlens-method) method) or to get all actual params ([getParams(...)](#getparams-method) method). Also **LensParams** provides structure to write/read params from JSON files (**JSON_READABLE** macro) and provides methods to encode and decode params.
 
 
 
@@ -933,7 +902,7 @@ public:
     /// position 0-65535. User should be able to set iris movement speed via
     /// lens parameters.
     int irisPos{0};
-    /// Hardware iris position. Parameter value depends on inplementation.
+    /// Hardware iris position. Parameter value depends on implementation.
     int irisHwPos{0};
     /// Focus mode. Parameter value depends on implementation but it is
     /// recommended to keep default values: 0 - Manual focus control,
@@ -1215,7 +1184,7 @@ public:
 
 ## Serialize lens params
 
-[**LensParams class**](#LensParams-class-description) provides method **encode(...)** to serialize lens params (fields of LensParams class, see Table 4). Serialization of lens params necessary in case when you need to send lens params via communication channels. Method doesn't encode **initString** string field and **fovPoints**. Method provides options to exclude particular parameters from serialization. To do this method inserts binary mask (7 bytes) where each bit represents particular parameter and **decode(...)** method recognizes it. Method declaration:
+[LensParams](#lensparams-class-description) class provides method **encode(...)** to serialize lens params (fields of LensParams class, see Table 4). Serialization of lens params necessary in case when you need to send lens params via communication channels. Method doesn't encode **initString** string field and **fovPoints**. Method provides options to exclude particular parameters from serialization. To do this method inserts binary mask (7 bytes) where each bit represents particular parameter and **decode(...)** method recognizes it. Method declaration:
 
 ```cpp
 bool encode(uint8_t* data, int bufferSize, int& size, LensParamsMask* mask = nullptr);
@@ -1226,7 +1195,7 @@ bool encode(uint8_t* data, int bufferSize, int& size, LensParamsMask* mask = nul
 | data       | Pointer to data buffer.                                      |
 | size       | Size of encoded data.                                        |
 | bufferSize | Data buffer size. Buffer size must be >= 201 bytes.          |
-| mask       | Parameters mask - pointer to **LensParamsMask** structure. **LensParamsMask** (declared in Lens.h file) determines flags for each field (parameter) declared in [**LensParams class**](#LensParams-class-description). If the user wants to exclude any parameters from serialization, he can put a pointer to the mask. If the user wants to exclude a particular parameter from serialization, he should set the corresponding flag in the **LensParamsMask** structure. |
+| mask       | Parameters mask - pointer to **LensParamsMask** structure. **LensParamsMask** (declared in Lens.h file) determines flags for each field (parameter) declared in [LensParams](#lensparams-class-description) class. If the user wants to exclude any parameters from serialization, he can put a pointer to the mask. If the user wants to exclude a particular parameter from serialization, he should set the corresponding flag in the **LensParamsMask** structure. |
 
 **LensParamsMask** structure declaration:
 
@@ -1566,7 +1535,7 @@ Done!
 
 # How to make custom implementation
 
-The **Lens** class provides only an interface, data structures, and methods for encoding and decoding commands and params. To create your own implementation of the lens controller, you must include the Lens repository in your project (see [**Build and connect to your project**](#Build-and-connect-to-your-project) section). The catalogue **example** (see [**Library files**](#Library-files) section) includes an example of the design of the custom lens controller. You must implement all the methods of the Lens interface class. Custom lens class declaration:
+The **Lens** class provides only an interface, data structures, and methods for encoding and decoding commands and params. To create your own implementation of the lens controller, you must include the Lens repository in your project (see [Build and connect to your project](#build-and-connect-to-your-project) section). The catalogue **example** (see [Library files](#library-files) section) includes an example of the design of the custom lens controller. You must implement all the methods of the Lens interface class. Custom lens class declaration:
 
 ```cpp
 class CustomLens: public Lens
@@ -1621,4 +1590,3 @@ private:
     LensParams m_params;
 };
 ```
-

@@ -140,7 +140,7 @@ public:
     /// position 0-65535. User should be able to set iris movement speed via
     /// lens parameters.
     int irisPos{0};
-    /// Hardware iris position. Parameter value depends on inplementation.
+    /// Hardware iris position. Parameter value depends on implementation.
     int irisHwPos{0};
     /// Focus mode. Parameter value depends on implementation but it is
     /// recommended to keep default values: 0 - Manual focus control,
