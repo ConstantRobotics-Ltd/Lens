@@ -1,10 +1,10 @@
-![lens_web_logo](_static/lens_web_logo.png)
+![lens_web_logo](./static/lens_web_logo.png)
 
 
 
 # **Lens interface C++ library**
 
-**v4.4.2**
+**v4.4.3**
 
 
 
@@ -45,7 +45,7 @@
 
 # Overview
 
-**Lens** C++ library provides standard interface as well defines data structures and rules for different lens controllers. **Lens** interface class doesn't do anything, just provides interface and provides methods to encode/decode commands and encode/decode params. Different lens controller classes inherit interface form **Lens** C++ class. **Lens.h** file contains list of data structures ([LensCommand](#lenscommand-enum) enum, [LensParam](#lensparam-enum) enum and [LensParams](#lensparams-class-description) class) and **Lens** class declaration. [LensCommand](#lenscommand-enum) enum contains IDs of commands supported by **Lens** class. [LensParam](#lensparam-enum) enum contains IDs of params supported by **Lens** class. [LensParams](#lensparam-enum) class contains fields for lens parameters values and provides methods to encode/decode and read/write lens parameters from JSON file. All lens controllers should include params and commands listed in **Lens.h** file. Lens interface class depends on [Frame](https://github.com/ConstantRobotics-Ltd/Frame) class (describes video frame and video frame data structures, necessary for autofocus functions, source code included, Apache 2.0 license) and [ConfigReader](https://github.com/ConstantRobotics-Ltd/ConfigReader) library (provides methods to read/write JSON config files, source code included, Apache 2.0 license). It uses C++17 standard. The library is licensed under the **Apache 2.0** license.
+**Lens** C++ library provides standard interface as well defines data structures and rules for different lens controllers. **Lens** interface class doesn't do anything, just provides interface and provides methods to encode / decode commands and encode / decode params. Different lens controller classes inherit interface form **Lens** C++ class. **Lens.h** file contains list of data structures ([LensCommand](#lenscommand-enum) enum, [LensParam](#lensparam-enum) enum and [LensParams](#lensparams-class-description) class) and [Lens](#lens-interface-class-description) class declaration. [LensCommand](#lenscommand-enum) enum contains IDs of commands supported by [Lens](#lens-interface-class-description) class. [LensParam](#lensparam-enum) enum contains IDs of params supported by **Lens** class. [LensParams](#lensparam-enum) class contains fields for lens parameters values and provides methods to encode/decode and read/write lens parameters from JSON file. All lens controllers should include params and commands listed in **Lens.h** file. Lens interface class depends on [Frame](https://rapidpixel.constantrobotics.com/docs/service-libraries/frame.html) class (describes video frame and video frame data structures, necessary for autofocus functions, source code included, Apache 2.0 license) and [ConfigReader](https://rapidpixel.constantrobotics.com/docs/service-libraries/config-reader.html) library (provides methods to read / write JSON config files, source code included, Apache 2.0 license). It uses C++17 standard. The library is licensed under the **Apache 2.0** license.
 
 
 
@@ -70,6 +70,7 @@
 | 4.3.1   | 13.11.2023   | - Frame class updated.                                       |
 | 4.4.1   | 13.12.2023   | - Virtual destructor added.<br />- Frame class updated.      |
 | 4.4.2   | 25.03.2024   | - Frame class updated.<br />- ConfigReader class updated.<br />- Documentation updated. |
+| 4.4.3   | 21.05.2024   | - Frame class updated.<br />- ConfigReader class updated.<br />- Documentation updated. |
 
 
 
@@ -78,26 +79,26 @@
 The library supplied by source code only. The user would be given a set of files in the form of a CMake project (repository). The repository structure is shown below:
 
 ```xml
-CMakeLists.txt --------------- Main CMake file of the library.
-3rdparty --------------------- Folder with third-party libraries.
-    CMakeLists.txt ----------- CMake file to include third-party libraries.
-    ConfigReader ------------- Source code of the ConfigReader library.
-    Frame -------------------- Source code of the Frame library.
-example ---------------------- Folder with an example lens controller.
-    CMakeLists.txt ----------- CMake file for example of lens controller.
-    CustomLens.cpp ----------- C++ implementation file.
-    CustomLens.h ------------- Header with class declaration.
-    CustomLensVersion.h ------ Header file which includes class version.
-    CustomLensVersion.h.in --- CMake service file to generate version file.
-test ------------------------- Folder with test application.
-    CMakeLists.txt ----------- CMake file for test application.
-    main.cpp ----------------- Source code file of test application.
-src -------------------------- Folder with source code of the library.
-    CMakeLists.txt ----------- CMake file of the library.
-    Lens.cpp ----------------- C++ implementation file.
-    Lens.h ------------------- Header file which includes Lens class declaration.
-    LensVersion.h ------------ Header file which includes version of the library.
-    LensVersion.h.in --------- CMake service file to generate version file.
+CMakeLists.txt -------------- Main CMake file of the library.
+3rdparty -------------------- Folder with third-party libraries.
+    CMakeLists.txt ---------- CMake file to include third-party libraries.
+    ConfigReader ------------ Folder with ConfigReader library source code.
+    Frame ------------------- Folder with Frame library source code.
+example --------------------- Folder with an example lens controller.
+    CMakeLists.txt ---------- CMake file for example of lens controller.
+    CustomLens.cpp ---------- C++ implementation file.
+    CustomLens.h ------------ Header with class declaration.
+    CustomLensVersion.h ----- Header file which includes class version.
+    CustomLensVersion.h.in -- CMake service file to generate version file.
+test ------------------------ Folder with test application.
+    CMakeLists.txt ---------- CMake file for test application.
+    main.cpp ---------------- Source code file of test application.
+src ------------------------- Folder with source code of the library.
+    CMakeLists.txt ---------- CMake file of the library.
+    Lens.cpp ---------------- C++ implementation file.
+    Lens.h ------------------ Header file which includes Lens class declaration.
+    LensVersion.h ----------- Header file which includes version of the library.
+    LensVersion.h.in -------- CMake service file to generate version file.
 ```
 
 
@@ -190,7 +191,7 @@ std::cout << "Lens class version: " << Lens::getVersion() << std::endl;
 Console output:
 
 ```bash
-Lens class version: 4.4.2
+Lens class version: 4.4.3
 ```
 
 
@@ -221,7 +222,7 @@ virtual bool initLens(LensParams& params) = 0;
 
 | Parameter | Value                                                        |
 | --------- | ------------------------------------------------------------ |
-| params    | Parameters ([LensParams class](#lensparams-class-description)). LensParams class includes initString which used in **openLens(...)** method. See description of [LensParams](#lensparams-class-description) class. |
+| params    | Parameters ([LensParams](#lensparams-class-description) class). LensParams class includes initString which used in **openLens(...)** method. See description of [LensParams](#lensparams-class-description) class. |
 
 **Returns:** TRUE if the lens controller initialized or FALSE if not.
 
@@ -272,7 +273,7 @@ virtual bool setParam(LensParam id, float value) = 0;
 | Parameter | Description                                                  |
 | --------- | ------------------------------------------------------------ |
 | id        | Lens parameter ID (see description of [LensParam](#lensparam-enum) enum). |
-| value     | Lens parameter value. Value depends on parameter ID (see description of [**LensParam enum**](#LensParam-enum)). |
+| value     | Lens parameter value. Value depends on parameter ID (see description of [LensParam enum](#lensparam-enum) enum). |
 
 **Returns:** TRUE if the parameter was set or FALSE if not.
 
@@ -335,7 +336,7 @@ virtual void addVideoFrame(cr::video::Frame& frame) = 0;
 
 | Parameter | Description                                                  |
 | --------- | ------------------------------------------------------------ |
-| frame     | Video frame object (see [Frame](https://github.com/ConstantRobotics-Ltd/Frame) class description). |
+| frame     | Video frame object (see [Frame](https://rapidpixel.constantrobotics.com/docs/service-libraries/frame.html) class description). |
 
 **Returns:** TRUE is the video frame accepted or FALSE if not. **Note:** if particular lens controller doesn't support this function it should return **TRUE** (recommended).
 

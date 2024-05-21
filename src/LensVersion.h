@@ -2,6 +2,6 @@
 
 #define LENS_MAJOR_VERSION 4
 #define LENS_MINOR_VERSION 4
-#define LENS_PATCH_VERSION 2
+#define LENS_PATCH_VERSION 3
 
-#define LENS_VERSION "4.4.2"
+#define LENS_VERSION "4.4.3"
