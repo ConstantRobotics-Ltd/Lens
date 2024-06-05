@@ -346,7 +346,7 @@ bool cr::lens::LensParams::encode(uint8_t* data, int bufferSize, int& size,
     }
     if (mask->isConnected)
     {
-        isConnected = data[pos] == 0x00 ? false : true; pos += 1;
+        data[pos] = isConnected ? 0x01 : 0x00; pos += 1;
     }
     if (mask->afHwSpeed)
     {
@@ -414,7 +414,7 @@ bool cr::lens::LensParams::encode(uint8_t* data, int bufferSize, int& size,
     }
     if (mask->isOpen)
     {
-        isOpen = data[pos] == 0x00 ? false : true; pos += 1;
+        data[pos] = isOpen ? 0x01 : 0x00; pos += 1;
     }
     if (mask->type)
     {

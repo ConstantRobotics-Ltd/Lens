@@ -505,6 +505,8 @@ bool encodeDecodeParamsTest()
 
     // Decode data.
     LensParams out;
+    out.isConnected = false;
+    out.isOpen = false;
     if (!out.decode(data, size))
     {
         cout << "Can't decode data" << endl;
