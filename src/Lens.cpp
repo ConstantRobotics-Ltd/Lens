@@ -97,73 +97,10 @@ bool cr::lens::LensParams::encode(uint8_t* data, int bufferSize, int& size,
     data[pos] = LENS_MAJOR_VERSION; pos += 1;
     data[pos] = LENS_MINOR_VERSION; pos += 1;
 
+    // Set mask.
+    cr::lens::LensParamsMask defaultMask;
     if (mask == nullptr)
-    {
-        // Prepare mask.
-        data[pos] = 0xFF; pos += 1;
-        data[pos] = 0xFF; pos += 1;
-        data[pos] = 0xFF; pos += 1;
-        data[pos] = 0xFF; pos += 1;
-        data[pos] = 0xFF; pos += 1;
-        data[pos] = 0xFF; pos += 1;
-        data[pos] = 0xFF; pos += 1;
-
-        // Encode data.
-        memcpy(&data[pos], &zoomPos, 4); pos += 4;
-        memcpy(&data[pos], &zoomHwPos, 4); pos += 4;
-        memcpy(&data[pos], &focusPos, 4); pos += 4;
-        memcpy(&data[pos], &focusHwPos, 4); pos += 4;
-        memcpy(&data[pos], &irisPos, 4); pos += 4;
-        memcpy(&data[pos], &irisHwPos, 4); pos += 4;
-        memcpy(&data[pos], &focusMode, 4); pos += 4;
-        memcpy(&data[pos], &filterMode, 4); pos += 4;
-        memcpy(&data[pos], &afRoiX0, 4); pos += 4;
-        memcpy(&data[pos], &afRoiY0, 4); pos += 4;
-        memcpy(&data[pos], &afRoiX1, 4); pos += 4;
-        memcpy(&data[pos], &afRoiY1, 4); pos += 4;
-        memcpy(&data[pos], &zoomSpeed, 4); pos += 4;
-        memcpy(&data[pos], &zoomHwSpeed, 4); pos += 4;
-        memcpy(&data[pos], &zoomHwMaxSpeed, 4); pos += 4;
-        memcpy(&data[pos], &focusSpeed, 4); pos += 4;
-        memcpy(&data[pos], &focusHwSpeed, 4); pos += 4;
-        memcpy(&data[pos], &focusHwMaxSpeed, 4); pos += 4;
-        memcpy(&data[pos], &irisSpeed, 4); pos += 4;
-        memcpy(&data[pos], &irisHwSpeed, 4); pos += 4;
-        memcpy(&data[pos], &irisHwMaxSpeed, 4); pos += 4;
-        memcpy(&data[pos], &zoomHwTeleLimit, 4); pos += 4;
-        memcpy(&data[pos], &zoomHwWideLimit, 4); pos += 4;
-        memcpy(&data[pos], &focusHwFarLimit, 4); pos += 4;
-        memcpy(&data[pos], &focusHwNearLimit, 4); pos += 4;
-        memcpy(&data[pos], &irisHwOpenLimit, 4); pos += 4;
-        memcpy(&data[pos], &irisHwCloseLimit, 4); pos += 4;
-        memcpy(&data[pos], &focusFactor, 4); pos += 4;
-        data[pos] = isConnected == true ? 0x01 : 0x00; pos += 1;
-        memcpy(&data[pos], &afHwSpeed, 4); pos += 4;
-        memcpy(&data[pos], &focusFactorThreshold, 4); pos += 4;
-        memcpy(&data[pos], &refocusTimeoutSec, 4); pos += 4;
-        data[pos] = afIsActive == true ? 0x01 : 0x00; pos += 1;
-        memcpy(&data[pos], &irisMode, 4); pos += 4;
-        memcpy(&data[pos], &autoAfRoiWidth, 4); pos += 4;
-        memcpy(&data[pos], &autoAfRoiHeight, 4); pos += 4;
-        memcpy(&data[pos], &autoAfRoiBorder, 4); pos += 4;
-        memcpy(&data[pos], &afRoiMode, 4); pos += 4;
-        memcpy(&data[pos], &extenderMode, 4); pos += 4;
-        memcpy(&data[pos], &stabiliserMode, 4); pos += 4;
-        memcpy(&data[pos], &afRange, 4); pos += 4;
-        memcpy(&data[pos], &xFovDeg, 4); pos += 4;
-        memcpy(&data[pos], &yFovDeg, 4); pos += 4;
-        memcpy(&data[pos], &logMode, 4); pos += 4;
-        memcpy(&data[pos], &temperature, 4); pos += 4;
-        data[pos] = isOpen == true ? 0x01 : 0x00; pos += 1;
-        memcpy(&data[pos], &type, 4); pos += 4;
-        memcpy(&data[pos], &custom1, 4); pos += 4;
-        memcpy(&data[pos], &custom2, 4); pos += 4;
-        memcpy(&data[pos], &custom3, 4); pos += 4;
-
-        size = pos;
-
-        return true;
-    }
+        mask = &defaultMask;
 
     // Prepare mask.
     data[pos] = 0;
@@ -362,7 +299,7 @@ bool cr::lens::LensParams::encode(uint8_t* data, int bufferSize, int& size,
     }
     if (mask->afIsActive)
     {
-        afIsActive = data[pos] == 0x00 ? false : true; pos += 1;
+        data[pos] = afIsActive ? 0x01 : 0x00; pos += 1;
     }
     if (mask->irisMode)
     {

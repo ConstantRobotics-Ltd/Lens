@@ -87,7 +87,7 @@ typedef struct LensParamsMask
     bool yFovDeg{true};
     bool logMode{true};
     bool temperature{true};
-    bool isOpen{false};
+    bool isOpen{true};
     bool type{true};
     bool custom1{true};
     bool custom2{true};
@@ -337,40 +337,15 @@ public:
     /// approximation.
     std::vector<FovPoint> fovPoints{std::vector<FovPoint>()};
 
-    JSON_READABLE(LensParams,
-                  initString,
-                  focusMode,
-                  filterMode,
-                  afRoiX0,
-                  afRoiY0,
-                  afRoiX1,
-                  afRoiY1,
-                  zoomHwMaxSpeed,
-                  focusHwMaxSpeed,
-                  irisHwMaxSpeed,
-                  zoomHwTeleLimit,
-                  zoomHwWideLimit,
-                  focusHwFarLimit,
-                  focusHwNearLimit,
-                  irisHwOpenLimit,
-                  irisHwCloseLimit,
-                  afHwSpeed,
-                  focusFactorThreshold,
-                  refocusTimeoutSec,
-                  irisMode,
-                  autoAfRoiWidth,
-                  autoAfRoiHeight,
-                  autoAfRoiBorder,
-                  afRoiMode,
-                  extenderMode,
-                  stabiliserMode,
-                  afRange,
-                  logMode,
-                  type,
-                  custom1,
-                  custom2,
-                  custom3,
-                  fovPoints);
+    JSON_READABLE(LensParams, initString, focusMode, filterMode,
+                  afRoiX0, afRoiY0, afRoiX1, afRoiY1, zoomHwMaxSpeed,
+                  focusHwMaxSpeed, irisHwMaxSpeed, zoomHwTeleLimit,
+                  zoomHwWideLimit, focusHwFarLimit, focusHwNearLimit,
+                  irisHwOpenLimit, irisHwCloseLimit, afHwSpeed,
+                  focusFactorThreshold, refocusTimeoutSec, irisMode,
+                  autoAfRoiWidth, autoAfRoiHeight, autoAfRoiBorder,
+                  afRoiMode, extenderMode, stabiliserMode, afRange,
+                  logMode, type, custom1, custom2, custom3, fovPoints);
 
     /**
      * @brief operator =

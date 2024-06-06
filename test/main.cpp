@@ -3,7 +3,7 @@
 
 
 
-/// Link namesapces.
+/// Link namespaces.
 using namespace cr::lens;
 using namespace std;
 
@@ -24,6 +24,9 @@ bool encodeDecodeCommandsTest();
 
 /// JSON read/write test.
 bool jsonReadWriteTest();
+
+/// Compare params.
+bool compareParams(LensParams& in, LensParams& out, LensParamsMask& mask);
 
 
 
@@ -146,287 +149,8 @@ bool copyTest()
     LensParams out = in;
 
     // Compare params.
-    bool result = true;
-    if (in.initString != out.initString)
-    {
-        cout << "in.initString" << endl;
-        result = false;
-    }
-    if (in.zoomPos != out.zoomPos)
-    {
-        cout << "in.zoomPos" << endl;
-        result = false;
-    }
-    if (in.zoomHwPos != out.zoomHwPos)
-    {
-        cout << "in.zoomHwPos" << endl;
-        result = false;
-    }
-    if (in.focusPos != out.focusPos)
-    {
-        cout << "in.focusPos" << endl;
-        result = false;
-    }
-    if (in.focusHwPos != out.focusHwPos)
-    {
-        cout << "in.focusHwPos" << endl;
-        result = false;
-    }
-    if (in.irisPos != out.irisPos)
-    {
-        cout << "in.irisPos" << endl;
-        result = false;
-    }
-    if (in.irisHwPos != out.irisHwPos)
-    {
-        cout << "in.irisHwPos" << endl;
-        result = false;
-    }
-    if (in.focusMode != out.focusMode)
-    {
-        cout << "in.focusMode" << endl;
-        result = false;
-    }
-    if (in.filterMode != out.filterMode)
-    {
-        cout << "in.filterMode" << endl;
-        result = false;
-    }
-    if (in.afRoiX0 != out.afRoiX0)
-    {
-        cout << "in.afRoiX0" << endl;
-        result = false;
-    }
-    if (in.afRoiY0 != out.afRoiY0)
-    {
-        cout << "in.afRoiY0" << endl;
-        result = false;
-    }
-    if (in.afRoiX1 != out.afRoiX1)
-    {
-        cout << "in.afRoiX1" << endl;
-        result = false;
-    }
-    if (in.afRoiY1 != out.afRoiY1)
-    {
-        cout << "in.afRoiY1" << endl;
-        result = false;
-    }
-    if (in.zoomSpeed != out.zoomSpeed)
-    {
-        cout << "in.zoomSpeed" << endl;
-        result = false;
-    }
-    if (in.zoomHwSpeed != out.zoomHwSpeed)
-    {
-        cout << "in.zoomHwSpeed" << endl;
-        result = false;
-    }
-    if (in.zoomHwMaxSpeed != out.zoomHwMaxSpeed)
-    {
-        cout << "in.zoomHwMaxSpeed" << endl;
-        result = false;
-    }
-    if (in.focusSpeed != out.focusSpeed)
-    {
-        cout << "in.focusSpeed" << endl;
-        result = false;
-    }
-    if (in.focusHwSpeed != out.focusHwSpeed)
-    {
-        cout << "in.focusHwSpeed" << endl;
-        result = false;
-    }
-    if (in.focusHwMaxSpeed != out.focusHwMaxSpeed)
-    {
-        cout << "in.focusHwMaxSpeed" << endl;
-        result = false;
-    }
-    if (in.irisSpeed != out.irisSpeed)
-    {
-        cout << "in.irisSpeed" << endl;
-        result = false;
-    }
-    if (in.irisHwSpeed != out.irisHwSpeed)
-    {
-        cout << "in.irisHwSpeed" << endl;
-        result = false;
-    }
-    if (in.irisHwMaxSpeed != out.irisHwMaxSpeed)
-    {
-        cout << "in.irisHwMaxSpeed" << endl;
-        result = false;
-    }
-    if (in.zoomHwTeleLimit != out.zoomHwTeleLimit)
-    {
-        cout << "in.zoomHwTeleLimit" << endl;
-        result = false;
-    }
-    if (in.zoomHwWideLimit != out.zoomHwWideLimit)
-    {
-        cout << "in.zoomHwWideLimit" << endl;
-        result = false;
-    }
-    if (in.focusHwFarLimit != out.focusHwFarLimit)
-    {
-        cout << "in.focusHwFarLimit" << endl;
-        result = false;
-    }
-    if (in.focusHwNearLimit != out.focusHwNearLimit)
-    {
-        cout << "in.focusHwNearLimit" << endl;
-        result = false;
-    }
-    if (in.irisHwOpenLimit != out.irisHwOpenLimit)
-    {
-        cout << "in.irisHwOpenLimit" << endl;
-        result = false;
-    }
-    if (in.irisHwCloseLimit != out.irisHwCloseLimit)
-    {
-        cout << "in.irisHwCloseLimit" << endl;
-        result = false;
-    }
-    if (in.focusFactor != out.focusFactor)
-    {
-        cout << "in.focusFactor" << endl;
-        result = false;
-    }
-    if (in.isConnected != out.isConnected)
-    {
-        cout << "in.isConnected" << endl;
-        result = false;
-    }
-    if (in.afHwSpeed != out.afHwSpeed)
-    {
-        cout << "in.afHwSpeed" << endl;
-        result = false;
-    }
-    if (in.focusFactorThreshold != out.focusFactorThreshold)
-    {
-        cout << "in.focusFactorThreshold" << endl;
-        result = false;
-    }
-    if (in.refocusTimeoutSec != out.refocusTimeoutSec)
-    {
-        cout << "in.refocusTimeoutSec" << endl;
-        result = false;
-    }
-    if (in.afIsActive != out.afIsActive)
-    {
-        cout << "in.afIsActive" << endl;
-        result = false;
-    }
-    if (in.irisMode != out.irisMode)
-    {
-        cout << "in.irisMode" << endl;
-        result = false;
-    }
-    if (in.autoAfRoiWidth != out.autoAfRoiWidth)
-    {
-        cout << "in.autoAfRoiWidth" << endl;
-        result = false;
-    }
-    if (in.autoAfRoiHeight != out.autoAfRoiHeight)
-    {
-        cout << "in.autoAfRoiHeight" << endl;
-        result = false;
-    }
-    if (in.autoAfRoiBorder != out.autoAfRoiBorder)
-    {
-        cout << "in.autoAfRoiBorder" << endl;
-        result = false;
-    }
-    if (in.afRoiMode != out.afRoiMode)
-    {
-        cout << "in.afRoiMode" << endl;
-        result = false;
-    }
-    if (in.extenderMode != out.extenderMode)
-    {
-        cout << "in.extenderMode" << endl;
-        result = false;
-    }
-    if (in.stabiliserMode != out.stabiliserMode)
-    {
-        cout << "in.stabiliserMode" << endl;
-        result = false;
-    }
-    if (in.afRange != out.afRange)
-    {
-        cout << "in.afRange" << endl;
-        result = false;
-    }
-    if (in.xFovDeg != out.xFovDeg)
-    {
-        cout << "in.xFovDeg" << endl;
-        result = false;
-    }
-    if (in.yFovDeg != out.yFovDeg)
-    {
-        cout << "in.yFovDeg" << endl;
-        result = false;
-    }
-    if (in.logMode != out.logMode)
-    {
-        cout << "in.logMode" << endl;
-        result = false;
-    }
-    if (in.temperature != out.temperature)
-    {
-        cout << "in.temperature" << endl;
-        result = false;
-    }
-    if (in.isOpen != out.isOpen)
-    {
-        cout << "in.isOpen" << endl;
-        result = false;
-    }
-    if (in.type != out.type)
-    {
-        cout << "in.type" << endl;
-        result = false;
-    }
-    if (in.custom1 != out.custom1)
-    {
-        cout << "in.custom1" << endl;
-        result = false;
-    }
-    if (in.custom2 != out.custom2)
-    {
-        cout << "in.custom2" << endl;
-        result = false;
-    }
-    if (in.custom3 != out.custom3)
-    {
-        cout << "in.custom3" << endl;
-        result = false;
-    }
-    if (in.fovPoints.size() != out.fovPoints.size())
-    {
-        cout << "in.fovPoints.size()" << endl;
-        result = false;
-    }
-    for (int i = 0; i < in.fovPoints.size(); ++i)
-    {
-        if (in.fovPoints[i].hwZoomPos != out.fovPoints[i].hwZoomPos)
-        {
-            cout << "in.fovPoints[" << i << "].hwZoomPos" << endl;
-            result = false;
-        }
-        if (in.fovPoints[i].xFovDeg != out.fovPoints[i].xFovDeg)
-        {
-            cout << "in.fovPoints[" << i << "].xFovDeg" << endl;
-            result = false;
-        }
-        if (in.fovPoints[i].yFovDeg != out.fovPoints[i].yFovDeg)
-        {
-            cout << "in.fovPoints[" << i << "].yFovDeg" << endl;
-            result = false;
-        }
-    }
-
-    return result;
+    LensParamsMask mask;
+    return compareParams(in, out, mask);
 }
 
 
@@ -514,264 +238,8 @@ bool encodeDecodeParamsTest()
     }
 
     // Compare params.
-    bool result = true;
-    if (out.initString != "")
-    {
-        cout << "in.initString" << endl;
-        result = false;
-    }
-    if (in.zoomPos != out.zoomPos)
-    {
-        cout << "in.zoomPos" << endl;
-        result = false;
-    }
-    if (in.zoomHwPos != out.zoomHwPos)
-    {
-        cout << "in.zoomHwPos" << endl;
-        result = false;
-    }
-    if (in.focusPos != out.focusPos)
-    {
-        cout << "in.focusPos" << endl;
-        result = false;
-    }
-    if (in.focusHwPos != out.focusHwPos)
-    {
-        cout << "in.focusHwPos" << endl;
-        result = false;
-    }
-    if (in.irisPos != out.irisPos)
-    {
-        cout << "in.irisPos" << endl;
-        result = false;
-    }
-    if (in.irisHwPos != out.irisHwPos)
-    {
-        cout << "in.irisHwPos" << endl;
-        result = false;
-    }
-    if (in.focusMode != out.focusMode)
-    {
-        cout << "in.focusMode" << endl;
-        result = false;
-    }
-    if (in.filterMode != out.filterMode)
-    {
-        cout << "in.filterMode" << endl;
-        result = false;
-    }
-    if (in.afRoiX0 != out.afRoiX0)
-    {
-        cout << "in.afRoiX0" << endl;
-        result = false;
-    }
-    if (in.afRoiY0 != out.afRoiY0)
-    {
-        cout << "in.afRoiY0" << endl;
-        result = false;
-    }
-    if (in.afRoiX1 != out.afRoiX1)
-    {
-        cout << "in.afRoiX1" << endl;
-        result = false;
-    }
-    if (in.afRoiY1 != out.afRoiY1)
-    {
-        cout << "in.afRoiY1" << endl;
-        result = false;
-    }
-    if (in.zoomSpeed != out.zoomSpeed)
-    {
-        cout << "in.zoomSpeed" << endl;
-        result = false;
-    }
-    if (in.zoomHwSpeed != out.zoomHwSpeed)
-    {
-        cout << "in.zoomHwSpeed" << endl;
-        result = false;
-    }
-    if (in.zoomHwMaxSpeed != out.zoomHwMaxSpeed)
-    {
-        cout << "in.zoomHwMaxSpeed" << endl;
-        result = false;
-    }
-    if (in.focusSpeed != out.focusSpeed)
-    {
-        cout << "in.focusSpeed" << endl;
-        result = false;
-    }
-    if (in.focusHwSpeed != out.focusHwSpeed)
-    {
-        cout << "in.focusHwSpeed" << endl;
-        result = false;
-    }
-    if (in.focusHwMaxSpeed != out.focusHwMaxSpeed)
-    {
-        cout << "in.focusHwMaxSpeed" << endl;
-        result = false;
-    }
-    if (in.irisSpeed != out.irisSpeed)
-    {
-        cout << "in.irisSpeed" << endl;
-        result = false;
-    }
-    if (in.irisHwSpeed != out.irisHwSpeed)
-    {
-        cout << "in.irisHwSpeed" << endl;
-        result = false;
-    }
-    if (in.irisHwMaxSpeed != out.irisHwMaxSpeed)
-    {
-        cout << "in.irisHwMaxSpeed" << endl;
-        result = false;
-    }
-    if (in.zoomHwTeleLimit != out.zoomHwTeleLimit)
-    {
-        cout << "in.zoomHwTeleLimit" << endl;
-        result = false;
-    }
-    if (in.zoomHwWideLimit != out.zoomHwWideLimit)
-    {
-        cout << "in.zoomHwWideLimit" << endl;
-        result = false;
-    }
-    if (in.focusHwFarLimit != out.focusHwFarLimit)
-    {
-        cout << "in.focusHwFarLimit" << endl;
-        result = false;
-    }
-    if (in.focusHwNearLimit != out.focusHwNearLimit)
-    {
-        cout << "in.focusHwNearLimit" << endl;
-        result = false;
-    }
-    if (in.irisHwOpenLimit != out.irisHwOpenLimit)
-    {
-        cout << "in.irisHwOpenLimit" << endl;
-        result = false;
-    }
-    if (in.irisHwCloseLimit != out.irisHwCloseLimit)
-    {
-        cout << "in.irisHwCloseLimit" << endl;
-        result = false;
-    }
-    if (in.focusFactor != out.focusFactor)
-    {
-        cout << "in.focusFactor" << endl;
-        result = false;
-    }
-    if (in.isConnected != out.isConnected)
-    {
-        cout << "in.isConnected" << endl;
-        result = false;
-    }
-    if (in.afHwSpeed != out.afHwSpeed)
-    {
-        cout << "in.afHwSpeed" << endl;
-        result = false;
-    }
-    if (in.focusFactorThreshold != out.focusFactorThreshold)
-    {
-        cout << "in.focusFactorThreshold" << endl;
-        result = false;
-    }
-    if (in.refocusTimeoutSec != out.refocusTimeoutSec)
-    {
-        cout << "in.refocusTimeoutSec" << endl;
-        result = false;
-    }
-    if (in.afIsActive != out.afIsActive)
-    {
-        cout << "in.afIsActive" << endl;
-        result = false;
-    }
-    if (in.irisMode != out.irisMode)
-    {
-        cout << "in.irisMode" << endl;
-        result = false;
-    }
-    if (in.autoAfRoiWidth != out.autoAfRoiWidth)
-    {
-        cout << "in.autoAfRoiWidth" << endl;
-        result = false;
-    }
-    if (in.autoAfRoiHeight != out.autoAfRoiHeight)
-    {
-        cout << "in.autoAfRoiHeight" << endl;
-        result = false;
-    }
-    if (in.autoAfRoiBorder != out.autoAfRoiBorder)
-    {
-        cout << "in.autoAfRoiBorder" << endl;
-        result = false;
-    }
-    if (in.afRoiMode != out.afRoiMode)
-    {
-        cout << "in.afRoiMode" << endl;
-        result = false;
-    }
-    if (in.extenderMode != out.extenderMode)
-    {
-        cout << "in.extenderMode" << endl;
-        result = false;
-    }
-    if (in.stabiliserMode != out.stabiliserMode)
-    {
-        cout << "in.stabiliserMode" << endl;
-        result = false;
-    }
-    if (in.afRange != out.afRange)
-    {
-        cout << "in.afRange" << endl;
-        result = false;
-    }
-    if (in.xFovDeg != out.xFovDeg)
-    {
-        cout << "in.xFovDeg" << endl;
-        result = false;
-    }
-    if (in.yFovDeg != out.yFovDeg)
-    {
-        cout << "in.yFovDeg" << endl;
-        result = false;
-    }
-    if (in.logMode != out.logMode)
-    {
-        cout << "in.logMode" << endl;
-        result = false;
-    }
-    if (in.temperature != out.temperature)
-    {
-        cout << "in.temperature" << endl;
-        result = false;
-    }
-    if (in.isOpen != out.isOpen)
-    {
-        cout << "in.isOpen" << endl;
-        result = false;
-    }
-    if (in.type != out.type)
-    {
-        cout << "in.type" << endl;
-        result = false;
-    }
-    if (in.custom1 != out.custom1)
-    {
-        cout << "in.custom1" << endl;
-        result = false;
-    }
-    if (in.custom2 != out.custom2)
-    {
-        cout << "in.custom2" << endl;
-        result = false;
-    }
-    if (in.custom3 != out.custom3)
-    {
-        cout << "in.custom3" << endl;
-        result = false;
-    }
-
-    return result;
+    LensParamsMask mask;
+    return compareParams(in, out, mask);
 }
 
 
@@ -922,192 +390,27 @@ bool jsonReadWriteTest()
     }
 
     // Compare params.
-    bool result = true;
-    if (in.initString != out.initString)
-    {
-        cout << "in.initString" << endl;
-        result = false;
-    }
-    if (in.focusMode != out.focusMode)
-    {
-        cout << "in.focusMode" << endl;
-        result = false;
-    }
-    if (in.filterMode != out.filterMode)
-    {
-        cout << "in.filterMode" << endl;
-        result = false;
-    }
-    if (in.afRoiX0 != out.afRoiX0)
-    {
-        cout << "in.afRoiX0" << endl;
-        result = false;
-    }
-    if (in.afRoiY0 != out.afRoiY0)
-    {
-        cout << "in.afRoiY0" << endl;
-        result = false;
-    }
-    if (in.afRoiX1 != out.afRoiX1)
-    {
-        cout << "in.afRoiX1" << endl;
-        result = false;
-    }
-    if (in.afRoiY1 != out.afRoiY1)
-    {
-        cout << "in.afRoiY1" << endl;
-        result = false;
-    }
-    if (in.zoomHwMaxSpeed != out.zoomHwMaxSpeed)
-    {
-        cout << "in.zoomHwMaxSpeed" << endl;
-        result = false;
-    }
-    if (in.focusHwMaxSpeed != out.focusHwMaxSpeed)
-    {
-        cout << "in.focusHwMaxSpeed" << endl;
-        result = false;
-    }
-    if (in.irisHwMaxSpeed != out.irisHwMaxSpeed)
-    {
-        cout << "in.irisHwMaxSpeed" << endl;
-        result = false;
-    }
-    if (in.zoomHwTeleLimit != out.zoomHwTeleLimit)
-    {
-        cout << "in.zoomHwTeleLimit" << endl;
-        result = false;
-    }
-    if (in.zoomHwWideLimit != out.zoomHwWideLimit)
-    {
-        cout << "in.zoomHwWideLimit" << endl;
-        result = false;
-    }
-    if (in.focusHwFarLimit != out.focusHwFarLimit)
-    {
-        cout << "in.focusHwFarLimit" << endl;
-        result = false;
-    }
-    if (in.focusHwNearLimit != out.focusHwNearLimit)
-    {
-        cout << "in.focusHwNearLimit" << endl;
-        result = false;
-    }
-    if (in.irisHwOpenLimit != out.irisHwOpenLimit)
-    {
-        cout << "in.irisHwOpenLimit" << endl;
-        result = false;
-    }
-    if (in.irisHwCloseLimit != out.irisHwCloseLimit)
-    {
-        cout << "in.irisHwCloseLimit" << endl;
-        result = false;
-    }
-    if (in.afHwSpeed != out.afHwSpeed)
-    {
-        cout << "in.afHwSpeed" << endl;
-        result = false;
-    }
-    if (in.focusFactorThreshold != out.focusFactorThreshold)
-    {
-        cout << "in.focusFactorThreshold" << endl;
-        result = false;
-    }
-    if (in.refocusTimeoutSec != out.refocusTimeoutSec)
-    {
-        cout << "in.refocusTimeoutSec" << endl;
-        result = false;
-    }
-    if (in.irisMode != out.irisMode)
-    {
-        cout << "in.irisMode" << endl;
-        result = false;
-    }
-    if (in.autoAfRoiWidth != out.autoAfRoiWidth)
-    {
-        cout << "in.autoAfRoiWidth" << endl;
-        result = false;
-    }
-    if (in.autoAfRoiHeight != out.autoAfRoiHeight)
-    {
-        cout << "in.autoAfRoiHeight" << endl;
-        result = false;
-    }
-    if (in.autoAfRoiBorder != out.autoAfRoiBorder)
-    {
-        cout << "in.autoAfRoiBorder" << endl;
-        result = false;
-    }
-    if (in.afRoiMode != out.afRoiMode)
-    {
-        cout << "in.afRoiMode" << endl;
-        result = false;
-    }
-    if (in.extenderMode != out.extenderMode)
-    {
-        cout << "in.extenderMode" << endl;
-        result = false;
-    }
-    if (in.stabiliserMode != out.stabiliserMode)
-    {
-        cout << "in.stabiliserMode" << endl;
-        result = false;
-    }
-    if (in.afRange != out.afRange)
-    {
-        cout << "in.afRange" << endl;
-        result = false;
-    }
-    if (in.logMode != out.logMode)
-    {
-        cout << "in.logMode" << endl;
-        result = false;
-    }
-    if (in.type != out.type)
-    {
-        cout << "in.type" << endl;
-        result = false;
-    }
-    if (in.custom1 != out.custom1)
-    {
-        cout << "in.custom1" << endl;
-        result = false;
-    }
-    if (in.custom2 != out.custom2)
-    {
-        cout << "in.custom2" << endl;
-        result = false;
-    }
-    if (in.custom3 != out.custom3)
-    {
-        cout << "in.custom3" << endl;
-        result = false;
-    }
-    if (in.fovPoints.size() != out.fovPoints.size())
-    {
-        cout << "in.fovPoints.size()" << endl;
-        result = false;
-    }
-    for (int i = 0; i < in.fovPoints.size(); ++i)
-    {
-        if (in.fovPoints[i].hwZoomPos != out.fovPoints[i].hwZoomPos)
-        {
-            cout << "in.fovPoints[" << i << "].hwZoomPos" << endl;
-            result = false;
-        }
-        if (in.fovPoints[i].xFovDeg != out.fovPoints[i].xFovDeg)
-        {
-            cout << "in.fovPoints[" << i << "].xFovDeg" << endl;
-            result = false;
-        }
-        if (in.fovPoints[i].yFovDeg != out.fovPoints[i].yFovDeg)
-        {
-            cout << "in.fovPoints[" << i << "].yFovDeg" << endl;
-            result = false;
-        }
-    }
-
-    return result;
+    LensParamsMask mask;
+    mask.zoomPos = false;
+    mask.zoomHwPos = false;
+    mask.focusPos = false;
+    mask.focusHwPos = false;
+    mask.irisPos = false;
+    mask.irisHwPos = false;
+    mask.zoomSpeed = false;
+    mask.zoomHwSpeed = false;
+    mask.focusSpeed = false;
+    mask.focusHwSpeed = false;
+    mask.irisSpeed = false;
+    mask.irisHwSpeed = false;
+    mask.focusFactor = false;
+    mask.isConnected = false;
+    mask.afIsActive = false;
+    mask.xFovDeg = false;
+    mask.yFovDeg = false;
+    mask.temperature = false;
+    mask.isOpen = false;
+    return compareParams(in, out, mask);
 }
 
 
@@ -1225,7 +528,7 @@ bool encodeDecodeParamsWithMaskTest()
     mask.yFovDeg = true;
     mask.logMode = false;
     mask.temperature = true;
-    mask.isOpen = false;
+    mask.isOpen = true;
     mask.type = true;
     mask.custom1 = false;
     mask.custom2 = true;
@@ -1246,278 +549,290 @@ bool encodeDecodeParamsWithMaskTest()
         return false;
     }
 
-    // Compare params.
-    bool result = true;
-    if (out.initString != "")
-    {
-        cout << "in.initString" << endl;
-        result = false;
-    }
-    if (in.zoomPos != out.zoomPos)
-    {
-        cout << "in.zoomPos" << endl;
-        result = false;
-    }
-    if (0 != out.zoomHwPos)
-    {
-        cout << "in.zoomHwPos" << endl;
-        result = false;
-    }
-    if (in.focusPos != out.focusPos)
-    {
-        cout << "in.focusPos" << endl;
-        result = false;
-    }
-    if (0 != out.focusHwPos)
-    {
-        cout << "in.focusHwPos" << endl;
-        result = false;
-    }
-    if (in.irisPos != out.irisPos)
-    {
-        cout << "in.irisPos" << endl;
-        result = false;
-    }
-    if (0 != out.irisHwPos)
-    {
-        cout << "in.irisHwPos" << endl;
-        result = false;
-    }
-    if (in.focusMode != out.focusMode)
-    {
-        cout << "in.focusMode" << endl;
-        result = false;
-    }
-    if (0 != out.filterMode)
-    {
-        cout << "in.filterMode" << endl;
-        result = false;
-    }
-    if (in.afRoiX0 != out.afRoiX0)
-    {
-        cout << "in.afRoiX0" << endl;
-        result = false;
-    }
-    if (0 != out.afRoiY0)
-    {
-        cout << "in.afRoiY0" << endl;
-        result = false;
-    }
-    if (in.afRoiX1 != out.afRoiX1)
-    {
-        cout << "in.afRoiX1" << endl;
-        result = false;
-    }
-    if (0 != out.afRoiY1)
-    {
-        cout << "in.afRoiY1" << endl;
-        result = false;
-    }
-    if (in.zoomSpeed != out.zoomSpeed)
-    {
-        cout << "in.zoomSpeed" << endl;
-        result = false;
-    }
-    if (0 != out.zoomHwSpeed)
-    {
-        cout << "in.zoomHwSpeed" << endl;
-        result = false;
-    }
-    if (in.zoomHwMaxSpeed != out.zoomHwMaxSpeed)
-    {
-        cout << "in.zoomHwMaxSpeed" << endl;
-        result = false;
-    }
-    if (0 != out.focusSpeed)
-    {
-        cout << "in.focusSpeed" << endl;
-        result = false;
-    }
-    if (in.focusHwSpeed != out.focusHwSpeed)
-    {
-        cout << "in.focusHwSpeed" << endl;
-        result = false;
-    }
-    if (0 != out.focusHwMaxSpeed)
-    {
-        cout << "in.focusHwMaxSpeed" << endl;
-        result = false;
-    }
-    if (in.irisSpeed != out.irisSpeed)
-    {
-        cout << "in.irisSpeed" << endl;
-        result = false;
-    }
-    if (0 != out.irisHwSpeed)
-    {
-        cout << "in.irisHwSpeed" << endl;
-        result = false;
-    }
-    if (in.irisHwMaxSpeed != out.irisHwMaxSpeed)
-    {
-        cout << "in.irisHwMaxSpeed" << endl;
-        result = false;
-    }
-    if (0 != out.zoomHwTeleLimit)
-    {
-        cout << "in.zoomHwTeleLimit" << endl;
-        result = false;
-    }
-    if (in.zoomHwWideLimit != out.zoomHwWideLimit)
-    {
-        cout << "in.zoomHwWideLimit" << endl;
-        result = false;
-    }
-    if (0 != out.focusHwFarLimit)
-    {
-        cout << "in.focusHwFarLimit" << endl;
-        result = false;
-    }
-    if (in.focusHwNearLimit != out.focusHwNearLimit)
-    {
-        cout << "in.focusHwNearLimit" << endl;
-        result = false;
-    }
-    if (0 != out.irisHwOpenLimit)
-    {
-        cout << "in.irisHwOpenLimit" << endl;
-        result = false;
-    }
-    if (in.irisHwCloseLimit != out.irisHwCloseLimit)
-    {
-        cout << "in.irisHwCloseLimit" << endl;
-        result = false;
-    }
-    if (0 != out.focusFactor)
-    {
-        cout << "in.focusFactor" << endl;
-        result = false;
-    }
-    if (in.isConnected != out.isConnected)
-    {
-        cout << "in.isConnected" << endl;
-        result = false;
-    }
-    if (0 != out.afHwSpeed)
-    {
-        cout << "in.afHwSpeed" << endl;
-        result = false;
-    }
-    if (in.focusFactorThreshold != out.focusFactorThreshold)
-    {
-        cout << "in.focusFactorThreshold" << endl;
-        result = false;
-    }
-    if (0 != out.refocusTimeoutSec)
-    {
-        cout << "in.refocusTimeoutSec" << endl;
-        result = false;
-    }
-    if (in.afIsActive != out.afIsActive)
-    {
-        cout << "in.afIsActive" << endl;
-        result = false;
-    }
-    if (0 != out.irisMode)
-    {
-        cout << "in.irisMode" << endl;
-        result = false;
-    }
-    if (in.autoAfRoiWidth != out.autoAfRoiWidth)
-    {
-        cout << "in.autoAfRoiWidth" << endl;
-        result = false;
-    }
-    if (0 != out.autoAfRoiHeight)
-    {
-        cout << "in.autoAfRoiHeight" << endl;
-        result = false;
-    }
-    if (in.autoAfRoiBorder != out.autoAfRoiBorder)
-    {
-        cout << "in.autoAfRoiBorder" << endl;
-        result = false;
-    }
-    if (0 != out.afRoiMode)
-    {
-        cout << "in.afRoiMode" << endl;
-        result = false;
-    }
-    if (in.extenderMode != out.extenderMode)
-    {
-        cout << "in.extenderMode" << endl;
-        result = false;
-    }
-    if (0 != out.stabiliserMode)
-    {
-        cout << "in.stabiliserMode" << endl;
-        result = false;
-    }
-    if (in.afRange != out.afRange)
-    {
-        cout << "in.afRange" << endl;
-        result = false;
-    }
-    if (0.0f != out.xFovDeg)
-    {
-        cout << "in.xFovDeg" << endl;
-        result = false;
-    }
-    if (in.yFovDeg != out.yFovDeg)
-    {
-        cout << "in.yFovDeg" << endl;
-        result = false;
-    }
-    if (0 != out.logMode)
-    {
-        cout << "in.logMode" << endl;
-        result = false;
-    }
-    if (in.temperature != out.temperature)
-    {
-        cout << "in.temperature" << endl;
-        result = false;
-    }
-    if (false != out.isOpen)
-    {
-        cout << "in.isOpen" << endl;
-        result = false;
-    }
-    if (in.type != out.type)
-    {
-        cout << "in.type" << endl;
-        result = false;
-    }
-    if (0.0f != out.custom1)
-    {
-        cout << "in.custom1" << endl;
-        result = false;
-    }
-    if (in.custom2 != out.custom2)
-    {
-        cout << "in.custom2" << endl;
-        result = false;
-    }
-    if (0.0f != out.custom3)
-    {
-        cout << "in.custom3" << endl;
-        result = false;
-    }
+    cout << (out.isOpen ? "lens is open" : "lens is closed") << endl;
+    cout << (out.isConnected ? "lens is connected" : "lens not connected") << endl;
 
-    return result;
+    // Compare params.
+    return compareParams(in, out, mask);
 }
 
 
 
+bool compareParams(LensParams& in, LensParams& out, LensParamsMask& mask)
+{
+    bool result = true;
+    if (in.initString != out.initString)
+    {
+        cout << "in.initString" << endl;
+    }
+    if (in.zoomPos != out.zoomPos && mask.zoomPos)
+    {
+        cout << "in.zoomPos" << endl;
+        result = false;
+    }
+    if (in.zoomHwPos != out.zoomHwPos && mask.zoomHwPos)
+    {
+        cout << "in.zoomHwPos" << endl;
+        result = false;
+    }
+    if (in.focusPos != out.focusPos && mask.focusPos)
+    {
+        cout << "in.focusPos" << endl;
+        result = false;
+    }
+    if (in.focusHwPos != out.focusHwPos && mask.focusHwPos)
+    {
+        cout << "in.focusHwPos" << endl;
+        result = false;
+    }
+    if (in.irisPos != out.irisPos && mask.irisPos)
+    {
+        cout << "in.irisPos" << endl;
+        result = false;
+    }
+    if (in.irisHwPos != out.irisHwPos && mask.irisHwPos)
+    {
+        cout << "in.irisHwPos" << endl;
+        result = false;
+    }
+    if (in.focusMode != out.focusMode && mask.focusMode)
+    {
+        cout << "in.focusMode" << endl;
+        result = false;
+    }
+    if (in.filterMode != out.filterMode && mask.filterMode)
+    {
+        cout << "in.filterMode" << endl;
+        result = false;
+    }
+    if (in.afRoiX0 != out.afRoiX0 && mask.afRoiX0)
+    {
+        cout << "in.afRoiX0" << endl;
+        result = false;
+    }
+    if (in.afRoiY0 != out.afRoiY0 && mask.afRoiY0)
+    {
+        cout << "in.afRoiY0" << endl;
+        result = false;
+    }
+    if (in.afRoiX1 != out.afRoiX1 && mask.afRoiX1)
+    {
+        cout << "in.afRoiX1" << endl;
+        result = false;
+    }
+    if (in.afRoiY1 != out.afRoiY1 && mask.afRoiY1)
+    {
+        cout << "in.afRoiY1" << endl;
+        result = false;
+    }
+    if (in.zoomSpeed != out.zoomSpeed && mask.zoomSpeed)
+    {
+        cout << "in.zoomSpeed" << endl;
+        result = false;
+    }
+    if (in.zoomHwSpeed != out.zoomHwSpeed && mask.zoomHwSpeed)
+    {
+        cout << "in.zoomHwSpeed" << endl;
+        result = false;
+    }
+    if (in.zoomHwMaxSpeed != out.zoomHwMaxSpeed && mask.zoomHwMaxSpeed)
+    {
+        cout << "in.zoomHwMaxSpeed" << endl;
+        result = false;
+    }
+    if (in.focusSpeed != out.focusSpeed && mask.focusSpeed)
+    {
+        cout << "in.focusSpeed" << endl;
+        result = false;
+    }
+    if (in.focusHwSpeed != out.focusHwSpeed && mask.focusHwSpeed)
+    {
+        cout << "in.focusHwSpeed" << endl;
+        result = false;
+    }
+    if (in.focusHwMaxSpeed != out.focusHwMaxSpeed && mask.focusHwMaxSpeed)
+    {
+        cout << "in.focusHwMaxSpeed" << endl;
+        result = false;
+    }
+    if (in.irisSpeed != out.irisSpeed && mask.irisSpeed)
+    {
+        cout << "in.irisSpeed" << endl;
+        result = false;
+    }
+    if (in.irisHwSpeed != out.irisHwSpeed && mask.irisHwSpeed)
+    {
+        cout << "in.irisHwSpeed" << endl;
+        result = false;
+    }
+    if (in.irisHwMaxSpeed != out.irisHwMaxSpeed && mask.irisHwMaxSpeed)
+    {
+        cout << "in.irisHwMaxSpeed" << endl;
+        result = false;
+    }
+    if (in.zoomHwTeleLimit != out.zoomHwTeleLimit && mask.zoomHwTeleLimit)
+    {
+        cout << "in.zoomHwTeleLimit" << endl;
+        result = false;
+    }
+    if (in.zoomHwWideLimit != out.zoomHwWideLimit && mask.zoomHwWideLimit)
+    {
+        cout << "in.zoomHwWideLimit" << endl;
+        result = false;
+    }
+    if (in.focusHwFarLimit != out.focusHwFarLimit && mask.focusHwFarLimit)
+    {
+        cout << "in.focusHwFarLimit" << endl;
+        result = false;
+    }
+    if (in.focusHwNearLimit != out.focusHwNearLimit && mask.focusHwNearLimit)
+    {
+        cout << "in.focusHwNearLimit" << endl;
+        result = false;
+    }
+    if (in.irisHwOpenLimit != out.irisHwOpenLimit && mask.irisHwOpenLimit)
+    {
+        cout << "in.irisHwOpenLimit" << endl;
+        result = false;
+    }
+    if (in.irisHwCloseLimit != out.irisHwCloseLimit && mask.irisHwCloseLimit)
+    {
+        cout << "in.irisHwCloseLimit" << endl;
+        result = false;
+    }
+    if (in.focusFactor != out.focusFactor && mask.focusFactor)
+    {
+        cout << "in.focusFactor" << endl;
+        result = false;
+    }
+    if (in.isConnected != out.isConnected && mask.isConnected)
+    {
+        cout << "in.isConnected" << endl;
+        result = false;
+    }
+    if (in.afHwSpeed != out.afHwSpeed && mask.afHwSpeed)
+    {
+        cout << "in.afHwSpeed" << endl;
+        result = false;
+    }
+    if (in.focusFactorThreshold != out.focusFactorThreshold && mask.focusFactorThreshold)
+    {
+        cout << "in.focusFactorThreshold" << endl;
+        result = false;
+    }
+    if (in.refocusTimeoutSec != out.refocusTimeoutSec && mask.refocusTimeoutSec)
+    {
+        cout << "in.refocusTimeoutSec" << endl;
+        result = false;
+    }
+    if (in.afIsActive != out.afIsActive && mask.afIsActive)
+    {
+        cout << "in.afIsActive" << endl;
+        result = false;
+    }
+    if (in.irisMode != out.irisMode && mask.irisMode)
+    {
+        cout << "in.irisMode" << endl;
+        result = false;
+    }
+    if (in.autoAfRoiWidth != out.autoAfRoiWidth && mask.autoAfRoiWidth)
+    {
+        cout << "in.autoAfRoiWidth" << endl;
+        result = false;
+    }
+    if (in.autoAfRoiHeight != out.autoAfRoiHeight && mask.autoAfRoiHeight)
+    {
+        cout << "in.autoAfRoiHeight" << endl;
+        result = false;
+    }
+    if (in.autoAfRoiBorder != out.autoAfRoiBorder && mask.autoAfRoiBorder)
+    {
+        cout << "in.autoAfRoiBorder" << endl;
+        result = false;
+    }
+    if (in.afRoiMode != out.afRoiMode && mask.afRoiMode)
+    {
+        cout << "in.afRoiMode" << endl;
+        result = false;
+    }
+    if (in.extenderMode != out.extenderMode && mask.extenderMode)
+    {
+        cout << "in.extenderMode" << endl;
+        result = false;
+    }
+    if (in.stabiliserMode != out.stabiliserMode && mask.stabiliserMode)
+    {
+        cout << "in.stabiliserMode" << endl;
+        result = false;
+    }
+    if (in.afRange != out.afRange && mask.afRange)
+    {
+        cout << "in.afRange" << endl;
+        result = false;
+    }
+    if (in.xFovDeg != out.xFovDeg && mask.xFovDeg)
+    {
+        cout << "in.xFovDeg" << endl;
+        result = false;
+    }
+    if (in.yFovDeg != out.yFovDeg && mask.yFovDeg)
+    {
+        cout << "in.yFovDeg" << endl;
+        result = false;
+    }
+    if (in.logMode != out.logMode && mask.logMode)
+    {
+        cout << "in.logMode" << endl;
+        result = false;
+    }
+    if (in.temperature != out.temperature && mask.temperature)
+    {
+        cout << "in.temperature" << endl;
+        result = false;
+    }
+    if (in.isOpen != out.isOpen && mask.isOpen)
+    {
+        cout << "in.isOpen" << endl;
+        result = false;
+    }
+    if (in.type != out.type && mask.type)
+    {
+        cout << "in.type" << endl;
+        result = false;
+    }
+    if (in.custom1 != out.custom1 && mask.custom1)
+    {
+        cout << "in.custom1" << endl;
+        result = false;
+    }
+    if (in.custom2 != out.custom2 && mask.custom2)
+    {
+        cout << "in.custom2" << endl;
+        result = false;
+    }
+    if (in.custom3 != out.custom3 && mask.custom3)
+    {
+        cout << "in.custom3" << endl;
+        result = false;
+    }
+    if (in.fovPoints.size() != out.fovPoints.size())
+    {
+        cout << "in.fovPoints.size()" << endl;
+    }
+    else
+    {
+        for (int i = 0; i < out.fovPoints.size(); ++i)
+        {
+            if (in.fovPoints[i].hwZoomPos != out.fovPoints[i].hwZoomPos)
+                result = false;
+            if (in.fovPoints[i].xFovDeg != out.fovPoints[i].xFovDeg)
+                result = false;
+            if (in.fovPoints[i].yFovDeg != out.fovPoints[i].yFovDeg)
+                result = false;
+        }
+        if (!result)
+            cout << "in.fovPoints" << endl;
+    }
 
-
-
-
-
-
-
-
-
-
-
-
+    return result;
+}
