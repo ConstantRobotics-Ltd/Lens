@@ -24,10 +24,7 @@ public:
     /// Vertical field of view, degree.
     float yFovDeg{0.0f};
 
-    JSON_READABLE(FovPoint,
-                  hwZoomPos,
-                  xFovDeg,
-                  yFovDeg);
+    JSON_READABLE(FovPoint, hwZoomPos, xFovDeg, yFovDeg);
 
     /**
      * @brief operator =
@@ -253,7 +250,7 @@ public:
     /// port lens controller connects to serial port (opens serial port file
     /// in OS) but lens can be not active (no power). In this case connection
     /// status shows that lens controller doesn't have data exchange with lens
-    /// equipment (methos will return 0). It lens controller has data exchange
+    /// equipment (method will return 0). It lens controller has data exchange
     /// with lens equipment the method will return 1. If lens controller not
     /// initialize the connection status always FALSE. Value:
     /// false - not connected. true - connected.
@@ -350,7 +347,7 @@ public:
     /**
      * @brief operator =
      * @param src Source object.
-     * @return LensParams obect.
+     * @return LensParams object.
      */
     LensParams& operator= (const LensParams& src);
 
@@ -703,7 +700,7 @@ public:
     virtual bool openLens(std::string initString) = 0;
 
     /**
-     * @brief Init lens controller by structure. Can be used instead
+     * @brief Init lens controller by set of parameters. Can be used instead
      * openLens(...) method.
      * @param initString Init string. Format depends on lens controller.
      * @return TRUE if the lens controller is init or FALSE.

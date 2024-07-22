@@ -703,7 +703,7 @@ bool cr::lens::CustomLens::decodeAndExecuteCommand(uint8_t* data, int size)
     {
     // COMMAND.
     case 0:
-        // Executte command.
+        // Execute command.
         return executeCommand(commandId);
     // SET_PARAM.
     case 1:
