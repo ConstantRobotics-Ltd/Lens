@@ -346,8 +346,6 @@ virtual void addVideoFrame(cr::video::Frame& frame) = 0;
 | --------- | ------------------------------------------------------------ |
 | frame     | Video [Frame](https://rapidpixel.constantrobotics.com/docs/service-libraries/frame.html) object. |
 
-**Returns:** TRUE is the video frame accepted or FALSE if not. **Note:** if particular lens controller doesn't support this function it should return **TRUE** (recommended).
-
 
 
 ## encodeSetParamCommand method
