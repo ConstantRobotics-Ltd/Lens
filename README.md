@@ -344,7 +344,7 @@ virtual void addVideoFrame(cr::video::Frame& frame) = 0;
 
 | Parameter | Description                                                  |
 | --------- | ------------------------------------------------------------ |
-| frame     | Video [Frame](https://rapidpixel.constantrobotics.com/docs/service-libraries/frame.html) object. |
+| frame     | Video [Frame](https://rapidpixel.constantrobotics.com/docs/Service/Frame.html) object. |
 
 
 
