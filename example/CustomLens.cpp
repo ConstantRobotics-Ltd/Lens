@@ -1,5 +1,156 @@
 #include "CustomLens.h"
 #include "CustomLensVersion.h"
+#include <cstddef>
+#include <cstdint>
+#include <limits>
+#include <mutex>
+#include <utility>
+#include "Frame.h"
+#include "Lens.h"
+
+
+
+namespace
+{
+/// Limit of float values which can be converted to int. 2^31 is exactly
+/// representable as float, so (-LIMIT <= value < LIMIT) is the exact range
+/// of int.
+constexpr float INT_RANGE_LIMIT{2147483648.0f};
+
+/// The whole range of int: the params whose values depend on the lens
+/// hardware are not limited by the example.
+constexpr int ANY_MIN{std::numeric_limits<int>::min()};
+constexpr int ANY_MAX{std::numeric_limits<int>::max()};
+/// Range of the user space positions of zoom, focus and iris: 0 (full wide,
+/// near or close) - 65535 (full tele, far or open).
+constexpr int POSITION_MIN{0};
+constexpr int POSITION_MAX{65535};
+/// Range of the speeds of zoom, focus and iris, percent of the max hardware
+/// speed.
+constexpr int SPEED_MIN{0};
+constexpr int SPEED_MAX{100};
+/// Range of the params which have two states (focus, filter and iris modes,
+/// AF ROI mode, extender and stabiliser modes): 0 or 1.
+constexpr int MODE_MIN{0};
+constexpr int MODE_MAX{1};
+/// Range of the logging mode: 0 - disable, 1 - only file, 2 - only terminal,
+/// 3 - file and terminal.
+constexpr int LOG_MODE_MIN{0};
+constexpr int LOG_MODE_MAX{3};
+/// Maximum value of the timeout for automatic refocus, seconds.
+constexpr int REFOCUS_TIMEOUT_MAX{100000};
+/// Minimum size of the autofocus ROI (width and height) when the ROI position
+/// is detected automatically, pixels.
+constexpr int AUTO_AF_ROI_SIZE_MIN{8};
+/// Range of the threshold for changes of focus factor to start refocus,
+/// percent.
+constexpr float FOCUS_FACTOR_THRESHOLD_MIN{0.0f};
+constexpr float FOCUS_FACTOR_THRESHOLD_MAX{100.0f};
+/// Range of the custom params: any finite float.
+constexpr float CUSTOM_MIN{std::numeric_limits<float>::lowest()};
+constexpr float CUSTOM_MAX{std::numeric_limits<float>::max()};
+/// Maximum size of the init string, bytes.
+constexpr std::size_t MAX_INIT_STRING_SIZE{256};
+/// Maximum number of the points to calculate field of view.
+constexpr std::size_t MAX_FOV_POINTS{256};
+
+
+
+/// Convert float param value to int. A conversion of NaN or of a value outside
+/// of the int range is undefined behavior, so such values are rejected. The
+/// negation of the whole condition is intentional: a comparison with NaN is
+/// false, so NaN is rejected.
+bool toInt(float value, int& result)
+{
+    if (!(value >= -INT_RANGE_LIMIT && value < INT_RANGE_LIMIT))
+    {
+        return false;
+    }
+    result = static_cast<int>(value);
+    return true;
+}
+
+
+
+/// Check that the value is inside [minValue, maxValue].
+bool inRange(int value, int minValue, int maxValue)
+{
+    return value >= minValue && value <= maxValue;
+}
+
+
+
+/// Check that the value is inside [minValue, maxValue]. The check is false for
+/// NaN.
+bool inRange(float value, float minValue, float maxValue)
+{
+    return value >= minValue && value <= maxValue;
+}
+
+
+
+/// Assign the param value to the target if the value is an int inside
+/// [minValue, maxValue].
+bool assignInt(int& target, float value, int minValue, int maxValue)
+{
+    int result = 0;
+    if (!toInt(value, result) || !inRange(result, minValue, maxValue))
+    {
+        return false;
+    }
+    target = result;
+    return true;
+}
+
+
+
+/// Assign the param value to the target if the value is inside
+/// [minValue, maxValue] (NaN is rejected).
+bool assignFloat(float& target, float value, float minValue, float maxValue)
+{
+    if (!inRange(value, minValue, maxValue))
+    {
+        return false;
+    }
+    target = value;
+    return true;
+}
+
+
+
+/// Check the values of the params which are set by the user.
+bool isValid(const cr::lens::LensParams& p)
+{
+    return p.initString.size() <= MAX_INIT_STRING_SIZE &&
+           p.fovPoints.size() <= MAX_FOV_POINTS &&
+           inRange(p.zoomPos, POSITION_MIN, POSITION_MAX) &&
+           inRange(p.focusPos, POSITION_MIN, POSITION_MAX) &&
+           inRange(p.irisPos, POSITION_MIN, POSITION_MAX) &&
+           inRange(p.zoomSpeed, SPEED_MIN, SPEED_MAX) &&
+           inRange(p.focusSpeed, SPEED_MIN, SPEED_MAX) &&
+           inRange(p.irisSpeed, SPEED_MIN, SPEED_MAX) &&
+           inRange(p.focusMode, MODE_MIN, MODE_MAX) &&
+           inRange(p.filterMode, MODE_MIN, MODE_MAX) &&
+           inRange(p.irisMode, MODE_MIN, MODE_MAX) &&
+           inRange(p.afRoiMode, MODE_MIN, MODE_MAX) &&
+           inRange(p.extenderMode, MODE_MIN, MODE_MAX) &&
+           inRange(p.stabiliserMode, MODE_MIN, MODE_MAX) &&
+           inRange(p.logMode, LOG_MODE_MIN, LOG_MODE_MAX) &&
+           inRange(p.refocusTimeoutSec, 0, REFOCUS_TIMEOUT_MAX) &&
+           inRange(p.afRoiX0, 0, ANY_MAX) &&
+           inRange(p.afRoiY0, 0, ANY_MAX) &&
+           inRange(p.afRoiX1, 0, ANY_MAX) &&
+           inRange(p.afRoiY1, 0, ANY_MAX) &&
+           inRange(p.autoAfRoiWidth, AUTO_AF_ROI_SIZE_MIN, ANY_MAX) &&
+           inRange(p.autoAfRoiHeight, AUTO_AF_ROI_SIZE_MIN, ANY_MAX) &&
+           inRange(p.autoAfRoiBorder, 0, ANY_MAX) &&
+           inRange(p.focusFactorThreshold, FOCUS_FACTOR_THRESHOLD_MIN,
+                   FOCUS_FACTOR_THRESHOLD_MAX) &&
+           inRange(p.custom1, CUSTOM_MIN, CUSTOM_MAX) &&
+           inRange(p.custom2, CUSTOM_MIN, CUSTOM_MAX) &&
+           inRange(p.custom3, CUSTOM_MIN, CUSTOM_MAX);
+}
+}
 
 
 
@@ -12,10 +163,7 @@ cr::lens::CustomLens::CustomLens()
 
 
 
-cr::lens::CustomLens::~CustomLens()
-{
-
-}
+cr::lens::CustomLens::~CustomLens() = default;
 
 
 
@@ -28,7 +176,16 @@ std::string cr::lens::CustomLens::getVersion()
 
 bool cr::lens::CustomLens::openLens(std::string initString)
 {
-    // Set connection flags.
+    // Check the size of the init string.
+    if (initString.size() > MAX_INIT_STRING_SIZE)
+    {
+        return false;
+    }
+
+    const std::lock_guard<std::mutex> lock(m_paramsMutex);
+
+    // Save the init string and set connection flags.
+    m_params.initString = std::move(initString);
     m_params.isOpen = true;
     m_params.isConnected = true;
 
@@ -39,6 +196,14 @@ bool cr::lens::CustomLens::openLens(std::string initString)
 
 bool cr::lens::CustomLens::initLens(cr::lens::LensParams& params)
 {
+    // Check params: they are copied only if all values are valid.
+    if (!isValid(params))
+    {
+        return false;
+    }
+
+    const std::lock_guard<std::mutex> lock(m_paramsMutex);
+
     // Copy params.
     m_params = params;
 
@@ -53,6 +218,8 @@ bool cr::lens::CustomLens::initLens(cr::lens::LensParams& params)
 
 void cr::lens::CustomLens::closeLens()
 {
+    const std::lock_guard<std::mutex> lock(m_paramsMutex);
+
     // Reset connection flags.
     m_params.isOpen = false;
     m_params.isConnected = false;
@@ -62,6 +229,8 @@ void cr::lens::CustomLens::closeLens()
 
 bool cr::lens::CustomLens::isLensOpen()
 {
+    const std::lock_guard<std::mutex> lock(m_paramsMutex);
+
     return m_params.isOpen;
 }
 
@@ -69,6 +238,8 @@ bool cr::lens::CustomLens::isLensOpen()
 
 bool cr::lens::CustomLens::isLensConnected()
 {
+    const std::lock_guard<std::mutex> lock(m_paramsMutex);
+
     return m_params.isConnected;
 }
 
@@ -76,425 +247,319 @@ bool cr::lens::CustomLens::isLensConnected()
 
 bool cr::lens::CustomLens::setParam(cr::lens::LensParam id, float value)
 {
-    // Check parameter ID.
+    const std::lock_guard<std::mutex> lock(m_paramsMutex);
+
+    // Check parameter ID and save the value if it is valid.
     switch (id)
     {
     case cr::lens::LensParam::ZOOM_POS:
     {
-        // Save param.
-        m_params.zoomPos = (int)value;
-        return true;
+        return assignInt(m_params.zoomPos, value, POSITION_MIN, POSITION_MAX);
     }
     case cr::lens::LensParam::ZOOM_HW_POS:
     {
-        // Save param.
-        m_params.zoomHwPos = (int)value;
-        return true;
+        return assignInt(m_params.zoomHwPos, value, ANY_MIN, ANY_MAX);
     }
     case cr::lens::LensParam::FOCUS_POS:
     {
-        // Save param.
-        m_params.focusPos = (int)value;
-        return true;
+        return assignInt(m_params.focusPos, value, POSITION_MIN, POSITION_MAX);
     }
     case cr::lens::LensParam::FOCUS_HW_POS:
     {
-        // Save param.
-        m_params.focusHwPos = (int)value;
-        return true;
+        return assignInt(m_params.focusHwPos, value, ANY_MIN, ANY_MAX);
     }
     case cr::lens::LensParam::IRIS_POS:
     {
-        // Save param.
-        m_params.irisPos = (int)value;
-        return true;
+        return assignInt(m_params.irisPos, value, POSITION_MIN, POSITION_MAX);
     }
     case cr::lens::LensParam::IRIS_HW_POS:
     {
-        // Save param.
-        m_params.irisHwPos = (int)value;
-        return true;
+        return assignInt(m_params.irisHwPos, value, ANY_MIN, ANY_MAX);
     }
     case cr::lens::LensParam::FOCUS_MODE:
     {
-        // Save param.
-        m_params.focusMode = (int)value;
-        return true;
+        return assignInt(m_params.focusMode, value, MODE_MIN, MODE_MAX);
     }
     case cr::lens::LensParam::FILTER_MODE:
     {
-        // Save param.
-        m_params.filterMode = (int)value;
-        return true;
+        return assignInt(m_params.filterMode, value, MODE_MIN, MODE_MAX);
     }
     case cr::lens::LensParam::AF_ROI_X0:
     {
-        // Save param.
-        m_params.afRoiX0 = (int)value;
-        return true;
+        return assignInt(m_params.afRoiX0, value, 0, ANY_MAX);
     }
     case cr::lens::LensParam::AF_ROI_Y0:
     {
-        // Save param.
-        m_params.afRoiY0 = (int)value;
-        return true;
+        return assignInt(m_params.afRoiY0, value, 0, ANY_MAX);
     }
     case cr::lens::LensParam::AF_ROI_X1:
     {
-        // Save param.
-        m_params.afRoiX1 = (int)value;
-        return true;
+        return assignInt(m_params.afRoiX1, value, 0, ANY_MAX);
     }
     case cr::lens::LensParam::AF_ROI_Y1:
     {
-        // Save param.
-        m_params.afRoiY1 = (int)value;
-        return true;
+        return assignInt(m_params.afRoiY1, value, 0, ANY_MAX);
     }
     case cr::lens::LensParam::ZOOM_SPEED:
     {
-        // Save param.
-        m_params.zoomSpeed = (int)value;
-        return true;
+        return assignInt(m_params.zoomSpeed, value, SPEED_MIN, SPEED_MAX);
     }
     case cr::lens::LensParam::ZOOM_HW_SPEED:
     {
-        // Save param.
-        m_params.zoomHwSpeed = (int)value;
-        return true;
+        return assignInt(m_params.zoomHwSpeed, value, ANY_MIN, ANY_MAX);
     }
     case cr::lens::LensParam::ZOOM_HW_MAX_SPEED:
     {
-        // Save param.
-        m_params.zoomHwMaxSpeed = (int)value;
-        return true;
+        return assignInt(m_params.zoomHwMaxSpeed, value, ANY_MIN, ANY_MAX);
     }
     case cr::lens::LensParam::FOCUS_SPEED:
     {
-        // Save param.
-        m_params.focusSpeed = (int)value;
-        return true;
+        return assignInt(m_params.focusSpeed, value, SPEED_MIN, SPEED_MAX);
     }
     case cr::lens::LensParam::FOCUS_HW_SPEED:
     {
-        // Save param.
-        m_params.focusHwSpeed = (int)value;
-        return true;
+        return assignInt(m_params.focusHwSpeed, value, ANY_MIN, ANY_MAX);
     }
     case cr::lens::LensParam::FOCUS_HW_MAX_SPEED:
     {
-        // Save param.
-        m_params.focusHwMaxSpeed = (int)value;
-        return true;
+        return assignInt(m_params.focusHwMaxSpeed, value, ANY_MIN, ANY_MAX);
     }
     case cr::lens::LensParam::IRIS_SPEED:
     {
-        // Save param.
-        m_params.irisSpeed = (int)value;
-        return true;
+        return assignInt(m_params.irisSpeed, value, SPEED_MIN, SPEED_MAX);
     }
     case cr::lens::LensParam::IRIS_HW_SPEED:
     {
-        // Save param.
-        m_params.irisHwSpeed = (int)value;
-        return true;
+        return assignInt(m_params.irisHwSpeed, value, ANY_MIN, ANY_MAX);
     }
     case cr::lens::LensParam::IRIS_HW_MAX_SPEED:
     {
-        // Save param.
-        m_params.irisHwMaxSpeed = (int)value;
-        return true;
+        return assignInt(m_params.irisHwMaxSpeed, value, ANY_MIN, ANY_MAX);
     }
     case cr::lens::LensParam::ZOOM_HW_TELE_LIMIT:
     {
-        // Save param.
-        m_params.zoomHwTeleLimit = (int)value;
-        return true;
+        return assignInt(m_params.zoomHwTeleLimit, value, ANY_MIN, ANY_MAX);
     }
     case cr::lens::LensParam::ZOOM_HW_WIDE_LIMIT:
     {
-        // Save param.
-        m_params.zoomHwWideLimit = (int)value;
-        return true;
+        return assignInt(m_params.zoomHwWideLimit, value, ANY_MIN, ANY_MAX);
     }
     case cr::lens::LensParam::FOCUS_HW_FAR_LIMIT:
     {
-        // Save param.
-        m_params.focusHwNearLimit = (int)value;
-        return true;
+        return assignInt(m_params.focusHwFarLimit, value, ANY_MIN, ANY_MAX);
     }
     case cr::lens::LensParam::FOCUS_HW_NEAR_LIMIT:
     {
-        // Save param.
-        m_params.focusHwNearLimit = (int)value;
-        return true;
+        return assignInt(m_params.focusHwNearLimit, value, ANY_MIN, ANY_MAX);
     }
     case cr::lens::LensParam::IRIS_HW_OPEN_LIMIT:
     {
-        // Save param.
-        m_params.irisHwOpenLimit = (int)value;
-        return true;
+        return assignInt(m_params.irisHwOpenLimit, value, ANY_MIN, ANY_MAX);
     }
     case cr::lens::LensParam::IRIS_HW_CLOSE_LIMIT:
     {
-        // Save param.
-        m_params.irisHwCloseLimit = (int)value;
-        return true;
-    }
-    case cr::lens::LensParam::FOCUS_FACTOR:
-    {
-        // Read only param.
-        return false;
-    }
-    case cr::lens::LensParam::IS_CONNECTED:
-    {
-        // Read only param.
-        return false;
+        return assignInt(m_params.irisHwCloseLimit, value, ANY_MIN, ANY_MAX);
     }
     case cr::lens::LensParam::FOCUS_HW_AF_SPEED:
     {
-        // Save param.
-        m_params.afHwSpeed = (int)value;
-        return true;
+        return assignInt(m_params.afHwSpeed, value, ANY_MIN, ANY_MAX);
     }
     case cr::lens::LensParam::FOCUS_FACTOR_THRESHOLD:
     {
-        // Save param.
-        m_params.focusFactorThreshold = value;
-        return true;
+        return assignFloat(m_params.focusFactorThreshold, value,
+                           FOCUS_FACTOR_THRESHOLD_MIN,
+                           FOCUS_FACTOR_THRESHOLD_MAX);
     }
     case cr::lens::LensParam::REFOCUS_TIMEOUT_SEC:
     {
-        // Save param.
-        m_params.refocusTimeoutSec = (int)value;
-        return true;
-    }
-    case cr::lens::LensParam::AF_IS_ACTIVE:
-    {
-        // Read only param.
-        return false;
+        return assignInt(m_params.refocusTimeoutSec, value, 0,
+                         REFOCUS_TIMEOUT_MAX);
     }
     case cr::lens::LensParam::IRIS_MODE:
     {
-        // Save param.
-        m_params.irisMode = (int)value;
-        return true;
+        return assignInt(m_params.irisMode, value, MODE_MIN, MODE_MAX);
     }
     case cr::lens::LensParam::AUTO_AF_ROI_WIDTH:
     {
-        // Save param.
-        m_params.autoAfRoiWidth = (int)value;
-        return true;
+        return assignInt(m_params.autoAfRoiWidth, value, AUTO_AF_ROI_SIZE_MIN,
+                         ANY_MAX);
     }
     case cr::lens::LensParam::AUTO_AF_ROI_HEIGHT:
     {
-        // Save param.
-        m_params.autoAfRoiHeight = (int)value;
-        return true;
+        return assignInt(m_params.autoAfRoiHeight, value, AUTO_AF_ROI_SIZE_MIN,
+                         ANY_MAX);
     }
     case cr::lens::LensParam::AUTO_AF_ROI_BORDER:
     {
-        // Save param.
-        m_params.autoAfRoiBorder = (int)value;
-        return true;
+        return assignInt(m_params.autoAfRoiBorder, value, 0, ANY_MAX);
     }
     case cr::lens::LensParam::AF_ROI_MODE:
     {
-        // Save param.
-        m_params.afRoiMode = (int)value;
-        return true;
+        return assignInt(m_params.afRoiMode, value, MODE_MIN, MODE_MAX);
     }
     case cr::lens::LensParam::EXTENDER_MODE:
     {
-        // Save param.
-        m_params.extenderMode = (int)value;
-        return true;
+        return assignInt(m_params.extenderMode, value, MODE_MIN, MODE_MAX);
     }
     case cr::lens::LensParam::STABILIZER_MODE:
     {
-        // Save param.
-        m_params.stabiliserMode = (int)value;
-        return true;
+        return assignInt(m_params.stabiliserMode, value, MODE_MIN, MODE_MAX);
     }
     case cr::lens::LensParam::AF_RANGE:
     {
-        // Save param.
-        m_params.afRange = (int)value;
-        return true;
-    }
-    case cr::lens::LensParam::X_FOV_DEG:
-    {
-        // Read only param.
-        return false;
-    }
-    case cr::lens::LensParam::Y_FOV_DEG:
-    {
-        // Read only param.
-        return false;
+        return assignInt(m_params.afRange, value, ANY_MIN, ANY_MAX);
     }
     case cr::lens::LensParam::LOG_MODE:
     {
-        // Save param.
-        m_params.logMode = (int)value;
-        return true;
-    }
-    case cr::lens::LensParam::TEMPERATURE:
-    {
-        // Read only param.
-        return false;
-    }
-    case cr::lens::LensParam::IS_OPEN:
-    {
-        // Read only param.
-        return false;
+        return assignInt(m_params.logMode, value, LOG_MODE_MIN, LOG_MODE_MAX);
     }
     case cr::lens::LensParam::TYPE:
     {
-        // Save param.
-        m_params.type = (int)value;
-        return true;
+        return assignInt(m_params.type, value, ANY_MIN, ANY_MAX);
     }
     case cr::lens::LensParam::CUSTOM_1:
     {
-        // Save param.
-        m_params.custom1 = value;
-        return true;
+        return assignFloat(m_params.custom1, value, CUSTOM_MIN, CUSTOM_MAX);
     }
     case cr::lens::LensParam::CUSTOM_2:
     {
-        // Save param.
-        m_params.custom2 = value;
-        return true;
+        return assignFloat(m_params.custom2, value, CUSTOM_MIN, CUSTOM_MAX);
     }
     case cr::lens::LensParam::CUSTOM_3:
     {
-        // Save param.
-        m_params.custom3 = value;
-        return true;
+        return assignFloat(m_params.custom3, value, CUSTOM_MIN, CUSTOM_MAX);
     }
+    case cr::lens::LensParam::FOCUS_FACTOR:
+    case cr::lens::LensParam::IS_CONNECTED:
+    case cr::lens::LensParam::AF_IS_ACTIVE:
+    case cr::lens::LensParam::X_FOV_DEG:
+    case cr::lens::LensParam::Y_FOV_DEG:
+    case cr::lens::LensParam::TEMPERATURE:
+    case cr::lens::LensParam::IS_OPEN:
     default:
     {
+        // Read only params and unknown IDs.
         return false;
     }
     }
-
-    return false;
 }
 
 
 
 float cr::lens::CustomLens::getParam(cr::lens::LensParam id)
 {
+    const std::lock_guard<std::mutex> lock(m_paramsMutex);
+
     // Check parameter ID.
     switch (id)
     {
     case cr::lens::LensParam::ZOOM_POS:
     {
-        return (float)m_params.zoomPos;
+        return static_cast<float>(m_params.zoomPos);
     }
     case cr::lens::LensParam::ZOOM_HW_POS:
     {
-        return (float)m_params.zoomHwPos;
+        return static_cast<float>(m_params.zoomHwPos);
     }
     case cr::lens::LensParam::FOCUS_POS:
     {
-        return (float)m_params.focusPos;
+        return static_cast<float>(m_params.focusPos);
     }
     case cr::lens::LensParam::FOCUS_HW_POS:
     {
-        return (float)m_params.focusHwPos;
+        return static_cast<float>(m_params.focusHwPos);
     }
     case cr::lens::LensParam::IRIS_POS:
     {
-        return (float)m_params.irisPos;
+        return static_cast<float>(m_params.irisPos);
     }
     case cr::lens::LensParam::IRIS_HW_POS:
     {
-        return (float)m_params.irisHwPos;
+        return static_cast<float>(m_params.irisHwPos);
     }
     case cr::lens::LensParam::FOCUS_MODE:
     {
-        return (float)m_params.focusMode;
+        return static_cast<float>(m_params.focusMode);
     }
     case cr::lens::LensParam::FILTER_MODE:
     {
-        return (float)m_params.filterMode;
+        return static_cast<float>(m_params.filterMode);
     }
     case cr::lens::LensParam::AF_ROI_X0:
     {
-        return (float)m_params.afRoiX0;
+        return static_cast<float>(m_params.afRoiX0);
     }
     case cr::lens::LensParam::AF_ROI_Y0:
     {
-        return (float)m_params.afRoiY0;
+        return static_cast<float>(m_params.afRoiY0);
     }
     case cr::lens::LensParam::AF_ROI_X1:
     {
-        return (float)m_params.afRoiX1;
+        return static_cast<float>(m_params.afRoiX1);
     }
     case cr::lens::LensParam::AF_ROI_Y1:
     {
-        return (float)m_params.afRoiY1;
+        return static_cast<float>(m_params.afRoiY1);
     }
     case cr::lens::LensParam::ZOOM_SPEED:
     {
-        return (float)m_params.zoomSpeed;
+        return static_cast<float>(m_params.zoomSpeed);
     }
     case cr::lens::LensParam::ZOOM_HW_SPEED:
     {
-        return (float)m_params.zoomHwSpeed;
+        return static_cast<float>(m_params.zoomHwSpeed);
     }
     case cr::lens::LensParam::ZOOM_HW_MAX_SPEED:
     {
-        return (float)m_params.zoomHwMaxSpeed;
+        return static_cast<float>(m_params.zoomHwMaxSpeed);
     }
     case cr::lens::LensParam::FOCUS_SPEED:
     {
-        return (float)m_params.focusSpeed;
+        return static_cast<float>(m_params.focusSpeed);
     }
     case cr::lens::LensParam::FOCUS_HW_SPEED:
     {
-        return (float)m_params.focusHwSpeed;
+        return static_cast<float>(m_params.focusHwSpeed);
     }
     case cr::lens::LensParam::FOCUS_HW_MAX_SPEED:
     {
-        return (float)m_params.focusHwMaxSpeed;
+        return static_cast<float>(m_params.focusHwMaxSpeed);
     }
     case cr::lens::LensParam::IRIS_SPEED:
     {
-        return (float)m_params.irisSpeed;
+        return static_cast<float>(m_params.irisSpeed);
     }
     case cr::lens::LensParam::IRIS_HW_SPEED:
     {
-        return (float)m_params.irisHwSpeed;
+        return static_cast<float>(m_params.irisHwSpeed);
     }
     case cr::lens::LensParam::IRIS_HW_MAX_SPEED:
     {
-        return (float)m_params.irisHwMaxSpeed;
+        return static_cast<float>(m_params.irisHwMaxSpeed);
     }
     case cr::lens::LensParam::ZOOM_HW_TELE_LIMIT:
     {
-        return (float)m_params.zoomHwTeleLimit;
+        return static_cast<float>(m_params.zoomHwTeleLimit);
     }
     case cr::lens::LensParam::ZOOM_HW_WIDE_LIMIT:
     {
-        return (float)m_params.zoomHwWideLimit;
+        return static_cast<float>(m_params.zoomHwWideLimit);
     }
     case cr::lens::LensParam::FOCUS_HW_FAR_LIMIT:
     {
-        return (float)m_params.focusHwNearLimit;
+        return static_cast<float>(m_params.focusHwFarLimit);
     }
     case cr::lens::LensParam::FOCUS_HW_NEAR_LIMIT:
     {
-        return (float)m_params.focusHwNearLimit;
+        return static_cast<float>(m_params.focusHwNearLimit);
     }
     case cr::lens::LensParam::IRIS_HW_OPEN_LIMIT:
     {
-        return (float)m_params.irisHwOpenLimit;
+        return static_cast<float>(m_params.irisHwOpenLimit);
     }
     case cr::lens::LensParam::IRIS_HW_CLOSE_LIMIT:
     {
-        return (float)m_params.irisHwCloseLimit;
+        return static_cast<float>(m_params.irisHwCloseLimit);
     }
     case cr::lens::LensParam::FOCUS_FACTOR:
     {
@@ -506,7 +571,7 @@ float cr::lens::CustomLens::getParam(cr::lens::LensParam id)
     }
     case cr::lens::LensParam::FOCUS_HW_AF_SPEED:
     {
-        return (float)m_params.afHwSpeed;
+        return static_cast<float>(m_params.afHwSpeed);
     }
     case cr::lens::LensParam::FOCUS_FACTOR_THRESHOLD:
     {
@@ -514,7 +579,7 @@ float cr::lens::CustomLens::getParam(cr::lens::LensParam id)
     }
     case cr::lens::LensParam::REFOCUS_TIMEOUT_SEC:
     {
-        return (float)m_params.refocusTimeoutSec;
+        return static_cast<float>(m_params.refocusTimeoutSec);
     }
     case cr::lens::LensParam::AF_IS_ACTIVE:
     {
@@ -522,35 +587,35 @@ float cr::lens::CustomLens::getParam(cr::lens::LensParam id)
     }
     case cr::lens::LensParam::IRIS_MODE:
     {
-        return (float)m_params.irisMode;
+        return static_cast<float>(m_params.irisMode);
     }
     case cr::lens::LensParam::AUTO_AF_ROI_WIDTH:
     {
-        return (float)m_params.autoAfRoiWidth;
+        return static_cast<float>(m_params.autoAfRoiWidth);
     }
     case cr::lens::LensParam::AUTO_AF_ROI_HEIGHT:
     {
-        return (float)m_params.autoAfRoiHeight;
+        return static_cast<float>(m_params.autoAfRoiHeight);
     }
     case cr::lens::LensParam::AUTO_AF_ROI_BORDER:
     {
-        return (float)m_params.autoAfRoiBorder;
+        return static_cast<float>(m_params.autoAfRoiBorder);
     }
     case cr::lens::LensParam::AF_ROI_MODE:
     {
-        return (float)m_params.afRoiMode;
+        return static_cast<float>(m_params.afRoiMode);
     }
     case cr::lens::LensParam::EXTENDER_MODE:
     {
-        return (float)m_params.extenderMode;
+        return static_cast<float>(m_params.extenderMode);
     }
     case cr::lens::LensParam::STABILIZER_MODE:
     {
-        return (float)m_params.stabiliserMode;
+        return static_cast<float>(m_params.stabiliserMode);
     }
     case cr::lens::LensParam::AF_RANGE:
     {
-        return (float)m_params.afRange;
+        return static_cast<float>(m_params.afRange);
     }
     case cr::lens::LensParam::X_FOV_DEG:
     {
@@ -562,7 +627,7 @@ float cr::lens::CustomLens::getParam(cr::lens::LensParam id)
     }
     case cr::lens::LensParam::LOG_MODE:
     {
-        return (float)m_params.logMode;
+        return static_cast<float>(m_params.logMode);
     }
     case cr::lens::LensParam::TEMPERATURE:
     {
@@ -574,7 +639,7 @@ float cr::lens::CustomLens::getParam(cr::lens::LensParam id)
     }
     case cr::lens::LensParam::TYPE:
     {
-        return (float)m_params.type;
+        return static_cast<float>(m_params.type);
     }
     case cr::lens::LensParam::CUSTOM_1:
     {
@@ -593,14 +658,14 @@ float cr::lens::CustomLens::getParam(cr::lens::LensParam id)
         return -1.0f;
     }
     }
-
-    return -1.0f;
 }
 
 
 
 void cr::lens::CustomLens::getParams(cr::lens::LensParams& params)
 {
+    const std::lock_guard<std::mutex> lock(m_paramsMutex);
+
     params = m_params;
 }
 
@@ -608,71 +673,47 @@ void cr::lens::CustomLens::getParams(cr::lens::LensParams& params)
 
 bool cr::lens::CustomLens::executeCommand(cr::lens::LensCommand id, float arg)
 {
+    const std::lock_guard<std::mutex> lock(m_paramsMutex);
+
     // Check command ID.
     switch (id)
     {
     case cr::lens::LensCommand::ZOOM_TELE:
-    {
-        return true;
-    }
     case cr::lens::LensCommand::ZOOM_WIDE:
+    case cr::lens::LensCommand::ZOOM_STOP:
+    case cr::lens::LensCommand::FOCUS_FAR:
+    case cr::lens::LensCommand::FOCUS_NEAR:
+    case cr::lens::LensCommand::FOCUS_STOP:
+    case cr::lens::LensCommand::IRIS_OPEN:
+    case cr::lens::LensCommand::IRIS_CLOSE:
+    case cr::lens::LensCommand::IRIS_STOP:
+    case cr::lens::LensCommand::RESTART:
+    case cr::lens::LensCommand::DETECT_HW_RANGES:
     {
+        // The example doesn't have lens hardware: the command is accepted.
         return true;
     }
     case cr::lens::LensCommand::ZOOM_TO_POS:
     {
-        return true;
-    }
-    case cr::lens::LensCommand::ZOOM_STOP:
-    {
-        return true;
-    }
-    case cr::lens::LensCommand::FOCUS_FAR:
-    {
-        return true;
-    }
-    case cr::lens::LensCommand::FOCUS_NEAR:
-    {
-        return true;
+        // Setting the position is equivalent to the ZOOM_TO_POS command.
+        return assignInt(m_params.zoomPos, arg, POSITION_MIN, POSITION_MAX);
     }
     case cr::lens::LensCommand::FOCUS_TO_POS:
     {
-        return true;
-    }
-    case cr::lens::LensCommand::FOCUS_STOP:
-    {
-        return true;
-    }
-    case cr::lens::LensCommand::IRIS_OPEN:
-    {
-        return true;
-    }
-    case cr::lens::LensCommand::IRIS_CLOSE:
-    {
-        return true;
+        return assignInt(m_params.focusPos, arg, POSITION_MIN, POSITION_MAX);
     }
     case cr::lens::LensCommand::IRIS_TO_POS:
     {
-        return true;
-    }
-    case cr::lens::LensCommand::IRIS_STOP:
-    {
-        return true;
+        return assignInt(m_params.irisPos, arg, POSITION_MIN, POSITION_MAX);
     }
     case cr::lens::LensCommand::AF_START:
     {
+        m_params.afIsActive = true;
         return true;
     }
     case cr::lens::LensCommand::AF_STOP:
     {
-        return true;
-    }
-    case cr::lens::LensCommand::RESTART:
-    {
-        return true;
-    }
-    case cr::lens::LensCommand::DETECT_HW_RANGES:
-    {
+        m_params.afIsActive = false;
         return true;
     }
     default:
@@ -680,41 +721,34 @@ bool cr::lens::CustomLens::executeCommand(cr::lens::LensCommand id, float arg)
         return false;
     }
     }
-
-    return false;
 }
 
 
 
-void cr::lens::CustomLens::addVideoFrame(cr::video::Frame& frame)
+void cr::lens::CustomLens::addVideoFrame(cr::video::Frame&)
 {
-
 }
 
 
 
 bool cr::lens::CustomLens::decodeAndExecuteCommand(uint8_t* data, int size)
 {
-    // Decode command.
-    LensCommand commandId = LensCommand::ZOOM_TELE;
-    LensParam paramId = LensParam::ZOOM_SPEED;
-    float value = 0.0f;
-    switch (Lens::decodeCommand(data, size, paramId, commandId, value))
+    // Decode command. The decoder checks the pointer, the size, the version
+    // and the IDs.
+    LensCommand commandId{LensCommand::ZOOM_TELE};
+    LensParam paramId{LensParam::ZOOM_POS};
+    float value{0.0f};
+    const int result = Lens::decodeCommand(
+                data, size, paramId, commandId, value);
+
+    // Execute the decoded command.
+    if (result == 0)
     {
-    // COMMAND.
-    case 0:
-        // Execute command.
-        return executeCommand(commandId);
-    // SET_PARAM.
-    case 1:
+        return executeCommand(commandId, value);
+    }
+    if (result == 1)
     {
-        // Set param.
         return setParam(paramId, value);
-    }
-    default:
-    {
-        return false;
-    }
     }
 
     return false;

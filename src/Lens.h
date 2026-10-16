@@ -1,6 +1,7 @@
 #pragma once
-#include <string>
 #include <cstdint>
+#include <string>
+#include <vector>
 #include "Frame.h"
 #include "ConfigReader.h"
 
@@ -13,7 +14,12 @@ namespace lens
 
 
 
-/// Field of view point class.
+/**
+ * @brief Field of view point class.
+ *
+ * @note The class is not thread-safe: an object must not be accessed from
+ * several threads at the same time without external synchronization.
+ */
 class FovPoint
 {
 public:
@@ -24,76 +30,110 @@ public:
     /// Vertical field of view, degree.
     float yFovDeg{0.0f};
 
-    JSON_READABLE(FovPoint, hwZoomPos, xFovDeg, yFovDeg);
+    JSON_READABLE(FovPoint, hwZoomPos, xFovDeg, yFovDeg)
 
     /**
-     * @brief operator =
-     * @param src Source object.
-     * @return FovPoint object.
+     * @brief Default constructor.
      */
-    FovPoint& operator= (const FovPoint& src);
+    FovPoint() = default;
+
+    /**
+     * @brief Copy constructor.
+     * @param src Source object.
+     */
+    FovPoint(const FovPoint& src) = default;
+
+    /**
+     * @brief Move constructor.
+     * @param src Source object.
+     */
+    FovPoint(FovPoint&& src) = default;
+
+    /**
+     * @brief Copy assignment operator.
+     * @param src Source object.
+     * @return Reference to this object.
+     */
+    FovPoint& operator= (const FovPoint& src) = default;
+
+    /**
+     * @brief Move assignment operator.
+     * @param src Source object.
+     * @return Reference to this object.
+     */
+    FovPoint& operator= (FovPoint&& src) = default;
 };
 
 
 
-/// Lens params mask structure.
+/**
+ * @brief Lens params mask structure.
+ *
+ * Each flag enables serialization of the LensParams field with the same
+ * name (see LensParams::encode(...)).
+ */
 typedef struct LensParamsMask
 {
-    bool zoomPos{true};
-    bool zoomHwPos{true};
-    bool focusPos{true};
-    bool focusHwPos{true};
-    bool irisPos{true};
-    bool irisHwPos{true};
-    bool focusMode{true};
-    bool filterMode{true};
-    bool afRoiX0{true};
-    bool afRoiY0{true};
-    bool afRoiX1{true};
-    bool afRoiY1{true};
-    bool zoomSpeed{true};
-    bool zoomHwSpeed{true};
-    bool zoomHwMaxSpeed{true};
-    bool focusSpeed{true};
-    bool focusHwSpeed{true};
-    bool focusHwMaxSpeed{true};
-    bool irisSpeed{true};
-    bool irisHwSpeed{true};
-    bool irisHwMaxSpeed{true};
-    bool zoomHwTeleLimit{true};
-    bool zoomHwWideLimit{true};
-    bool focusHwFarLimit{true};
-    bool focusHwNearLimit{true};
-    bool irisHwOpenLimit{true};
-    bool irisHwCloseLimit{true};
-    bool focusFactor{true};
-    bool isConnected{true};
-    bool afHwSpeed{true};
-    bool focusFactorThreshold{true};
-    bool refocusTimeoutSec{true};
-    bool afIsActive{true};
-    bool irisMode{true};
-    bool autoAfRoiWidth{true};
-    bool autoAfRoiHeight{true};
-    bool autoAfRoiBorder{true};
-    bool afRoiMode{true};
-    bool extenderMode{true};
-    bool stabiliserMode{true};
-    bool afRange{true};
-    bool xFovDeg{true};
-    bool yFovDeg{true};
-    bool logMode{true};
-    bool temperature{true};
-    bool isOpen{true};
-    bool type{true};
-    bool custom1{true};
-    bool custom2{true};
-    bool custom3{true};
+    bool zoomPos{true};  ///< Serialize zoomPos.
+    bool zoomHwPos{true};  ///< Serialize zoomHwPos.
+    bool focusPos{true};  ///< Serialize focusPos.
+    bool focusHwPos{true};  ///< Serialize focusHwPos.
+    bool irisPos{true};  ///< Serialize irisPos.
+    bool irisHwPos{true};  ///< Serialize irisHwPos.
+    bool focusMode{true};  ///< Serialize focusMode.
+    bool filterMode{true};  ///< Serialize filterMode.
+    bool afRoiX0{true};  ///< Serialize afRoiX0.
+    bool afRoiY0{true};  ///< Serialize afRoiY0.
+    bool afRoiX1{true};  ///< Serialize afRoiX1.
+    bool afRoiY1{true};  ///< Serialize afRoiY1.
+    bool zoomSpeed{true};  ///< Serialize zoomSpeed.
+    bool zoomHwSpeed{true};  ///< Serialize zoomHwSpeed.
+    bool zoomHwMaxSpeed{true};  ///< Serialize zoomHwMaxSpeed.
+    bool focusSpeed{true};  ///< Serialize focusSpeed.
+    bool focusHwSpeed{true};  ///< Serialize focusHwSpeed.
+    bool focusHwMaxSpeed{true};  ///< Serialize focusHwMaxSpeed.
+    bool irisSpeed{true};  ///< Serialize irisSpeed.
+    bool irisHwSpeed{true};  ///< Serialize irisHwSpeed.
+    bool irisHwMaxSpeed{true};  ///< Serialize irisHwMaxSpeed.
+    bool zoomHwTeleLimit{true};  ///< Serialize zoomHwTeleLimit.
+    bool zoomHwWideLimit{true};  ///< Serialize zoomHwWideLimit.
+    bool focusHwFarLimit{true};  ///< Serialize focusHwFarLimit.
+    bool focusHwNearLimit{true};  ///< Serialize focusHwNearLimit.
+    bool irisHwOpenLimit{true};  ///< Serialize irisHwOpenLimit.
+    bool irisHwCloseLimit{true};  ///< Serialize irisHwCloseLimit.
+    bool focusFactor{true};  ///< Serialize focusFactor.
+    bool isConnected{true};  ///< Serialize isConnected.
+    bool afHwSpeed{true};  ///< Serialize afHwSpeed.
+    bool focusFactorThreshold{true};  ///< Serialize focusFactorThreshold.
+    bool refocusTimeoutSec{true};  ///< Serialize refocusTimeoutSec.
+    bool afIsActive{true};  ///< Serialize afIsActive.
+    bool irisMode{true};  ///< Serialize irisMode.
+    bool autoAfRoiWidth{true};  ///< Serialize autoAfRoiWidth.
+    bool autoAfRoiHeight{true};  ///< Serialize autoAfRoiHeight.
+    bool autoAfRoiBorder{true};  ///< Serialize autoAfRoiBorder.
+    bool afRoiMode{true};  ///< Serialize afRoiMode.
+    bool extenderMode{true};  ///< Serialize extenderMode.
+    bool stabiliserMode{true};  ///< Serialize stabiliserMode.
+    bool afRange{true};  ///< Serialize afRange.
+    bool xFovDeg{true};  ///< Serialize xFovDeg.
+    bool yFovDeg{true};  ///< Serialize yFovDeg.
+    bool logMode{true};  ///< Serialize logMode.
+    bool temperature{true};  ///< Serialize temperature.
+    bool isOpen{true};  ///< Serialize isOpen.
+    bool type{true};  ///< Serialize type.
+    bool custom1{true};  ///< Serialize custom1.
+    bool custom2{true};  ///< Serialize custom2.
+    bool custom3{true};  ///< Serialize custom3.
 } LensParamsMask;
 
 
 
-/// Lens params class.
+/**
+ * @brief Lens params class.
+ *
+ * @note The class is not thread-safe: an object must not be accessed from
+ * several threads at the same time without external synchronization.
+ */
 class LensParams
 {
 public:
@@ -203,7 +243,7 @@ public:
     /// must be updated automatically. Formula for calculating speed:
     /// IRIS_SPEED = ( IRIS_HW_SPEED / IRIS_HW_MAX_SPEED) * 100.
     int irisSpeed{50};
-    /// Iris hardware speed. Value depends on implementation and les hardware.
+    /// Iris hardware speed. Value depends on implementation and lens hardware.
     /// The value of the parameters must be <= IRIS_HW_MAX_SPEED parameter.
     /// If the user sets a new parameter value of the IRIS_SPEED parameter the
     /// parameter IRIS_HW_SPEED must be updated automatically. Formula for
@@ -218,29 +258,29 @@ public:
     int irisHwMaxSpeed{50};
     /// Zoom hardware tele limit. Value depends on implementation and lens
     /// hardware. Lens controller should control zoom position. Lens controller
-    /// should stop zoom moving if hardware zoom position will be our of limits.
+    /// should stop zoom moving if hardware zoom position will be out of limits.
     int zoomHwTeleLimit{65535};
     /// Zoom hardware wide limit. Value depends on implementation and lens
     /// hardware. Lens controller should control zoom position. Lens controller
-    /// should stop zoom moving if hardware zoom position will be our of limits.
+    /// should stop zoom moving if hardware zoom position will be out of limits.
     int zoomHwWideLimit{0};
     /// Focus hardware far limit. Value depends on on implementation and lens
     /// hardware. Lens controller should control focus position. Lens controller
-    /// should stop focus moving if hardware focus position will be our of
+    /// should stop focus moving if hardware focus position will be out of
     /// limits.
     int focusHwFarLimit{65535};
     /// Focus hardware near limit. Value depends on implementation and lens
     /// hardware. Lens controller should control focus position. Lens controller
-    /// should stop focus moving if hardware focus position will be our of
+    /// should stop focus moving if hardware focus position will be out of
     /// limits.
     int focusHwNearLimit{0};
     /// Iris hardware open limit. Value depends on implementation and lens
     /// hardware. Lens controller should control iris position. Lens controller
-    /// should stop iris moving if hardware iris position will be our of limits.
+    /// should stop iris moving if hardware iris position will be out of limits.
     int irisHwOpenLimit{65535};
     /// Iris hardware close limit. Value depends on implementation and lens
     /// hardware. Lens controller should control iris position. Lens controller
-    /// should stop iris moving if hardware iris position will be our of limits.
+    /// should stop iris moving if hardware iris position will be out of limits.
     int irisHwCloseLimit{0};
     /// Focus factor if it was calculated. If not calculated must be -1.
     /// Value depends on particular lens controller.
@@ -250,16 +290,15 @@ public:
     /// port lens controller connects to serial port (opens serial port file
     /// in OS) but lens can be not active (no power). In this case connection
     /// status shows that lens controller doesn't have data exchange with lens
-    /// equipment (method will return 0). It lens controller has data exchange
-    /// with lens equipment the method will return 1. If lens controller not
-    /// initialize the connection status always FALSE. Value:
-    /// false - not connected. true - connected.
+    /// equipment. If lens controller has data exchange with lens equipment
+    /// the value is TRUE. If lens controller not initialize the connection
+    /// status always FALSE. Value: false - not connected. true - connected.
     bool isConnected{false};
     /// Focus hardware speed in autofocus mode. Value depends on implementation
     /// and lens hardware.
     int afHwSpeed{50};
-    /// Timeout for automatic refocus in seconds. Value: 0 - no automatic
-    /// refocus, 100000 - maximum value.
+    /// Threshold for changes of focus factor to start refocus. Value:
+    /// 0% - no check, 100% - changing x2.
     float focusFactorThreshold{0.0f};
     /// Timeout for automatic refocus in seconds. Value:
     /// 0 - no automatic refocus, 100000 - maximum value.
@@ -275,7 +314,7 @@ public:
     /// AUTO_AF_ROI_BORDER * 2).
     int autoAfRoiWidth{150};
     /// ROI height (pixels) for autofocus algorithm when lens controller detects
-    /// ROI position automatically. Value: from 8 to (video frame width -
+    /// ROI position automatically. Value: from 8 to (video frame height -
     /// AUTO_AF_ROI_BORDER * 2).
     int autoAfRoiHeight{150};
     /// Video frame border size (along vertical and horizontal axes).
@@ -329,8 +368,8 @@ public:
     /// Custom parameters used when particular lens equipment has specific
     /// unusual parameter.
     float custom3{0.0f};
-    /// List of points to calculate fiend of view. Lens controller should
-    /// calculate FOV table according to given list f points using
+    /// List of points to calculate field of view. Lens controller should
+    /// calculate FOV table according to given list of points using
     /// approximation.
     std::vector<FovPoint> fovPoints{std::vector<FovPoint>()};
 
@@ -342,37 +381,92 @@ public:
                   focusFactorThreshold, refocusTimeoutSec, irisMode,
                   autoAfRoiWidth, autoAfRoiHeight, autoAfRoiBorder,
                   afRoiMode, extenderMode, stabiliserMode, afRange,
-                  logMode, type, custom1, custom2, custom3, fovPoints);
+                  logMode, type, custom1, custom2, custom3, fovPoints)
 
     /**
-     * @brief operator =
-     * @param src Source object.
-     * @return LensParams object.
+     * @brief Default constructor.
      */
-    LensParams& operator= (const LensParams& src);
+    LensParams() = default;
 
     /**
-     * @brief Encode params. The method doesn't encode initString and fovPoints.
-     * @param data Pointer to data buffer.
-     * @param size Size of data.
-     * @param mask Pointer to params mask.
-     * @return TRUE if params encoded or FALSE if not.
+     * @brief Copy constructor.
+     * @param src Source object.
+     */
+    LensParams(const LensParams& src) = default;
+
+    /**
+     * @brief Move constructor.
+     * @param src Source object.
+     */
+    LensParams(LensParams&& src) = default;
+
+    /**
+     * @brief Copy assignment operator.
+     * @param src Source object.
+     * @return Reference to this object.
+     */
+    LensParams& operator= (const LensParams& src) = default;
+
+    /**
+     * @brief Move assignment operator.
+     * @param src Source object.
+     * @return Reference to this object.
+     */
+    LensParams& operator= (LensParams&& src) = default;
+
+    /**
+     * @brief Encode (serialize) params.
+     *
+     * The method doesn't encode initString and fovPoints. The encoded data
+     * consists of the header (data type, version Major and Minor, params mask
+     * of 7 bytes: one bit for each field of LensParamsMask) and the values of
+     * the selected params in the order of the LensParamsMask fields. Values of
+     * int and float fields use 4 bytes in the byte order of the host, values
+     * of bool fields use 1 byte.
+     *
+     * @param data Pointer to data buffer. Must not be nullptr and must be
+     * valid for bufferSize bytes.
+     * @param bufferSize Size of the data buffer, bytes. Must be >= 201 (the
+     * size of the data with all params encoded).
+     * @param size Size of the encoded data, bytes. Set to 0 if the params
+     * are not encoded.
+     * @param mask Pointer to params mask. If nullptr all params are encoded.
+     * @return TRUE if params encoded or FALSE if not (data is nullptr or
+     * bufferSize < 201).
      */
     bool encode(uint8_t* data, int bufferSize, int& size,
                 LensParamsMask* mask = nullptr);
 
     /**
-     * @brief Decode params. The method doesn't decode initString and fovPoints.
-     * @param data Pointer to data.
-     * @brief dataSize Size of data.
-     * @return TRUE is params decoded or FALSE if not.
+     * @brief Decode (deserialize) params encoded by encode(...) method.
+     *
+     * The method doesn't decode initString and fovPoints: initString is set
+     * to empty string and fovPoints is cleared. The method checks data type,
+     * version (Major and Minor) and params mask, and checks that each encoded
+     * value is inside the data before reading it. Params which are not
+     * encoded are set to 0 (FALSE for bool params). Bytes after the last
+     * encoded value are ignored. Values of params are not checked against any
+     * range: the lens controller must validate them before use.
+     *
+     * @param data Pointer to encoded data. Must not be nullptr and must be
+     * valid for dataSize bytes.
+     * @param dataSize Size of the encoded data, bytes.
+     * @return TRUE if params decoded or FALSE if not. If FALSE is returned
+     * the object is not changed.
      */
     bool decode(uint8_t* data, int dataSize);
 };
 
 
 
-/// Lens commands enum.
+/**
+ * @brief Lens commands enum.
+ *
+ * The IDs are consecutive and start from 1. Lens::decodeCommand(...) accepts
+ * the IDs from ZOOM_TELE to the last enumerator (DETECT_HW_RANGES). A command
+ * added to the enum must be placed at the end, and the check in Lens.cpp must
+ * use the last enumerator.
+ */
 enum class LensCommand
 {
     /// Move zoom tele (in). Command doesn't have arguments. User should be able
@@ -439,7 +533,14 @@ enum class LensCommand
 
 
 
-/// Lens params.
+/**
+ * @brief Lens params enum.
+ *
+ * The IDs are consecutive and start from 1. Lens::decodeCommand(...) accepts
+ * the IDs from ZOOM_POS to the last enumerator (CUSTOM_3). A param added to
+ * the enum must be placed at the end, and the check in Lens.cpp must use the
+ * last enumerator.
+ */
 enum class LensParam
 {
     /// Zoom position. Setting a parameter is equivalent to the command
@@ -544,7 +645,7 @@ enum class LensParam
     /// must be updated automatically. Formula for calculating speed:
     /// IRIS_SPEED = ( IRIS_HW_SPEED / IRIS_HW_MAX_SPEED) * 100.
     IRIS_SPEED,
-    /// Iris hardware speed. Value depends on implementation and les hardware.
+    /// Iris hardware speed. Value depends on implementation and lens hardware.
     /// The value of the parameters must be <= IRIS_HW_MAX_SPEED parameter.
     /// If the user sets a new parameter value of the IRIS_SPEED parameter
     /// the parameter IRIS_HW_SPEED must be updated automatically. Formula
@@ -559,29 +660,29 @@ enum class LensParam
     IRIS_HW_MAX_SPEED,
     /// Zoom hardware tele limit. Value depends on implementation and lens
     /// hardware. Lens controller should control zoom position. Lens controller
-    /// should stop zoom moving if hardware zoom position will be our of limits.
+    /// should stop zoom moving if hardware zoom position will be out of limits.
     ZOOM_HW_TELE_LIMIT,
     /// Zoom hardware wide limit. Value depends on implementation and lens
     /// hardware. Lens controller should control zoom position. Lens controller
-    /// should stop zoom moving if hardware zoom position will be our of limits.
+    /// should stop zoom moving if hardware zoom position will be out of limits.
     ZOOM_HW_WIDE_LIMIT,
     /// Focus hardware far limit. Value depends on on implementation and lens
     /// hardware. Lens controller should control focus position. Lens controller
-    /// should stop focus moving if hardware focus position will be our of
+    /// should stop focus moving if hardware focus position will be out of
     /// limits.
     FOCUS_HW_FAR_LIMIT,
     /// Focus hardware near limit. Value depends on implementation and lens
     /// hardware. Lens controller should control focus position. Lens controller
-    /// should stop focus moving if hardware focus position will be our of
+    /// should stop focus moving if hardware focus position will be out of
     /// limits.
     FOCUS_HW_NEAR_LIMIT,
     /// Iris hardware open limit. Value depends on implementation and lens
     /// hardware. Lens controller should control iris position. Lens controller
-    /// should stop iris moving if hardware iris position will be our of limits.
+    /// should stop iris moving if hardware iris position will be out of limits.
     IRIS_HW_OPEN_LIMIT,
     /// Iris hardware close limit. Value depends on implementation and lens
     /// hardware. Lens controller should control iris position. Lens controller
-    /// should stop iris moving if hardware iris position will be our of limits.
+    /// should stop iris moving if hardware iris position will be out of limits.
     IRIS_HW_CLOSE_LIMIT,
     /// Focus factor if it was calculated. If not calculated must be -1.
     /// Value depends on particular lens controller.
@@ -591,10 +692,10 @@ enum class LensParam
     /// port lens controller connects to serial port
     /// (opens serial port file in OS) but lens can be not active (no power).
     /// In this case connection status shows that lens controller doesn't have
-    /// data exchange with lens equipment (methos will return 0). It lens
-    /// controller has data exchange with lens equipment the method will
-    /// return 1. If lens controller not initialize the connection status always
-    /// FALSE. Value: 0 - not connected. 1 - connected.
+    /// data exchange with lens equipment (the value is 0). If lens controller
+    /// has data exchange with lens equipment the value is 1. If lens controller
+    /// not initialize the connection status always FALSE. Value: 0 - not
+    /// connected. 1 - connected.
     IS_CONNECTED,
     /// Focus hardware speed in autofocus mode. Value depends on implementation
     /// and lens hardware.
@@ -616,8 +717,8 @@ enum class LensParam
     /// AUTO_AF_ROI_BORDER * 2).
     AUTO_AF_ROI_WIDTH,
     /// ROI height (pixels) for autofocus algorithm when lens controller
-    /// detects ROI position automatically. Value: from 8
-    /// (video frame width - AUTO_AF_ROI_BORDER * 2).
+    /// detects ROI position automatically. Value: from 8 to
+    /// (video frame height - AUTO_AF_ROI_BORDER * 2).
     AUTO_AF_ROI_HEIGHT,
     /// Video frame border size (along vertical and horizontal axes).
     /// Value: border size from 0 to video frame
@@ -653,7 +754,7 @@ enum class LensParam
     /// lens controller connects to serial port (opens serial port file in OS)
     /// but lens can be not active (no power). In this case open status just
     /// shows that lens controller has opened serial port. Values: 0 - not open
-    /// not initialized), 1 - open (initialized).
+    /// (not initialized), 1 - open (initialized).
     IS_OPEN,
     /// Lens type. Value depends on implementation. Type allows to lens
     /// initialize necessary parameters for particular lens hardware.
@@ -676,6 +777,11 @@ enum class LensParam
 
 /**
  * @brief Lens controller interface class.
+ *
+ * The class defines the interface of a lens controller, the data structures
+ * and the methods to encode and decode commands. The methods of the interface
+ * which change or read the state of a lens controller must be thread-safe in
+ * the particular implementation.
  */
 class Lens
 {
@@ -702,7 +808,7 @@ public:
     /**
      * @brief Init lens controller by set of parameters. Can be used instead
      * openLens(...) method.
-     * @param initString Init string. Format depends on lens controller.
+     * @param params Lens params. LensParams::initString is the init string.
      * @return TRUE if the lens controller is init or FALSE.
      */
     virtual bool initLens(LensParams& params) = 0;
@@ -721,33 +827,37 @@ public:
     /**
      * @brief Get lens connection status. Lens can be open but no response from
      * lens hardware.
-     * @return TRUE if the lens is open or FALSE.
+     * @return TRUE if the lens has data exchange with lens hardware or FALSE.
      */
     virtual bool isLensConnected() = 0;
 
     /**
      * @brief Set the lens controller param.
+     * @note The implementation must be thread-safe.
      * @param id Param ID.
      * @param value Param value.
-     * @return TRUE if the property set or FALSE.
+     * @return TRUE if the param was set or FALSE.
      */
     virtual bool setParam(LensParam id, float value) = 0;
 
     /**
      * @brief Get the lens controller param.
+     * @note The implementation must be thread-safe.
      * @param id Param ID.
-     * @return float Param value or -1 of the param not exists.
+     * @return Param value or -1 if the param doesn't exist.
      */
     virtual float getParam(LensParam id) = 0;
 
     /**
      * @brief Get the lens controller params.
+     * @note The implementation must be thread-safe.
      * @param params Reference to LensParams object.
      */
     virtual void getParams(LensParams& params) = 0;
 
     /**
      * @brief Execute command.
+     * @note The implementation must be thread-safe.
      * @param id Command ID.
      * @param arg Command argument.
      * @return TRUE if the command executed or FALSE.
@@ -763,8 +873,9 @@ public:
 
     /**
      * @brief Encode set param command.
-     * @param data Pointer to data buffer. Must have size >= 11.
-     * @param size Size of encoded data.
+     * @param data Pointer to data buffer. Must not be nullptr and must be
+     * valid for 11 bytes.
+     * @param size Size of encoded data: 11 bytes, or 0 if data is nullptr.
      * @param id Lens parameter id.
      * @param value Lens parameter value.
      */
@@ -773,8 +884,9 @@ public:
 
     /**
      * @brief Encode command.
-     * @param data Pointer to data buffer. Must have size >= 11.
-     * @param size Size of encoded data.
+     * @param data Pointer to data buffer. Must not be nullptr and must be
+     * valid for 11 bytes.
+     * @param size Size of encoded data: 11 bytes, or 0 if data is nullptr.
      * @param id Lens command ID.
      * @param arg Lens command argument.
      */
@@ -783,10 +895,18 @@ public:
 
     /**
      * @brief Decode command.
-     * @param data Pointer to command data.
-     * @param size Size of data.
-     * @param paramId Output command ID.
-     * @param commandId Output command ID.
+     *
+     * The method checks the pointer, the size (must be exactly 11 bytes), the
+     * version (Major and Minor), the command type and the ID: the ID must be
+     * inside the range of the LensCommand or LensParam enum. The value is not
+     * checked against any range: the lens controller must validate it before
+     * use. The output arguments are changed only if the method returns 0 or 1.
+     *
+     * @param data Pointer to command data. Must not be nullptr and must be
+     * valid for size bytes.
+     * @param size Size of data, bytes.
+     * @param paramId Output param ID (set if the method returns 1).
+     * @param commandId Output command ID (set if the method returns 0).
      * @param value Param or command value.
      * @return 0 - command decoded, 1 - set param command decoded, -1 - error.
      */
@@ -798,11 +918,45 @@ public:
 
     /**
      * @brief Decode and execute command.
+     * @note The implementation must be thread-safe.
      * @param data Pointer to command data.
      * @param size Size of data.
      * @return TRUE if command decoded and executed or FALSE if not.
      */
     virtual bool decodeAndExecuteCommand(uint8_t* data, int size) = 0;
+
+protected:
+
+    /**
+     * @brief Default constructor. The class can be used as a base only.
+     */
+    Lens() = default;
+
+    /**
+     * @brief Copy constructor.
+     * @param src Source object.
+     */
+    Lens(const Lens& src) = default;
+
+    /**
+     * @brief Move constructor.
+     * @param src Source object.
+     */
+    Lens(Lens&& src) = default;
+
+    /**
+     * @brief Copy assignment operator.
+     * @param src Source object.
+     * @return Reference to this object.
+     */
+    Lens& operator= (const Lens& src) = default;
+
+    /**
+     * @brief Move assignment operator.
+     * @param src Source object.
+     * @return Reference to this object.
+     */
+    Lens& operator= (Lens&& src) = default;
 };
 }
 }

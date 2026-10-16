@@ -4,7 +4,7 @@
 
 # **Lens interface C++ library**
 
-**v4.4.4**
+**v4.4.5**
 
 
 
@@ -39,13 +39,17 @@
   - [Deserialize lens params](#deserialize-lens-params)
   - [Read params from JSON file and write to JSON file](#read-params-from-json-file-and-write-to-json-file)
 - [Build and connect to your project](#build-and-connect-to-your-project)
+  - [Build stand alone](#build-stand-alone)
+  - [CMake options](#cmake-options)
+  - [Connect to your project](#connect-to-your-project)
+- [Portability](#portability)
 - [How to make custom implementation](#how-to-make-custom-implementation)
 
 
 
 # Overview
 
-**Lens** C++ library provides standard interface as well defines data structures and rules for different lens controllers. **Lens** class allows you to create a single set of functions and commands for different lens controllers. In this way the **Lens** class creates a program abstraction from the lens hardware features. **Lens** interface class doesn't do anything, just provides interface and provides methods to encode / decode commands and encode / decode params. Different lens controller classes inherit interface form **Lens** C++ class. **Lens.h** file contains list of data structures ([LensCommand](#lenscommand-enum) enum, [LensParam](#lensparam-enum) enum and [LensParams](#lensparams-class-description) class) and [Lens](#lens-interface-class-description) class declaration. [LensCommand](#lenscommand-enum) enum contains IDs of commands supported by [Lens](#lens-interface-class-description) class. [LensParam](#lensparam-enum) enum contains IDs of params supported by **Lens** class. [LensParams](#lensparam-enum) class contains fields for lens parameters values and provides methods to encode/decode and read/write lens parameters from JSON file. All lens controllers should include params and commands listed in **Lens.h** file. Lens interface class depends on [Frame](https://rapidpixel.constantrobotics.com/docs/Service/Frame.html) class (describes video frame and video frame data structures, necessary for autofocus functions, source code included, Apache 2.0 license) and [ConfigReader](https://rapidpixel.constantrobotics.com/docs/Service/ConfigReader.html) library (provides methods to read / write JSON config files, source code included, Apache 2.0 license). It uses C++17 standard. The library is licensed under the **Apache 2.0** license.
+**Lens** C++ library provides standard interface as well defines data structures and rules for different lens controllers. **Lens** class allows you to create a single set of functions and commands for different lens controllers. In this way the **Lens** class creates a program abstraction from the lens hardware features. **Lens** interface class doesn't do anything, just provides interface and provides methods to encode / decode commands and encode / decode params. Different lens controller classes inherit interface form **Lens** C++ class. **Lens.h** file contains list of data structures ([LensCommand](#lenscommand-enum) enum, [LensParam](#lensparam-enum) enum and [LensParams](#lensparams-class-description) class) and [Lens](#lens-interface-class-description) class declaration. [LensCommand](#lenscommand-enum) enum contains IDs of commands supported by [Lens](#lens-interface-class-description) class. [LensParam](#lensparam-enum) enum contains IDs of params supported by **Lens** class. [LensParams](#lensparams-class-description) class contains fields for lens parameters values and provides methods to encode/decode and read/write lens parameters from JSON file. All lens controllers should include params and commands listed in **Lens.h** file. Lens interface class depends on [Frame](https://rapidpixel.constantrobotics.com/docs/Service/Frame.html) class (describes video frame and video frame data structures, necessary for autofocus functions) and [ConfigReader](https://rapidpixel.constantrobotics.com/docs/Service/ConfigReader.html) library (provides methods to read / write JSON config files). The repository doesn't contain these libraries: they must be placed next to the **Lens** repository (see [Build and connect to your project](#build-and-connect-to-your-project) section). It uses C++17 standard.
 
 
 
@@ -72,6 +76,7 @@
 | 4.4.2   | 25.03.2024   | - Frame class updated.<br />- ConfigReader class updated.<br />- Documentation updated. |
 | 4.4.3   | 21.05.2024   | - Frame class updated.<br />- ConfigReader class updated.<br />- Documentation updated. |
 | 4.4.4   | 22.07.2024   | - Frame class updated.<br />- ConfigReader class updated.<br />- CMake updated. |
+| 4.4.5   | 16.10.2026   | - Sub-repositories excluded: **Frame** and **ConfigReader** must be placed next to the library repository.<br />- Methods **encode(...)**, **decode(...)**, **encodeCommand(...)**, **encodeSetParamCommand(...)** and **decodeCommand(...)** reject nullptr arguments.<br />- Method **decode(...)** doesn't change the object if it returns FALSE, rejects data with unknown mask bits and decodes data with empty mask.<br />- Method **decodeCommand(...)** checks command and parameter IDs and doesn't change output arguments if it returns -1.<br />- Method **encode(...)** sets size to 0 if it returns FALSE.<br />- Fixed description of **focusFactorThreshold** and **autoAfRoiHeight** parameters.<br />- Compiler warning options and security options added to CMake files.<br />- Example of custom lens controller is thread-safe, checks values and sets **FOCUS_HW_FAR_LIMIT** parameter correctly.<br />- Test application updated.<br />- Documentation updated. |
 
 
 
@@ -81,16 +86,14 @@ The library supplied by source code only. The user would be given a set of files
 
 ```xml
 CMakeLists.txt -------------- Main CMake file of the library.
-3rdparty -------------------- Folder with third-party libraries.
-    CMakeLists.txt ---------- CMake file to include third-party libraries.
-    ConfigReader ------------ Folder with ConfigReader library source code.
-    Frame ------------------- Folder with Frame library source code.
+README.md ------------------- Documentation of the library.
 example --------------------- Folder with an example of custom lens controller.
     CMakeLists.txt ---------- CMake file for example of custom lens controller.
     CustomLens.cpp ---------- C++ implementation file.
     CustomLens.h ------------ Header with class declaration.
     CustomLensVersion.h ----- Header file which includes class version.
     CustomLensVersion.h.in -- CMake service file to generate version file.
+static ---------------------- Folder with images of the documentation.
 test ------------------------ Folder with test application.
     CMakeLists.txt ---------- CMake file for test application.
     main.cpp ---------------- Source code file of test application.
@@ -175,6 +178,23 @@ public:
 
     /// Decode and execute command.
     virtual bool decodeAndExecuteCommand(uint8_t* data, int size) = 0;
+
+protected:
+
+    /// Default constructor. The class can be used as a base only.
+    Lens() = default;
+
+    /// Copy constructor.
+    Lens(const Lens& src) = default;
+
+    /// Move constructor.
+    Lens(Lens&& src) = default;
+
+    /// Copy assignment operator.
+    Lens& operator= (const Lens& src) = default;
+
+    /// Move assignment operator.
+    Lens& operator= (Lens&& src) = default;
 };
 }
 }
@@ -193,13 +213,13 @@ static std::string getVersion();
 Method can be used without **Lens** class instance:
 
 ```cpp
-std::cout << "Lens class version: " << Lens::getVersion() << std::endl;
+std::cout << "Lens class version: " << cr::lens::Lens::getVersion() << std::endl;
 ```
 
 Console output:
 
 ```bash
-Lens class version: 4.4.4
+Lens class version: 4.4.5
 ```
 
 
@@ -358,8 +378,8 @@ static void encodeSetParamCommand(uint8_t* data, int& size, LensParam id, float 
 
 | Parameter | Description                                                  |
 | --------- | ------------------------------------------------------------ |
-| data      | Pointer to data buffer for encoded command. Must have size >= 11. |
-| size      | Size of encoded data. Will be 11 bytes.                      |
+| data      | Pointer to data buffer for encoded command. Must have size >= 11. Must not be nullptr. |
+| size      | Size of encoded data. Will be 11 bytes (0 if **data** is nullptr). |
 | id        | Parameter ID according to [LensParam](#lensparam-enum) enum. |
 | value     | Parameter value.                                             |
 
@@ -370,10 +390,11 @@ static void encodeSetParamCommand(uint8_t* data, int& size, LensParam id, float 
 uint8_t data[11];
 // Size of encoded data.
 int size = 0;
-// Random parameter value.
-float outValue = (float)(rand() % 20);
+// Parameter value.
+float value = 10.0f;
 // Encode command.
-Lens::encodeSetParamCommand(data, size, LensParam::AF_ROI_X0, outValue);
+cr::lens::Lens::encodeSetParamCommand(
+    data, size, cr::lens::LensParam::AF_ROI_X0, value);
 ```
 
 
@@ -388,8 +409,8 @@ static void encodeCommand(uint8_t* data, int& size, LensCommand id, float arg = 
 
 | Parameter | Description                                                  |
 | --------- | ------------------------------------------------------------ |
-| data      | Pointer to data buffer for encoded command. Must have size >= 11. |
-| size      | Size of encoded data. Will be 11 bytes.                      |
+| data      | Pointer to data buffer for encoded command. Must have size >= 11. Must not be nullptr. |
+| size      | Size of encoded data. Will be 11 bytes (0 if **data** is nullptr). |
 | id        | Command ID according to [LensCommand](#lenscommand-enum) enum. |
 | arg       | Command argument value (value depends on command ID).        |
 
@@ -400,17 +421,18 @@ static void encodeCommand(uint8_t* data, int& size, LensCommand id, float arg = 
 uint8_t data[11];
 // Size of encoded data.
 int size = 0;
-// Random command argument value.
-float outValue = (float)(rand() % 20);
+// Command argument value.
+float arg = 1000.0f;
 // Encode command.
-Lens::encodeCommand(data, size, LensCommand::ZOOM_TO_POS, outValue);
+cr::lens::Lens::encodeCommand(
+    data, size, cr::lens::LensCommand::ZOOM_TO_POS, arg);
 ```
 
 
 
 ## decodeCommand method
 
-The **decodeCommand(...)** static method designed to decode command on lens controller side. o control a lens remotely, the developer has to develop his own protocol and according to it decode the command on lens controller side. To simplify this, the **Lens** interface class contains static method to decode input command (commands should be encoded by [encodeSetParamCommand(...)](#encodesetparamcommand-method) or [encodeCommand(...)](#encodecommand-method) methods). The **Lens** class provides two types of commands: a parameter change command (SET_PARAM) and an action command (COMMAND). Method declaration:
+The **decodeCommand(...)** static method designed to decode command on lens controller side. To control a lens remotely, the developer has to develop his own protocol and according to it decode the command on lens controller side. To simplify this, the **Lens** interface class contains static method to decode input command (commands should be encoded by [encodeSetParamCommand(...)](#encodesetparamcommand-method) or [encodeCommand(...)](#encodecommand-method) methods). The **Lens** class provides two types of commands: a parameter change command (SET_PARAM) and an action command (COMMAND). Method declaration:
 
 ```cpp
 static int decodeCommand(uint8_t* data, int size, LensParam& paramId, LensCommand& commandId, float& value);
@@ -418,13 +440,13 @@ static int decodeCommand(uint8_t* data, int size, LensParam& paramId, LensComman
 
 | Parameter | Description                                                  |
 | --------- | ------------------------------------------------------------ |
-| data      | Pointer to input command.                                    |
-| size      | Size of command. Should be 11 bytes.                         |
-| paramId   | Lens parameter ID according to [LensParam](#lensparam-enum) enum. After decoding SET_PARAM command the method will return parameter ID. |
-| commandId | Lens command ID according to [LensCommand](#lenscommand-enum) enum. After decoding COMMAND the method will return command ID. |
-| value     | Lens parameter value (after decoding SET_PARAM command) or lens command argument (after decoding COMMAND). |
+| data      | Pointer to input command. Must not be nullptr.               |
+| size      | Size of command. Must be exactly 11 bytes.                   |
+| paramId   | Lens parameter ID according to [LensParam](#lensparam-enum) enum. After decoding SET_PARAM command the method will return parameter ID. The argument is not changed in other cases. |
+| commandId | Lens command ID according to [LensCommand](#lenscommand-enum) enum. After decoding COMMAND the method will return command ID. The argument is not changed in other cases. |
+| value     | Lens parameter value (after decoding SET_PARAM command) or lens command argument (after decoding COMMAND). The value is not checked against any range: lens controller must validate it before use. The argument is changed only if the command was decoded. |
 
-**Returns:** **0** - in case decoding COMMAND, **1** - in case decoding SET_PARAM command or **-1** in case errors.
+**Returns:** **0** - in case decoding COMMAND, **1** - in case decoding SET_PARAM command or **-1** in case errors: **data** is nullptr, **size** is not 11, version (Major and Minor) of the command is not equal to the version of the library, the command type is unknown, the command ID or the parameter ID is outside of the range of [LensCommand](#lenscommand-enum) or [LensParam](#lensparam-enum) enum. If the method returns **-1** the output arguments are not changed.
 
 
 
@@ -441,22 +463,26 @@ virtual bool decodeAndExecuteCommand(uint8_t* data, int size) = 0;
 | data      | Pointer to input command.                                    |
 | size      | Size of command. Must be 11 bytes for SET_PARAM and COMMAND. |
 
-**Returns:** TRUE if command decoded (SET_PARAM or COMMAND) and executed (action command or set param command).
+**Returns:** TRUE if command decoded (SET_PARAM or COMMAND) and executed (action command or set param command) or FALSE if the data is not a valid command (see [decodeCommand(...)](#decodecommand-method) method) or the lens controller didn't accept the command.
 
 Example of internal implementation of **decodeAndExecuteCommand(...)** method:
 
 ```cpp
 // Decode and execute command.
-LensCommand commandId;
-LensParam paramId
-float value;
-switch (Lens::decodeCommand(data, size, paramId, commandId, value)) {
+cr::lens::LensCommand commandId{cr::lens::LensCommand::ZOOM_TELE};
+cr::lens::LensParam paramId{cr::lens::LensParam::ZOOM_POS};
+float value{0.0f};
+switch (cr::lens::Lens::decodeCommand(data, size, paramId, commandId, value))
+{
 // COMMAND.
-case 0: return executeCommand(commandId);
+case 0:
+    return executeCommand(commandId, value);
 // SET_PARAM.
-case 1: return setParam(paramId, value);
-// Error
-default: return false;
+case 1:
+    return setParam(paramId, value);
+// Error.
+default:
+    return false;
 }
 ```
 
@@ -475,6 +501,14 @@ namespace cr
 {
 namespace lens
 {
+/**
+ * @brief Lens commands enum.
+ *
+ * The IDs are consecutive and start from 1. Lens::decodeCommand(...) accepts
+ * the IDs from ZOOM_TELE to the last enumerator (DETECT_HW_RANGES). A command
+ * added to the enum must be placed at the end, and the check in Lens.cpp must
+ * use the last enumerator.
+ */
 enum class LensCommand
 {
     /// Move zoom tele (in). Command doesn't have arguments. User should be able
@@ -574,6 +608,14 @@ namespace cr
 {
 namespace lens
 {
+/**
+ * @brief Lens params enum.
+ *
+ * The IDs are consecutive and start from 1. Lens::decodeCommand(...) accepts
+ * the IDs from ZOOM_POS to the last enumerator (CUSTOM_3). A param added to
+ * the enum must be placed at the end, and the check in Lens.cpp must use the
+ * last enumerator.
+ */
 enum class LensParam
 {
     /// Zoom position. Setting a parameter is equivalent to the command
@@ -678,7 +720,7 @@ enum class LensParam
     /// must be updated automatically. Formula for calculating speed:
     /// IRIS_SPEED = ( IRIS_HW_SPEED / IRIS_HW_MAX_SPEED) * 100.
     IRIS_SPEED,
-    /// Iris hardware speed. Value depends on implementation and les hardware.
+    /// Iris hardware speed. Value depends on implementation and lens hardware.
     /// The value of the parameters must be <= IRIS_HW_MAX_SPEED parameter.
     /// If the user sets a new parameter value of the IRIS_SPEED parameter
     /// the parameter IRIS_HW_SPEED must be updated automatically. Formula
@@ -693,29 +735,29 @@ enum class LensParam
     IRIS_HW_MAX_SPEED,
     /// Zoom hardware tele limit. Value depends on implementation and lens
     /// hardware. Lens controller should control zoom position. Lens controller
-    /// should stop zoom moving if hardware zoom position will be our of limits.
+    /// should stop zoom moving if hardware zoom position will be out of limits.
     ZOOM_HW_TELE_LIMIT,
     /// Zoom hardware wide limit. Value depends on implementation and lens
     /// hardware. Lens controller should control zoom position. Lens controller
-    /// should stop zoom moving if hardware zoom position will be our of limits.
+    /// should stop zoom moving if hardware zoom position will be out of limits.
     ZOOM_HW_WIDE_LIMIT,
     /// Focus hardware far limit. Value depends on on implementation and lens
     /// hardware. Lens controller should control focus position. Lens controller
-    /// should stop focus moving if hardware focus position will be our of
+    /// should stop focus moving if hardware focus position will be out of
     /// limits.
     FOCUS_HW_FAR_LIMIT,
     /// Focus hardware near limit. Value depends on implementation and lens
     /// hardware. Lens controller should control focus position. Lens controller
-    /// should stop focus moving if hardware focus position will be our of
+    /// should stop focus moving if hardware focus position will be out of
     /// limits.
     FOCUS_HW_NEAR_LIMIT,
     /// Iris hardware open limit. Value depends on implementation and lens
     /// hardware. Lens controller should control iris position. Lens controller
-    /// should stop iris moving if hardware iris position will be our of limits.
+    /// should stop iris moving if hardware iris position will be out of limits.
     IRIS_HW_OPEN_LIMIT,
     /// Iris hardware close limit. Value depends on implementation and lens
     /// hardware. Lens controller should control iris position. Lens controller
-    /// should stop iris moving if hardware iris position will be our of limits.
+    /// should stop iris moving if hardware iris position will be out of limits.
     IRIS_HW_CLOSE_LIMIT,
     /// Focus factor if it was calculated. If not calculated must be -1.
     /// Value depends on particular lens controller.
@@ -725,10 +767,10 @@ enum class LensParam
     /// port lens controller connects to serial port
     /// (opens serial port file in OS) but lens can be not active (no power).
     /// In this case connection status shows that lens controller doesn't have
-    /// data exchange with lens equipment (methos will return 0). It lens
-    /// controller has data exchange with lens equipment the method will
-    /// return 1. If lens controller not initialize the connection status always
-    /// FALSE. Value: 0 - not connected. 1 - connected.
+    /// data exchange with lens equipment (the value is 0). If lens controller
+    /// has data exchange with lens equipment the value is 1. If lens controller
+    /// not initialize the connection status always FALSE. Value: 0 - not
+    /// connected. 1 - connected.
     IS_CONNECTED,
     /// Focus hardware speed in autofocus mode. Value depends on implementation
     /// and lens hardware.
@@ -750,8 +792,8 @@ enum class LensParam
     /// AUTO_AF_ROI_BORDER * 2).
     AUTO_AF_ROI_WIDTH,
     /// ROI height (pixels) for autofocus algorithm when lens controller
-    /// detects ROI position automatically. Value: from 8
-    /// (video frame width - AUTO_AF_ROI_BORDER * 2).
+    /// detects ROI position automatically. Value: from 8 to
+    /// (video frame height - AUTO_AF_ROI_BORDER * 2).
     AUTO_AF_ROI_HEIGHT,
     /// Video frame border size (along vertical and horizontal axes).
     /// Value: border size from 0 to video frame
@@ -787,7 +829,7 @@ enum class LensParam
     /// lens controller connects to serial port (opens serial port file in OS)
     /// but lens can be not active (no power). In this case open status just
     /// shows that lens controller has opened serial port. Values: 0 - not open
-    /// not initialized), 1 - open (initialized).
+    /// (not initialized), 1 - open (initialized).
     IS_OPEN,
     /// Lens type. Value depends on implementation. Type allows to lens
     /// initialize necessary parameters for particular lens hardware.
@@ -848,7 +890,7 @@ enum class LensParam
 | AF_IS_ACTIVE           | read only    | Flag about active autofocus algorithm. Value: 0 - autofocus not working, 1 - working. |
 | IRIS_MODE              | read / write | Iris mode. Value depends on implementation but it is recommended to keep default values: 0 - manual iris control, 1 - auto iris control. |
 | AUTO_AF_ROI_WIDTH      | read / write | ROI width (pixels) for autofocus algorithm when lens controller detects ROI position automatically. Value: from 8 to (video frame width - AUTO_AF_ROI_BORDER * 2). |
-| AUTO_AF_ROI_HEIGHT     | read / write | ROI height (pixels) for autofocus algorithm when lens controller detects ROI position automatically. Value: from 8 to (video frame width - AUTO_AF_ROI_BORDER * 2). |
+| AUTO_AF_ROI_HEIGHT     | read / write | ROI height (pixels) for autofocus algorithm when lens controller detects ROI position automatically. Value: from 8 to (video frame height - AUTO_AF_ROI_BORDER * 2). |
 | AUTO_AF_ROI_BORDER     | read / write | Video frame border size (along vertical and horizontal axes). Value: border size from 0 to minimum of video frame width / 2 and height / 2. |
 | AF_ROI_MODE            | read / write | AF ROI mode. Value: 0 - Manual position, 1 - Auto position. |
 | EXTENDER_MODE          | read / write | Lens extender mode. Value depends on implementation but it is recommended to keep default values: 0 - no extender, 1 - x2 extender. |
@@ -881,7 +923,12 @@ namespace cr
 {
 namespace lens
 {
-/// Field of view point class.
+/**
+ * @brief Field of view point class.
+ *
+ * @note The class is not thread-safe: an object must not be accessed from
+ * several threads at the same time without external synchronization.
+ */
 class FovPoint
 {
 public:
@@ -892,17 +939,46 @@ public:
     /// Vertical field of view, degree.
     float yFovDeg{0.0f};
 
-    JSON_READABLE(FovPoint, hwZoomPos, xFovDeg, yFovDeg);
+    JSON_READABLE(FovPoint, hwZoomPos, xFovDeg, yFovDeg)
 
     /**
-     * @brief operator =
-     * @param src Source object.
-     * @return FovPoint object.
+     * @brief Default constructor.
      */
-    FovPoint& operator= (const FovPoint& src);
+    FovPoint() = default;
+
+    /**
+     * @brief Copy constructor.
+     * @param src Source object.
+     */
+    FovPoint(const FovPoint& src) = default;
+
+    /**
+     * @brief Move constructor.
+     * @param src Source object.
+     */
+    FovPoint(FovPoint&& src) = default;
+
+    /**
+     * @brief Copy assignment operator.
+     * @param src Source object.
+     * @return Reference to this object.
+     */
+    FovPoint& operator= (const FovPoint& src) = default;
+
+    /**
+     * @brief Move assignment operator.
+     * @param src Source object.
+     * @return Reference to this object.
+     */
+    FovPoint& operator= (FovPoint&& src) = default;
 };
 
-/// Lens params class.
+/**
+ * @brief Lens params class.
+ *
+ * @note The class is not thread-safe: an object must not be accessed from
+ * several threads at the same time without external synchronization.
+ */
 class LensParams
 {
 public:
@@ -1012,7 +1088,7 @@ public:
     /// must be updated automatically. Formula for calculating speed:
     /// IRIS_SPEED = ( IRIS_HW_SPEED / IRIS_HW_MAX_SPEED) * 100.
     int irisSpeed{50};
-    /// Iris hardware speed. Value depends on implementation and les hardware.
+    /// Iris hardware speed. Value depends on implementation and lens hardware.
     /// The value of the parameters must be <= IRIS_HW_MAX_SPEED parameter.
     /// If the user sets a new parameter value of the IRIS_SPEED parameter the
     /// parameter IRIS_HW_SPEED must be updated automatically. Formula for
@@ -1027,29 +1103,29 @@ public:
     int irisHwMaxSpeed{50};
     /// Zoom hardware tele limit. Value depends on implementation and lens
     /// hardware. Lens controller should control zoom position. Lens controller
-    /// should stop zoom moving if hardware zoom position will be our of limits.
+    /// should stop zoom moving if hardware zoom position will be out of limits.
     int zoomHwTeleLimit{65535};
     /// Zoom hardware wide limit. Value depends on implementation and lens
     /// hardware. Lens controller should control zoom position. Lens controller
-    /// should stop zoom moving if hardware zoom position will be our of limits.
+    /// should stop zoom moving if hardware zoom position will be out of limits.
     int zoomHwWideLimit{0};
     /// Focus hardware far limit. Value depends on on implementation and lens
     /// hardware. Lens controller should control focus position. Lens controller
-    /// should stop focus moving if hardware focus position will be our of
+    /// should stop focus moving if hardware focus position will be out of
     /// limits.
     int focusHwFarLimit{65535};
     /// Focus hardware near limit. Value depends on implementation and lens
     /// hardware. Lens controller should control focus position. Lens controller
-    /// should stop focus moving if hardware focus position will be our of
+    /// should stop focus moving if hardware focus position will be out of
     /// limits.
     int focusHwNearLimit{0};
     /// Iris hardware open limit. Value depends on implementation and lens
     /// hardware. Lens controller should control iris position. Lens controller
-    /// should stop iris moving if hardware iris position will be our of limits.
+    /// should stop iris moving if hardware iris position will be out of limits.
     int irisHwOpenLimit{65535};
     /// Iris hardware close limit. Value depends on implementation and lens
     /// hardware. Lens controller should control iris position. Lens controller
-    /// should stop iris moving if hardware iris position will be our of limits.
+    /// should stop iris moving if hardware iris position will be out of limits.
     int irisHwCloseLimit{0};
     /// Focus factor if it was calculated. If not calculated must be -1.
     /// Value depends on particular lens controller.
@@ -1059,16 +1135,15 @@ public:
     /// port lens controller connects to serial port (opens serial port file
     /// in OS) but lens can be not active (no power). In this case connection
     /// status shows that lens controller doesn't have data exchange with lens
-    /// equipment (method will return 0). It lens controller has data exchange
-    /// with lens equipment the method will return 1. If lens controller not
-    /// initialize the connection status always FALSE. Value:
-    /// false - not connected. true - connected.
+    /// equipment. If lens controller has data exchange with lens equipment
+    /// the value is TRUE. If lens controller not initialize the connection
+    /// status always FALSE. Value: false - not connected. true - connected.
     bool isConnected{false};
     /// Focus hardware speed in autofocus mode. Value depends on implementation
     /// and lens hardware.
     int afHwSpeed{50};
-    /// Timeout for automatic refocus in seconds. Value: 0 - no automatic
-    /// refocus, 100000 - maximum value.
+    /// Threshold for changes of focus factor to start refocus. Value:
+    /// 0% - no check, 100% - changing x2.
     float focusFactorThreshold{0.0f};
     /// Timeout for automatic refocus in seconds. Value:
     /// 0 - no automatic refocus, 100000 - maximum value.
@@ -1084,7 +1159,7 @@ public:
     /// AUTO_AF_ROI_BORDER * 2).
     int autoAfRoiWidth{150};
     /// ROI height (pixels) for autofocus algorithm when lens controller detects
-    /// ROI position automatically. Value: from 8 to (video frame width -
+    /// ROI position automatically. Value: from 8 to (video frame height -
     /// AUTO_AF_ROI_BORDER * 2).
     int autoAfRoiHeight{150};
     /// Video frame border size (along vertical and horizontal axes).
@@ -1138,8 +1213,8 @@ public:
     /// Custom parameters used when particular lens equipment has specific
     /// unusual parameter.
     float custom3{0.0f};
-    /// List of points to calculate fiend of view. Lens controller should
-    /// calculate FOV table according to given list f points using
+    /// List of points to calculate field of view. Lens controller should
+    /// calculate FOV table according to given list of points using
     /// approximation.
     std::vector<FovPoint> fovPoints{std::vector<FovPoint>()};
 
@@ -1151,30 +1226,78 @@ public:
                   focusFactorThreshold, refocusTimeoutSec, irisMode,
                   autoAfRoiWidth, autoAfRoiHeight, autoAfRoiBorder,
                   afRoiMode, extenderMode, stabiliserMode, afRange,
-                  logMode, type, custom1, custom2, custom3, fovPoints);
+                  logMode, type, custom1, custom2, custom3, fovPoints)
 
     /**
-     * @brief operator =
-     * @param src Source object.
-     * @return LensParams object.
+     * @brief Default constructor.
      */
-    LensParams& operator= (const LensParams& src);
+    LensParams() = default;
 
     /**
-     * @brief Encode params. The method doesn't encode initString and fovPoints.
-     * @param data Pointer to data buffer.
-     * @param size Size of data.
-     * @param mask Pointer to params mask.
-     * @return TRUE if params encoded or FALSE if not.
+     * @brief Copy constructor.
+     * @param src Source object.
+     */
+    LensParams(const LensParams& src) = default;
+
+    /**
+     * @brief Move constructor.
+     * @param src Source object.
+     */
+    LensParams(LensParams&& src) = default;
+
+    /**
+     * @brief Copy assignment operator.
+     * @param src Source object.
+     * @return Reference to this object.
+     */
+    LensParams& operator= (const LensParams& src) = default;
+
+    /**
+     * @brief Move assignment operator.
+     * @param src Source object.
+     * @return Reference to this object.
+     */
+    LensParams& operator= (LensParams&& src) = default;
+
+    /**
+     * @brief Encode (serialize) params.
+     *
+     * The method doesn't encode initString and fovPoints. The encoded data
+     * consists of the header (data type, version Major and Minor, params mask
+     * of 7 bytes: one bit for each field of LensParamsMask) and the values of
+     * the selected params in the order of the LensParamsMask fields. Values of
+     * int and float fields use 4 bytes in the byte order of the host, values
+     * of bool fields use 1 byte.
+     *
+     * @param data Pointer to data buffer. Must not be nullptr and must be
+     * valid for bufferSize bytes.
+     * @param bufferSize Size of the data buffer, bytes. Must be >= 201 (the
+     * size of the data with all params encoded).
+     * @param size Size of the encoded data, bytes. Set to 0 if the params
+     * are not encoded.
+     * @param mask Pointer to params mask. If nullptr all params are encoded.
+     * @return TRUE if params encoded or FALSE if not (data is nullptr or
+     * bufferSize < 201).
      */
     bool encode(uint8_t* data, int bufferSize, int& size,
                 LensParamsMask* mask = nullptr);
 
     /**
-     * @brief Decode params. The method doesn't decode initString and fovPoints.
-     * @param data Pointer to data.
-     * @brief dataSize Size of data.
-     * @return TRUE is params decoded or FALSE if not.
+     * @brief Decode (deserialize) params encoded by encode(...) method.
+     *
+     * The method doesn't decode initString and fovPoints: initString is set
+     * to empty string and fovPoints is cleared. The method checks data type,
+     * version (Major and Minor) and params mask, and checks that each encoded
+     * value is inside the data before reading it. Params which are not
+     * encoded are set to 0 (FALSE for bool params). Bytes after the last
+     * encoded value are ignored. Values of params are not checked against any
+     * range: the lens controller must validate them before use.
+     *
+     * @param data Pointer to encoded data. Must not be nullptr and must be
+     * valid for dataSize bytes.
+     * @param dataSize Size of the encoded data, bytes.
+     * @return TRUE if params decoded or FALSE if not. If FALSE is returned
+     * the object is not changed.
      */
     bool decode(uint8_t* data, int dataSize);
 };
@@ -1217,12 +1340,12 @@ public:
 | focusFactor          | float    | Focus factor if it was calculated. If not calculated must be -1. Value depends on particular lens controller. |
 | isConnected          | bool     | Lens connection status. Connection status shows if the lens controller has data exchange with lens equipment. For example, if lens has serial port lens controller connects to serial port (opens serial port file in OS) but lens can be not active (no power). In this case connection status shows that lens controller doesn't have data exchange with lens equipment. If lens controller has data exchange with lens equipment the parameter will be TRUE. If lens controller not initialize the connection status always FALSE. Value: false - not connected. true - connected. |
 | afHwSpeed            | int      | Focus hardware speed in autofocus mode. Value depends on implementation and lens hardware. |
-| focusFactorThreshold | float    | Timeout for automatic refocus in seconds. Value: 0 - no automatic refocus, 100000 - maximum value. |
+| focusFactorThreshold | float    | Threshold for changes of focus factor to start refocus. Value: 0% - no check, 100% - changing x2. |
 | refocusTimeoutSec    | int      | Timeout for automatic refocus in seconds. Value: 0 - no automatic refocus, 100000 - maximum value. |
 | afIsActive           | bool     | Flag about active autofocus algorithm. Value: 0 - autofocus not working, 1 - working. |
 | irisMode             | int      | Iris mode. Value depends on implementation but it is recommended to keep default values: 0 - manual iris control, 1 - auto iris control. |
 | autoAfRoiWidth       | int      | ROI width (pixels) for autofocus algorithm when lens controller detects ROI position automatically. Value: from 8 to (video frame width - autoAfRoiBorder * 2). |
-| autoAfRoiHeight      | int      | ROI height (pixels) for autofocus algorithm when lens controller detects ROI position automatically. Value: from 8 to (video frame width - autoAfRoiBorder * 2). |
+| autoAfRoiHeight      | int      | ROI height (pixels) for autofocus algorithm when lens controller detects ROI position automatically. Value: from 8 to (video frame height - autoAfRoiBorder * 2). |
 | autoAfRoiBorder      | int      | Video frame border size (along vertical and horizontal axes). Value: border size from 0 to minimum of video frame width / 2 and height / 2. |
 | afRoiMode            | int      | AF ROI mode. Value: 0 - Manual position, 1 - Auto position. |
 | extenderMode         | int      | Lens extender mode. Value depends on implementation but it is recommended to keep default values: 0 - no extender, 1 - x2 extender. |
@@ -1237,9 +1360,9 @@ public:
 | custom1              | float    | Lens custom parameter. Value depends on particular lens controller. Custom parameters used when particular lens equipment has specific unusual parameter. |
 | custom2              | float    | Lens custom parameter. Value depends on particular lens controller. Custom parameters used when particular lens equipment has specific unusual parameter. |
 | custom3              | float    | Lens custom parameter. Value depends on particular lens controller. Custom parameters used when particular lens equipment has specific unusual parameter. |
-| fovPoints            | FovPoint | List of points to calculate fiend of view. Lens controller should calculate FOV table according to given list f points using approximation (if provided by user). Each point includes (**FovPoint** class):<br />- **hwZoomPos** - hardware zoom position.<br />- **xFovDeg** - horizontal FOV, degree for hwZoomPos.<br />- **yFovDeg** - vertical FOV, degree for hwZoomPos. |
+| fovPoints            | FovPoint | List of points to calculate field of view. Lens controller should calculate FOV table according to given list of points using approximation (if provided by user). Each point includes (**FovPoint** class):<br />- **hwZoomPos** - hardware zoom position.<br />- **xFovDeg** - horizontal FOV, degree for hwZoomPos.<br />- **yFovDeg** - vertical FOV, degree for hwZoomPos. |
 
-**None:** *LensParams class fields listed in Table 4 **must** reflect params set/get by methods setParam(...) and getParam(...).*
+**Note:** *LensParams class fields listed in Table 4 **must** reflect params set/get by methods setParam(...) and getParam(...).*
 
 
 
@@ -1253,66 +1376,76 @@ bool encode(uint8_t* data, int bufferSize, int& size, LensParamsMask* mask = nul
 
 | Parameter  | Value                                                        |
 | ---------- | ------------------------------------------------------------ |
-| data       | Pointer to data buffer.                                      |
-| size       | Size of encoded data.                                        |
-| bufferSize | Data buffer size. Buffer size must be >= 201 bytes.          |
-| mask       | Parameters mask - pointer to **LensParamsMask** structure. **LensParamsMask** (declared in **Lens.h** file) determines flags for each field (parameter) declared in [LensParams](#lensparams-class-description) class. If the user wants to exclude any parameters from serialization, he can put a pointer to the mask. If the user wants to exclude a particular parameter from serialization, he should set the corresponding flag in the **LensParamsMask** structure. |
+| data       | Pointer to data buffer. Must not be nullptr.                 |
+| bufferSize | Data buffer size. Buffer size must be >= 201 bytes (the size of data with all parameters) regardless of the mask. |
+| size       | Size of encoded data. Set to 0 if the parameters are not encoded. |
+| mask       | Parameters mask - pointer to **LensParamsMask** structure. **LensParamsMask** (declared in **Lens.h** file) determines flags for each field (parameter) declared in [LensParams](#lensparams-class-description) class. If the user wants to exclude any parameters from serialization, he can put a pointer to the mask. If the user wants to exclude a particular parameter from serialization, he should set the corresponding flag of the **LensParamsMask** structure to **false**. If **mask** is nullptr all parameters are encoded. |
+
+**Returns:** TRUE if the parameters were encoded or FALSE if not (**data** is nullptr or **bufferSize** is less than 201). If the method returns FALSE **size** is set to 0 and nothing is written to the buffer.
+
+The encoded data consists of: data type (1 byte, 0x02), version Major and Minor (2 bytes), mask (7 bytes) and values of the selected parameters. The n-th field of **LensParamsMask** uses the bit (0x80 >> (n % 8)) of the mask byte n / 8 (fields are numbered from 0 in the order of the structure declaration). Values follow the mask in the order of the **LensParamsMask** fields. Values of int and float fields use 4 bytes in the byte order of the host (see [Portability](#portability) section), values of bool fields use 1 byte (0 or 1). The size of encoded data is from 10 bytes (no parameters) to 201 bytes (all parameters).
 
 **LensParamsMask** structure declaration:
 
 ```cpp
+/**
+ * @brief Lens params mask structure.
+ *
+ * Each flag enables serialization of the LensParams field with the same
+ * name (see LensParams::encode(...)).
+ */
 typedef struct LensParamsMask
 {
-    bool zoomPos{true};
-    bool zoomHwPos{true};
-    bool focusPos{true};
-    bool focusHwPos{true};
-    bool irisPos{true};
-    bool irisHwPos{true};
-    bool focusMode{true};
-    bool filterMode{true};
-    bool afRoiX0{true};
-    bool afRoiY0{true};
-    bool afRoiX1{true};
-    bool afRoiY1{true};
-    bool zoomSpeed{true};
-    bool zoomHwSpeed{true};
-    bool zoomHwMaxSpeed{true};
-    bool focusSpeed{true};
-    bool focusHwSpeed{true};
-    bool focusHwMaxSpeed{true};
-    bool irisSpeed{true};
-    bool irisHwSpeed{true};
-    bool irisHwMaxSpeed{true};
-    bool zoomHwTeleLimit{true};
-    bool zoomHwWideLimit{true};
-    bool focusHwFarLimit{true};
-    bool focusHwNearLimit{true};
-    bool irisHwOpenLimit{true};
-    bool irisHwCloseLimit{true};
-    bool focusFactor{true};
-    bool isConnected{true};
-    bool afHwSpeed{true};
-    bool focusFactorThreshold{true};
-    bool refocusTimeoutSec{true};
-    bool afIsActive{true};
-    bool irisMode{true};
-    bool autoAfRoiWidth{true};
-    bool autoAfRoiHeight{true};
-    bool autoAfRoiBorder{true};
-    bool afRoiMode{true};
-    bool extenderMode{true};
-    bool stabiliserMode{true};
-    bool afRange{true};
-    bool xFovDeg{true};
-    bool yFovDeg{true};
-    bool logMode{true};
-    bool temperature{true};
-    bool isOpen{true};
-    bool type{true};
-    bool custom1{true};
-    bool custom2{true};
-    bool custom3{true};
+    bool zoomPos{true};  ///< Serialize zoomPos.
+    bool zoomHwPos{true};  ///< Serialize zoomHwPos.
+    bool focusPos{true};  ///< Serialize focusPos.
+    bool focusHwPos{true};  ///< Serialize focusHwPos.
+    bool irisPos{true};  ///< Serialize irisPos.
+    bool irisHwPos{true};  ///< Serialize irisHwPos.
+    bool focusMode{true};  ///< Serialize focusMode.
+    bool filterMode{true};  ///< Serialize filterMode.
+    bool afRoiX0{true};  ///< Serialize afRoiX0.
+    bool afRoiY0{true};  ///< Serialize afRoiY0.
+    bool afRoiX1{true};  ///< Serialize afRoiX1.
+    bool afRoiY1{true};  ///< Serialize afRoiY1.
+    bool zoomSpeed{true};  ///< Serialize zoomSpeed.
+    bool zoomHwSpeed{true};  ///< Serialize zoomHwSpeed.
+    bool zoomHwMaxSpeed{true};  ///< Serialize zoomHwMaxSpeed.
+    bool focusSpeed{true};  ///< Serialize focusSpeed.
+    bool focusHwSpeed{true};  ///< Serialize focusHwSpeed.
+    bool focusHwMaxSpeed{true};  ///< Serialize focusHwMaxSpeed.
+    bool irisSpeed{true};  ///< Serialize irisSpeed.
+    bool irisHwSpeed{true};  ///< Serialize irisHwSpeed.
+    bool irisHwMaxSpeed{true};  ///< Serialize irisHwMaxSpeed.
+    bool zoomHwTeleLimit{true};  ///< Serialize zoomHwTeleLimit.
+    bool zoomHwWideLimit{true};  ///< Serialize zoomHwWideLimit.
+    bool focusHwFarLimit{true};  ///< Serialize focusHwFarLimit.
+    bool focusHwNearLimit{true};  ///< Serialize focusHwNearLimit.
+    bool irisHwOpenLimit{true};  ///< Serialize irisHwOpenLimit.
+    bool irisHwCloseLimit{true};  ///< Serialize irisHwCloseLimit.
+    bool focusFactor{true};  ///< Serialize focusFactor.
+    bool isConnected{true};  ///< Serialize isConnected.
+    bool afHwSpeed{true};  ///< Serialize afHwSpeed.
+    bool focusFactorThreshold{true};  ///< Serialize focusFactorThreshold.
+    bool refocusTimeoutSec{true};  ///< Serialize refocusTimeoutSec.
+    bool afIsActive{true};  ///< Serialize afIsActive.
+    bool irisMode{true};  ///< Serialize irisMode.
+    bool autoAfRoiWidth{true};  ///< Serialize autoAfRoiWidth.
+    bool autoAfRoiHeight{true};  ///< Serialize autoAfRoiHeight.
+    bool autoAfRoiBorder{true};  ///< Serialize autoAfRoiBorder.
+    bool afRoiMode{true};  ///< Serialize afRoiMode.
+    bool extenderMode{true};  ///< Serialize extenderMode.
+    bool stabiliserMode{true};  ///< Serialize stabiliserMode.
+    bool afRange{true};  ///< Serialize afRange.
+    bool xFovDeg{true};  ///< Serialize xFovDeg.
+    bool yFovDeg{true};  ///< Serialize yFovDeg.
+    bool logMode{true};  ///< Serialize logMode.
+    bool temperature{true};  ///< Serialize temperature.
+    bool isOpen{true};  ///< Serialize isOpen.
+    bool type{true};  ///< Serialize type.
+    bool custom1{true};  ///< Serialize custom1.
+    bool custom2{true};  ///< Serialize custom2.
+    bool custom3{true};  ///< Serialize custom3.
 } LensParamsMask;
 ```
 
@@ -1320,37 +1453,45 @@ Example without parameters mask:
 
 ```cpp
 // Encode data.
-LensParams in;
+cr::lens::LensParams in;
 in.logMode = 3;
 uint8_t data[1024];
 int size = 0;
-in.encode(data, 1024, size);
-cout << "Encoded data size: " << size << " bytes" << endl;
+if (!in.encode(data, 1024, size))
+{
+    std::cout << "Can't encode data" << std::endl;
+    return false;
+}
+std::cout << "Encoded data size: " << size << " bytes" << std::endl;
 ```
 
 Example with parameters mask:
 
 ```cpp
 // Prepare params.
-LensParams in;
+cr::lens::LensParams in;
 in.logMode = 3;
 
 // Prepare mask.
-LensParamsMask mask;
+cr::lens::LensParamsMask mask;
 mask.logMode = false; // Exclude logMode. Others by default.
 
 // Encode.
 uint8_t data[1024];
 int size = 0;
-in.encode(data, 1024, size, &mask);
-cout << "Encoded data size: " << size << " bytes" << endl;
+if (!in.encode(data, 1024, size, &mask))
+{
+    std::cout << "Can't encode data" << std::endl;
+    return false;
+}
+std::cout << "Encoded data size: " << size << " bytes" << std::endl;
 ```
 
 
 
 ## Deserialize lens params
 
-**LensParams** class provides method **decode(...)** to deserialize lens params (fields of **LensParams** class, see Table 4). Deserialization of lens params necessary in case when you need to receive lens params via communication channels. Method automatically recognizes which parameters were serialized by **encode(...)** method. Method doesn't decode fields: **initString** and **fovPoints**. Method declaration:
+**LensParams** class provides method **decode(...)** to deserialize lens params (fields of **LensParams** class, see Table 4). Deserialization of lens params necessary in case when you need to receive lens params via communication channels. Method automatically recognizes which parameters were serialized by **encode(...)** method. Method doesn't decode fields: **initString** and **fovPoints** (after decoding **initString** is empty and **fovPoints** is empty). Parameters which were not serialized are set to 0 (**false** for bool parameters). Method checks that the data has all values selected by the mask before it changes the object. Bytes after the last value are ignored. Values of the parameters are not checked against any range: lens controller must validate them before use. Method declaration:
 
 ```cpp
 bool decode(uint8_t* data, int dataSize);
@@ -1358,25 +1499,32 @@ bool decode(uint8_t* data, int dataSize);
 
 | Parameter | Value                   |
 | --------- | ----------------------- |
-| data      | Pointer to data buffer. |
-| dataSize  | Size of data.           |
+| data      | Pointer to data buffer. Must not be nullptr. |
+| dataSize  | Size of data, bytes.    |
 
-**Returns:** TRUE if data decoded (deserialized) or FALSE if not.
+**Returns:** TRUE if data decoded (deserialized) or FALSE if not: **data** is nullptr, **dataSize** is less than 10 (size of the header), data type or version (Major and Minor) is wrong, the mask has bits of unknown fields (the last 6 bits of the last mask byte must be 0) or the data doesn't have all values selected by the mask. If the method returns FALSE the object is not changed.
 
 Example:
 
 ```cpp
 // Encode data.
-LensParams in;
+cr::lens::LensParams in;
 uint8_t data[1024];
 int size = 0;
-in.encode(data, 1024, size);
-cout << "Encoded data size: " << size << " bytes" << endl;
+if (!in.encode(data, 1024, size))
+{
+    std::cout << "Can't encode data" << std::endl;
+    return false;
+}
+std::cout << "Encoded data size: " << size << " bytes" << std::endl;
 
 // Decode data.
-LensParams out;
+cr::lens::LensParams out;
 if (!out.decode(data, size))
-    cout << "Can't decode data" << endl;
+{
+    std::cout << "Can't decode data" << std::endl;
+    return false;
+}
 ```
 
 
@@ -1386,27 +1534,33 @@ if (!out.decode(data, size))
 **Lens** interface class library depends on **ConfigReader** library which provides method to read params from JSON file and to write params to JSON file. Example of writing and reading params to JSON file:
 
 ```cpp
-// Prepare random params.
-LensParams in;
+// Prepare params.
+cr::lens::LensParams in;
 for (int i = 0; i < 5; ++i)
 {
-    FovPoint pt;
-    pt.hwZoomPos = rand() % 255;
-    pt.xFovDeg = rand() % 255;
-    pt.yFovDeg = rand() % 255;
+    cr::lens::FovPoint pt;
+    pt.hwZoomPos = 100 * i;
+    pt.xFovDeg = 10.0f + static_cast<float>(i);
+    pt.yFovDeg = 5.0f + static_cast<float>(i);
     in.fovPoints.push_back(pt);
 }
 
 // Write params to file.
 cr::utils::ConfigReader inConfig;
-inConfig.set(in, "lensParams");
-inConfig.writeToFile("TestLensParams.json");
+if (!inConfig.set(in, "lensParams") ||
+    !inConfig.writeToFile("TestLensParams.json"))
+{
+    std::cout << "Can't write config file" << std::endl;
+    return false;
+}
 
 // Read params from file.
 cr::utils::ConfigReader outConfig;
-if(!outConfig.readFromFile("TestLensParams.json"))
+cr::lens::LensParams out;
+if (!outConfig.readFromFile("TestLensParams.json") ||
+    !outConfig.get(out, "lensParams"))
 {
-    cout << "Can't open config file" << endl;
+    std::cout << "Can't read params from file" << std::endl;
     return false;
 }
 ```
@@ -1416,65 +1570,65 @@ if(!outConfig.readFromFile("TestLensParams.json"))
 ```json
 {
     "lensParams": {
-        "afHwSpeed": 89,
-        "afRange": 140,
-        "afRoiMode": 215,
-        "afRoiX0": 33,
-        "afRoiX1": 138,
-        "afRoiY0": 201,
-        "afRoiY1": 99,
-        "autoAfRoiBorder": 52,
-        "autoAfRoiHeight": 194,
-        "autoAfRoiWidth": 125,
-        "custom1": 132.0,
-        "custom2": 74.0,
-        "custom3": 172.0,
-        "extenderMode": 19,
-        "filterMode": 53,
-        "focusFactorThreshold": 138.0,
-        "focusHwFarLimit": 168,
-        "focusHwMaxSpeed": 218,
-        "focusHwNearLimit": 39,
-        "focusMode": 83,
+        "initString": "/dev/ttyUSB0;9600;20",
+        "focusMode": 0,
+        "filterMode": 0,
+        "afRoiX0": 0,
+        "afRoiY0": 0,
+        "afRoiX1": 0,
+        "afRoiY1": 0,
+        "zoomHwMaxSpeed": 50,
+        "focusHwMaxSpeed": 50,
+        "irisHwMaxSpeed": 50,
+        "zoomHwTeleLimit": 65535,
+        "zoomHwWideLimit": 0,
+        "focusHwFarLimit": 65535,
+        "focusHwNearLimit": 0,
+        "irisHwOpenLimit": 65535,
+        "irisHwCloseLimit": 0,
+        "afHwSpeed": 50,
+        "focusFactorThreshold": 0.0,
+        "refocusTimeoutSec": 0,
+        "irisMode": 0,
+        "autoAfRoiWidth": 150,
+        "autoAfRoiHeight": 150,
+        "autoAfRoiBorder": 100,
+        "afRoiMode": 0,
+        "extenderMode": 0,
+        "stabiliserMode": 0,
+        "afRange": 0,
+        "logMode": 0,
+        "type": 0,
+        "custom1": 0.0,
+        "custom2": 0.0,
+        "custom3": 0.0,
         "fovPoints": [
             {
-                "hwZoomPos": 192,
-                "xFovDeg": 165.0,
-                "yFovDeg": 244.0
+                "hwZoomPos": 0,
+                "xFovDeg": 10.0,
+                "yFovDeg": 5.0
             },
             {
-                "hwZoomPos": 38,
+                "hwZoomPos": 100,
                 "xFovDeg": 11.0,
-                "yFovDeg": 2.0
+                "yFovDeg": 6.0
             },
             {
-                "hwZoomPos": 243,
-                "xFovDeg": 179.0,
-                "yFovDeg": 168.0
+                "hwZoomPos": 200,
+                "xFovDeg": 12.0,
+                "yFovDeg": 7.0
             },
             {
-                "hwZoomPos": 16,
-                "xFovDeg": 98.0,
-                "yFovDeg": 175.0
+                "hwZoomPos": 300,
+                "xFovDeg": 13.0,
+                "yFovDeg": 8.0
             },
             {
-                "hwZoomPos": 232,
-                "xFovDeg": 236.0,
-                "yFovDeg": 160.0
+                "hwZoomPos": 400,
+                "xFovDeg": 14.0,
+                "yFovDeg": 9.0
             }
-        ],
-        "initString": "dfhglsjirhuhjfb",
-        "irisHwCloseLimit": 47,
-        "irisHwMaxSpeed": 229,
-        "irisHwOpenLimit": 27,
-        "irisMode": 83,
-        "logMode": 151,
-        "refocusTimeoutSec": 240,
-        "stabiliserMode": 135,
-        "type": 62,
-        "zoomHwMaxSpeed": 178,
-        "zoomHwTeleLimit": 13,
-        "zoomHwWideLimit": 78
+        ]
     }
 }
 ```
@@ -1483,9 +1637,25 @@ if(!outConfig.readFromFile("TestLensParams.json"))
 
 # Build and connect to your project
 
-Typical commands to build **Lens** library:
+
+
+## Build stand alone
+
+The repository doesn't contain sub-repositories. The libraries **Lens** depends on (**Frame** and **ConfigReader**) must be cloned into the same folder as **Lens**. The folder structure must be:
 
 ```bash
+<work folder>
+    Lens
+    Frame
+    ConfigReader
+```
+
+Typical commands to build the library, the test application and the example (use the URLs of the repositories provided to you):
+
+```bash
+git clone <Lens repository URL>
+git clone <Frame repository URL>
+git clone <ConfigReader repository URL>
 cd Lens
 mkdir build
 cd build
@@ -1493,29 +1663,51 @@ cmake ..
 make
 ```
 
-If you want connect **Lens** library to your CMake project as source code you can make follow. For example, if your repository has structure:
+On Windows use `cmake --build . --config Release` instead of `make`. If **Lens** is the top-level CMake project, the main CMakeLists.txt file adds the folders ../Frame and ../ConfigReader (in this order) before the library itself. If a folder doesn't exist CMake stops with an error.
+
+
+
+## CMake options
+
+**Table 5** - CMake options of the repository. In the options below ${PARENT} is the prefix defined by the top-level project (empty if **Lens** is the top-level project).
+
+| Option                              | Default                                           | Description                                                  |
+| ----------------------------------- | ------------------------------------------------- | ------------------------------------------------------------ |
+| ${PARENT}_LENS                      | ON                                                | Build the library.                                           |
+| ${PARENT}_LENS_TEST                 | ON (stand alone), OFF (included in other project) | Build the test application.                                  |
+| ${PARENT}_LENS_EXAMPLE              | ON (stand alone), OFF (included in other project) | Build the example of custom lens controller.                 |
+| ${PARENT}_SUBMODULE_CACHE_OVERWRITE | ON                                                | Forced rewriting of the options above in the CMake cache. The top-level project sets it to OFF when it includes **Lens** as a sub-repository. |
+| CMAKE_BUILD_TYPE                    | Release (if not specified)                        | Build type.                                                  |
+
+
+
+## Connect to your project
+
+If you want to connect **Lens** library to your CMake project as source code you can make follow. For example, if your repository has structure:
 
 ```bash
 CMakeLists.txt
 src
-    CMakeList.txt
+    CMakeLists.txt
     yourLib.h
     yourLib.cpp
 ```
 
-Create folder **3rdparty** in your repository and copy **Lens** repository folder there. New structure of your repository:
+Create folder **3rdparty** in your repository and clone (or copy) the repositories of **Frame**, **ConfigReader** and **Lens** there. Structure of your repository with the libraries:
 
 ```bash
 CMakeLists.txt
 src
-    CMakeList.txt
+    CMakeLists.txt
     yourLib.h
     yourLib.cpp
 3rdparty
+    Frame
+    ConfigReader
     Lens
 ```
 
-Create CMakeLists.txt file in **3rdparty** folder. CMakeLists.txt should contain:
+When **Lens** is included in another project it doesn't add the libraries it depends on: your project must add **Frame** and **ConfigReader** by itself. If they are not added the compiler stops with the error `Frame.h: No such file or directory`. Create CMakeLists.txt file in **3rdparty** folder. CMakeLists.txt should contain:
 
 ```cmake
 cmake_minimum_required(VERSION 3.13)
@@ -1539,6 +1731,19 @@ SET(${PARENT}_SUBMODULE_CACHE_OVERWRITE OFF CACHE BOOL "" FORCE)
 ## CONFIGURATION
 ## 3rd-party submodules configuration
 ################################################################################
+SET(${PARENT}_SUBMODULE_FRAME                           ON  CACHE BOOL "" FORCE)
+if (${PARENT}_SUBMODULE_FRAME)
+    SET(${PARENT}_FRAME                                 ON  CACHE BOOL "" FORCE)
+    SET(${PARENT}_FRAME_TEST                            OFF CACHE BOOL "" FORCE)
+endif()
+
+SET(${PARENT}_SUBMODULE_CONFIG_READER                   ON  CACHE BOOL "" FORCE)
+if (${PARENT}_SUBMODULE_CONFIG_READER)
+    SET(${PARENT}_CONFIG_READER                         ON  CACHE BOOL "" FORCE)
+    SET(${PARENT}_CONFIG_READER_EXAMPLES                OFF CACHE BOOL "" FORCE)
+    SET(${PARENT}_CONFIG_READER_TESTS                   OFF CACHE BOOL "" FORCE)
+endif()
+
 SET(${PARENT}_SUBMODULE_LENS                            ON  CACHE BOOL "" FORCE)
 if (${PARENT}_SUBMODULE_LENS)
     SET(${PARENT}_LENS                                  ON  CACHE BOOL "" FORCE)
@@ -1550,21 +1755,31 @@ endif()
 ## INCLUDING SUBDIRECTORIES
 ## Adding subdirectories according to the 3rd-party configuration
 ################################################################################
+if (${PARENT}_SUBMODULE_FRAME)
+    add_subdirectory(Frame)
+endif()
+
+if (${PARENT}_SUBMODULE_CONFIG_READER)
+    add_subdirectory(ConfigReader)
+endif()
+
 if (${PARENT}_SUBMODULE_LENS)
     add_subdirectory(Lens)
 endif()
 ```
 
-File **3rdparty/CMakeLists.txt** adds folder **Lens** to your project and excludes test application and example (Lens class test applications and example of custom Lens class implementation) from compiling (by default test application and example excluded from copiling if **Lens** included as sub-repository). Your repository new structure will be:
+File **3rdparty/CMakeLists.txt** adds folders **Frame**, **ConfigReader** and **Lens** (in this order: **Lens** is added after the libraries it depends on) to your project and excludes test applications and examples from compiling (by default test application and example excluded from compiling if **Lens** included as sub-repository). Structure of your repository will be:
 
 ```bash
 CMakeLists.txt
 src
-    CMakeList.txt
+    CMakeLists.txt
     yourLib.h
     yourLib.cpp
 3rdparty
     CMakeLists.txt
+    Frame
+    ConfigReader
     Lens
 ```
 
@@ -1584,12 +1799,20 @@ Done!
 
 
 
+# Portability
+
+Encoded data (**LensParams::encode(...)**, **Lens::encodeCommand(...)** and **Lens::encodeSetParamCommand(...)** methods) stores int and float values as raw 4 bytes in the byte order of the host. The library checks at compile time that int and float have 4 bytes. Data must be exchanged between hosts with the same byte order. The library was built and tested only on little-endian CPUs (x86-64 and AArch64).
+
+The library doesn't use SIMD instructions or CPU specific code. The library, the example and the test application were built without warnings and the test application was run with MSVC 2022 (x86-64), GCC 12 and 13 (x86-64), Clang 15 and 18 (x86-64) and with GCC 13, Clang 15 and Clang 18 cross compilers for AArch64 (the test application was run under emulation).
+
+
+
 # How to make custom implementation
 
-The **Lens** class provides only an interface, data structures, and methods for encoding and decoding commands and params. To create your own implementation of the lens controller, you must include the Lens repository in your project (see [Build and connect to your project](#build-and-connect-to-your-project) section). The catalogue **example** (see [Library files](#library-files) section) includes an example of the design of the custom lens controller. You must implement all the methods of the Lens interface class. Custom lens class declaration:
+The **Lens** class provides only an interface, data structures, and methods for encoding and decoding commands and params. To create your own implementation of the lens controller, you must include the Lens repository in your project (see [Build and connect to your project](#build-and-connect-to-your-project) section). The catalogue **example** (see [Library files](#library-files) section) includes an example of the design of the custom lens controller. You must implement all the methods of the Lens interface class. The methods **setParam(...)**, **getParam(...)**, **getParams(...)**, **executeCommand(...)** and **decodeAndExecuteCommand(...)** must be thread-safe: the example protects the parameters with a mutex. The example checks the values which come from outside (see the description of **initLens(...)** and **setParam(...)** methods in **CustomLens.h**) and doesn't control any lens hardware. Custom lens class declaration:
 
 ```cpp
-class CustomLens: public Lens
+class CustomLens : public Lens
 {
 public:
 
@@ -1597,47 +1820,62 @@ public:
     CustomLens();
 
     /// Class destructor.
-    ~CustomLens();
+    ~CustomLens() override;
+
+    /// Copy constructor is deleted: the class owns a mutex.
+    CustomLens(const CustomLens&) = delete;
+
+    /// Move constructor is deleted: the class owns a mutex.
+    CustomLens(CustomLens&&) = delete;
+
+    /// Copy assignment operator is deleted: the class owns a mutex.
+    CustomLens& operator= (const CustomLens&) = delete;
+
+    /// Move assignment operator is deleted: the class owns a mutex.
+    CustomLens& operator= (CustomLens&&) = delete;
 
     /// Get lens class version.
     static std::string getVersion();
 
     /// Open lens controller.
-    bool openLens(std::string initString);
+    bool openLens(std::string initString) override;
 
     /// Init lens controller by structure.
-    bool initLens(LensParams& params);
+    bool initLens(LensParams& params) override;
 
     /// Close connection.
-    void closeLens();
+    void closeLens() override;
 
     /// Get lens open status.
-    bool isLensOpen();
+    bool isLensOpen() override;
 
     /// Get lens connection status.
-    bool isLensConnected();
+    bool isLensConnected() override;
 
     /// Set the lens controller param.
-    bool setParam(LensParam id, float value);
+    bool setParam(LensParam id, float value) override;
 
     /// Get the lens controller param.
-    float getParam(LensParam id);
+    float getParam(LensParam id) override;
 
     /// Get the lens controller params.
-    LensParams getParams();
+    void getParams(LensParams& params) override;
 
     /// Execute command.
-    bool executeCommand(LensCommand id, float arg = 0);
+    bool executeCommand(LensCommand id, float arg = 0) override;
 
     /// Add video frame for auto focus purposes.
-    void addVideoFrame(cr::video::Frame& frame);
+    void addVideoFrame(cr::video::Frame& frame) override;
 
     /// Decode and execute command.
-    bool decodeAndExecuteCommand(uint8_t* data, int size);
+    bool decodeAndExecuteCommand(uint8_t* data, int size) override;
 
 private:
 
-    /// Lens parameters structure (Default params).
+    /// Lens parameters structure (Default params). Protected by
+    /// m_paramsMutex.
     LensParams m_params;
+    /// Mutex to protect m_params.
+    std::mutex m_paramsMutex;
 };
 ```

@@ -1,373 +1,278 @@
 #include "Lens.h"
 #include "LensVersion.h"
+#include <array>
+#include <cstddef>
+#include <cstdint>
+#include <cstring>
+#include <new>
+#include <string>
+#include <utility>
 
 
 
-cr::lens::FovPoint &cr::lens::FovPoint::operator= (const FovPoint &src)
+namespace
 {
-    // Check yourself.
-    if (this == &src)
-        return *this;
+// Encoded data stores int and float fields as raw 4 bytes values.
+static_assert(sizeof(int) == 4, "int must be 4 bytes");
+static_assert(sizeof(float) == 4, "float must be 4 bytes");
 
-    // Copy params.
-    hwZoomPos = src.hwZoomPos;
-    xFovDeg = src.xFovDeg;
-    yFovDeg = src.yFovDeg;
+/// Size of an int or float field in the encoded data, bytes.
+constexpr int VALUE_SIZE{4};
+/// Size of a bool field in the encoded data, bytes.
+constexpr int FLAG_SIZE{1};
+/// Number of the params which can be encoded: one for each field of the
+/// params mask.
+constexpr int FIELDS_NUMBER{50};
+/// Number of bool fields (they use FLAG_SIZE bytes in the encoded data).
+constexpr int FLAGS_NUMBER{3};
+/// Number of int and float fields (they use VALUE_SIZE bytes).
+constexpr int VALUES_NUMBER{FIELDS_NUMBER - FLAGS_NUMBER};
+static_assert(sizeof(cr::lens::LensParamsMask) == FIELDS_NUMBER,
+              "wrong number of params mask fields");
 
-    return *this;
+/// Data type of the encoded params (the first byte of the data).
+constexpr uint8_t PARAMS_DATA_TYPE{0x02};
+/// Position of the Major version in the encoded params. The Minor version
+/// follows it.
+constexpr int PARAMS_VERSION_POS{1};
+/// Position of the params mask in the encoded params.
+constexpr int PARAMS_MASK_POS{3};
+/// Number of bits in a byte of the params mask.
+constexpr int MASK_BYTE_BITS{8};
+/// Bit of the first field of a mask byte: the most significant bit.
+constexpr unsigned int MASK_FIRST_BIT{0x80U};
+/// Size of the params mask: one bit for each field, the first field uses the
+/// most significant bit of the first byte.
+constexpr int PARAMS_MASK_SIZE{(FIELDS_NUMBER + MASK_BYTE_BITS - 1) /
+                               MASK_BYTE_BITS};
+/// Number of the bits of the last mask byte which belong to fields.
+constexpr int LAST_MASK_BYTE_BITS{
+    FIELDS_NUMBER - (PARAMS_MASK_SIZE - 1) * MASK_BYTE_BITS};
+/// Bits of the last mask byte which don't belong to any field. They must be
+/// zero: a set bit means that the data has a field which is unknown to the
+/// decoder, so the layout of the data can't be recognized.
+constexpr uint8_t PARAMS_RESERVED_MASK_BITS{
+    static_cast<uint8_t>(0xFFU >> LAST_MASK_BYTE_BITS)};
+/// Size of the encoded params header: data type, version and mask.
+constexpr int PARAMS_HEADER_SIZE{PARAMS_MASK_POS + PARAMS_MASK_SIZE};
+/// Maximum size of the encoded params (all fields encoded).
+constexpr int PARAMS_MAX_SIZE{PARAMS_HEADER_SIZE +
+                              VALUES_NUMBER * VALUE_SIZE +
+                              FLAGS_NUMBER * FLAG_SIZE};
+static_assert(PARAMS_MASK_SIZE == 7, "wrong size of params mask");
+static_assert(PARAMS_RESERVED_MASK_BITS == 0x3F, "wrong reserved mask bits");
+static_assert(PARAMS_MAX_SIZE == 201, "wrong size of encoded params");
+
+/// Data type of the command (the first byte of the encoded command).
+constexpr uint8_t COMMAND_DATA_TYPE{0x00};
+/// Data type of the set param command (the first byte of the encoded command).
+constexpr uint8_t SET_PARAM_DATA_TYPE{0x01};
+/// Position of the Major version in the encoded command. The Minor version
+/// follows it.
+constexpr int COMMAND_VERSION_POS{1};
+/// Position of the command or param ID in the encoded command.
+constexpr int COMMAND_ID_POS{3};
+/// Position of the command argument or param value in the encoded command.
+constexpr int COMMAND_VALUE_POS{7};
+/// Size of the encoded command and of the encoded set param command: data
+/// type, version, ID and value. The size is fixed.
+constexpr int COMMAND_SIZE{11};
+static_assert(COMMAND_VALUE_POS + VALUE_SIZE == COMMAND_SIZE,
+              "wrong size of encoded command");
+
+/// The first and the last valid command ID (see LensCommand enum).
+constexpr int FIRST_COMMAND_ID{
+    static_cast<int>(cr::lens::LensCommand::ZOOM_TELE)};
+constexpr int LAST_COMMAND_ID{
+    static_cast<int>(cr::lens::LensCommand::DETECT_HW_RANGES)};
+/// The first and the last valid param ID (see LensParam enum).
+constexpr int FIRST_PARAM_ID{static_cast<int>(cr::lens::LensParam::ZOOM_POS)};
+constexpr int LAST_PARAM_ID{static_cast<int>(cr::lens::LensParam::CUSTOM_3)};
+
+/// Result of Lens::decodeCommand(...): command decoded.
+constexpr int COMMAND_DECODED{0};
+/// Result of Lens::decodeCommand(...): set param command decoded.
+constexpr int SET_PARAM_DECODED{1};
+/// Result of Lens::decodeCommand(...): error.
+constexpr int DECODE_ERROR{-1};
+
+
+
+/// Location of a LensParams field in the encoded data.
+struct FieldRef
+{
+    /// Pointer to the field of a LensParams object.
+    void* value{nullptr};
+    /// Size of the field in the encoded data: VALUE_SIZE or FLAG_SIZE.
+    int size{0};
+};
+
+
+
+/// Get the table of LensParams fields in the order they are stored in the
+/// encoded data (the same order as the bits of the mask and the fields of
+/// LensParamsMask).
+std::array<FieldRef, FIELDS_NUMBER> makeFieldTable(cr::lens::LensParams& p)
+{
+    return {{
+        {&p.zoomPos, VALUE_SIZE},
+        {&p.zoomHwPos, VALUE_SIZE},
+        {&p.focusPos, VALUE_SIZE},
+        {&p.focusHwPos, VALUE_SIZE},
+        {&p.irisPos, VALUE_SIZE},
+        {&p.irisHwPos, VALUE_SIZE},
+        {&p.focusMode, VALUE_SIZE},
+        {&p.filterMode, VALUE_SIZE},
+        {&p.afRoiX0, VALUE_SIZE},
+        {&p.afRoiY0, VALUE_SIZE},
+        {&p.afRoiX1, VALUE_SIZE},
+        {&p.afRoiY1, VALUE_SIZE},
+        {&p.zoomSpeed, VALUE_SIZE},
+        {&p.zoomHwSpeed, VALUE_SIZE},
+        {&p.zoomHwMaxSpeed, VALUE_SIZE},
+        {&p.focusSpeed, VALUE_SIZE},
+        {&p.focusHwSpeed, VALUE_SIZE},
+        {&p.focusHwMaxSpeed, VALUE_SIZE},
+        {&p.irisSpeed, VALUE_SIZE},
+        {&p.irisHwSpeed, VALUE_SIZE},
+        {&p.irisHwMaxSpeed, VALUE_SIZE},
+        {&p.zoomHwTeleLimit, VALUE_SIZE},
+        {&p.zoomHwWideLimit, VALUE_SIZE},
+        {&p.focusHwFarLimit, VALUE_SIZE},
+        {&p.focusHwNearLimit, VALUE_SIZE},
+        {&p.irisHwOpenLimit, VALUE_SIZE},
+        {&p.irisHwCloseLimit, VALUE_SIZE},
+        {&p.focusFactor, VALUE_SIZE},
+        {&p.isConnected, FLAG_SIZE},
+        {&p.afHwSpeed, VALUE_SIZE},
+        {&p.focusFactorThreshold, VALUE_SIZE},
+        {&p.refocusTimeoutSec, VALUE_SIZE},
+        {&p.afIsActive, FLAG_SIZE},
+        {&p.irisMode, VALUE_SIZE},
+        {&p.autoAfRoiWidth, VALUE_SIZE},
+        {&p.autoAfRoiHeight, VALUE_SIZE},
+        {&p.autoAfRoiBorder, VALUE_SIZE},
+        {&p.afRoiMode, VALUE_SIZE},
+        {&p.extenderMode, VALUE_SIZE},
+        {&p.stabiliserMode, VALUE_SIZE},
+        {&p.afRange, VALUE_SIZE},
+        {&p.xFovDeg, VALUE_SIZE},
+        {&p.yFovDeg, VALUE_SIZE},
+        {&p.logMode, VALUE_SIZE},
+        {&p.temperature, VALUE_SIZE},
+        {&p.isOpen, FLAG_SIZE},
+        {&p.type, VALUE_SIZE},
+        {&p.custom1, VALUE_SIZE},
+        {&p.custom2, VALUE_SIZE},
+        {&p.custom3, VALUE_SIZE}
+    }};
 }
 
 
 
-cr::lens::LensParams &cr::lens::LensParams::operator= (const cr::lens::LensParams &src)
+/// Get the table of LensParamsMask flags in the same order as the table of
+/// LensParams fields.
+std::array<const bool*, FIELDS_NUMBER> makeFlagTable(
+        const cr::lens::LensParamsMask& m)
 {
-    // Check yourself.
-    if (this == &src)
-        return *this;
-
-    // Copy params.
-    initString = src.initString;
-    zoomPos = src.zoomPos;
-    zoomHwPos = src.zoomHwPos;
-    focusPos = src.focusPos;
-    focusHwPos = src.focusHwPos;
-    irisPos = src.irisPos;
-    irisHwPos = src.irisHwPos;
-    focusMode = src.focusMode;
-    filterMode = src.filterMode;
-    afRoiX0 = src.afRoiX0;
-    afRoiY0 = src.afRoiY0;
-    afRoiX1 = src.afRoiX1;
-    afRoiY1 = src.afRoiY1;
-    zoomSpeed = src.zoomSpeed;
-    zoomHwSpeed = src.zoomHwSpeed;
-    zoomHwMaxSpeed = src.zoomHwMaxSpeed;
-    focusSpeed = src.focusSpeed;
-    focusHwSpeed = src.focusHwSpeed;
-    focusHwMaxSpeed = src.focusHwMaxSpeed;
-    irisSpeed = src.irisSpeed;
-    irisHwSpeed = src.irisHwSpeed;
-    irisHwMaxSpeed = src.irisHwMaxSpeed;
-    zoomHwTeleLimit = src.zoomHwTeleLimit;
-    zoomHwWideLimit = src.zoomHwWideLimit;
-    focusHwFarLimit = src.focusHwFarLimit;
-    focusHwNearLimit = src.focusHwNearLimit;
-    irisHwOpenLimit = src.irisHwOpenLimit;
-    irisHwCloseLimit = src.irisHwCloseLimit;
-    focusFactor = src.focusFactor;
-    isConnected = src.isConnected;
-    afHwSpeed = src.afHwSpeed;
-    focusFactorThreshold = src.focusFactorThreshold;
-    refocusTimeoutSec = src.refocusTimeoutSec;
-    afIsActive = src.afIsActive;
-    irisMode = src.irisMode;
-    autoAfRoiWidth = src.autoAfRoiWidth;
-    autoAfRoiHeight = src.autoAfRoiHeight;
-    autoAfRoiBorder = src.autoAfRoiBorder;
-    afRoiMode = src.afRoiMode;
-    extenderMode = src.extenderMode;
-    stabiliserMode = src.stabiliserMode;
-    afRange = src.afRange;
-    xFovDeg = src.xFovDeg;
-    yFovDeg = src.yFovDeg;
-    logMode = src.logMode;
-    temperature = src.temperature;
-    isOpen = src.isOpen;
-    type = src.type;
-    custom1 = src.custom1;
-    custom2 = src.custom2;
-    custom3 = src.custom3;
-    fovPoints = src.fovPoints;
-
-    return *this;
+    return {{
+        &m.zoomPos, &m.zoomHwPos, &m.focusPos, &m.focusHwPos, &m.irisPos,
+        &m.irisHwPos, &m.focusMode, &m.filterMode, &m.afRoiX0, &m.afRoiY0,
+        &m.afRoiX1, &m.afRoiY1, &m.zoomSpeed, &m.zoomHwSpeed,
+        &m.zoomHwMaxSpeed, &m.focusSpeed, &m.focusHwSpeed, &m.focusHwMaxSpeed,
+        &m.irisSpeed, &m.irisHwSpeed, &m.irisHwMaxSpeed, &m.zoomHwTeleLimit,
+        &m.zoomHwWideLimit, &m.focusHwFarLimit, &m.focusHwNearLimit,
+        &m.irisHwOpenLimit, &m.irisHwCloseLimit, &m.focusFactor,
+        &m.isConnected, &m.afHwSpeed, &m.focusFactorThreshold,
+        &m.refocusTimeoutSec, &m.afIsActive, &m.irisMode, &m.autoAfRoiWidth,
+        &m.autoAfRoiHeight, &m.autoAfRoiBorder, &m.afRoiMode,
+        &m.extenderMode, &m.stabiliserMode, &m.afRange, &m.xFovDeg,
+        &m.yFovDeg, &m.logMode, &m.temperature, &m.isOpen, &m.type,
+        &m.custom1, &m.custom2, &m.custom3
+    }};
 }
 
 
 
-bool cr::lens::LensParams::encode(uint8_t* data, int bufferSize, int& size,
-                                  cr::lens::LensParamsMask* mask)
+/// Get the index of the mask byte which contains the bit of a field.
+int maskByteIndex(int fieldIndex)
 {
-    // Check buffer size.
-    if (bufferSize < 201)
+    return fieldIndex / MASK_BYTE_BITS;
+}
+
+
+
+/// Get the bit of a field inside its mask byte. The first field of each mask
+/// byte uses the most significant bit.
+uint8_t maskBit(int fieldIndex)
+{
+    return static_cast<uint8_t>(
+                MASK_FIRST_BIT >> (fieldIndex % MASK_BYTE_BITS));
+}
+
+
+
+/// Fill the header of an encoded command or set param command and the data
+/// (ID and value). The buffer must be valid for COMMAND_SIZE bytes.
+void encodeCommandData(
+        uint8_t* data, uint8_t dataType, int id, float value)
+{
+    data[0] = dataType;
+    data[COMMAND_VERSION_POS] = static_cast<uint8_t>(LENS_MAJOR_VERSION);
+    data[COMMAND_VERSION_POS + 1] = static_cast<uint8_t>(LENS_MINOR_VERSION);
+    std::memcpy(&data[COMMAND_ID_POS], &id, VALUE_SIZE);
+    std::memcpy(&data[COMMAND_VALUE_POS], &value, VALUE_SIZE);
+}
+}
+
+
+
+bool cr::lens::LensParams::encode(
+        uint8_t* data, int bufferSize, int& size, LensParamsMask* mask)
+{
+    // The size is 0 unless the params are encoded.
+    size = 0;
+
+    // Check pointer and buffer size: the buffer must be able to keep all
+    // params, regardless of the mask.
+    if (data == nullptr || bufferSize < PARAMS_MAX_SIZE)
+    {
         return false;
+    }
 
-    // Encode version.
-    int pos = 0;
-    data[pos] = 0x02; pos += 1;
-    data[pos] = LENS_MAJOR_VERSION; pos += 1;
-    data[pos] = LENS_MINOR_VERSION; pos += 1;
+    // Set mask: all params are encoded by default.
+    const LensParamsMask defaultMask;
+    const auto flags = makeFlagTable(mask == nullptr ? defaultMask : *mask);
+    const auto fields = makeFieldTable(*this);
 
-    // Set mask.
-    cr::lens::LensParamsMask defaultMask;
-    if (mask == nullptr)
-        mask = &defaultMask;
+    // Encode header: data type, version, mask (set bit by bit below).
+    data[0] = PARAMS_DATA_TYPE;
+    data[PARAMS_VERSION_POS] = static_cast<uint8_t>(LENS_MAJOR_VERSION);
+    data[PARAMS_VERSION_POS + 1] = static_cast<uint8_t>(LENS_MINOR_VERSION);
+    std::memset(&data[PARAMS_MASK_POS], 0, PARAMS_MASK_SIZE);
 
-    // Prepare mask.
-    data[pos] = 0;
-    data[pos] = data[pos] | (mask->zoomPos ? (uint8_t)128 : (uint8_t)0);
-    data[pos] = data[pos] | (mask->zoomHwPos ? (uint8_t)64 : (uint8_t)0);
-    data[pos] = data[pos] | (mask->focusPos ? (uint8_t)32 : (uint8_t)0);
-    data[pos] = data[pos] | (mask->focusHwPos ? (uint8_t)16 : (uint8_t)0);
-    data[pos] = data[pos] | (mask->irisPos ? (uint8_t)8 : (uint8_t)0);
-    data[pos] = data[pos] | (mask->irisHwPos ? (uint8_t)4 : (uint8_t)0);
-    data[pos] = data[pos] | (mask->focusMode ? (uint8_t)2 : (uint8_t)0);
-    data[pos] = data[pos] | (mask->filterMode ? (uint8_t)1 : (uint8_t)0);
-    pos += 1;
-    data[pos] = 0;
-    data[pos] = data[pos] | (mask->afRoiX0 ? (uint8_t)128 : (uint8_t)0);
-    data[pos] = data[pos] | (mask->afRoiY0 ? (uint8_t)64 : (uint8_t)0);
-    data[pos] = data[pos] | (mask->afRoiX1 ? (uint8_t)32 : (uint8_t)0);
-    data[pos] = data[pos] | (mask->afRoiY1 ? (uint8_t)16 : (uint8_t)0);
-    data[pos] = data[pos] | (mask->zoomSpeed ? (uint8_t)8 : (uint8_t)0);
-    data[pos] = data[pos] | (mask->zoomHwSpeed ? (uint8_t)4 : (uint8_t)0);
-    data[pos] = data[pos] | (mask->zoomHwMaxSpeed ? (uint8_t)2 : (uint8_t)0);
-    data[pos] = data[pos] | (mask->focusSpeed ? (uint8_t)1 : (uint8_t)0);
-    pos += 1;
-    data[pos] = 0;
-    data[pos] = data[pos] | (mask->focusHwSpeed ? (uint8_t)128 : (uint8_t)0);
-    data[pos] = data[pos] | (mask->focusHwMaxSpeed ? (uint8_t)64 : (uint8_t)0);
-    data[pos] = data[pos] | (mask->irisSpeed ? (uint8_t)32 : (uint8_t)0);
-    data[pos] = data[pos] | (mask->irisHwSpeed ? (uint8_t)16 : (uint8_t)0);
-    data[pos] = data[pos] | (mask->irisHwMaxSpeed ? (uint8_t)8 : (uint8_t)0);
-    data[pos] = data[pos] | (mask->zoomHwTeleLimit ? (uint8_t)4 : (uint8_t)0);
-    data[pos] = data[pos] | (mask->zoomHwWideLimit ? (uint8_t)2 : (uint8_t)0);
-    data[pos] = data[pos] | (mask->focusHwFarLimit ? (uint8_t)1 : (uint8_t)0);
-    pos += 1;
-    data[pos] = 0;
-    data[pos] = data[pos] | (mask->focusHwNearLimit ? (uint8_t)128 : (uint8_t)0);
-    data[pos] = data[pos] | (mask->irisHwOpenLimit ? (uint8_t)64 : (uint8_t)0);
-    data[pos] = data[pos] | (mask->irisHwCloseLimit ? (uint8_t)32 : (uint8_t)0);
-    data[pos] = data[pos] | (mask->focusFactor ? (uint8_t)16 : (uint8_t)0);
-    data[pos] = data[pos] | (mask->isConnected ? (uint8_t)8 : (uint8_t)0);
-    data[pos] = data[pos] | (mask->afHwSpeed ? (uint8_t)4 : (uint8_t)0);
-    data[pos] = data[pos] | (mask->focusFactorThreshold ? (uint8_t)2 : (uint8_t)0);
-    data[pos] = data[pos] | (mask->refocusTimeoutSec ? (uint8_t)1 : (uint8_t)0);
-    pos += 1;
-    data[pos] = 0;
-    data[pos] = data[pos] | (mask->afIsActive ? (uint8_t)128 : (uint8_t)0);
-    data[pos] = data[pos] | (mask->irisMode ? (uint8_t)64 : (uint8_t)0);
-    data[pos] = data[pos] | (mask->autoAfRoiWidth ? (uint8_t)32 : (uint8_t)0);
-    data[pos] = data[pos] | (mask->autoAfRoiHeight ? (uint8_t)16 : (uint8_t)0);
-    data[pos] = data[pos] | (mask->autoAfRoiBorder ? (uint8_t)8 : (uint8_t)0);
-    data[pos] = data[pos] | (mask->afRoiMode ? (uint8_t)4 : (uint8_t)0);
-    data[pos] = data[pos] | (mask->extenderMode ? (uint8_t)2 : (uint8_t)0);
-    data[pos] = data[pos] | (mask->stabiliserMode ? (uint8_t)1 : (uint8_t)0);
-    pos += 1;
-    data[pos] = 0;
-    data[pos] = data[pos] | (mask->afRange ? (uint8_t)128 : (uint8_t)0);
-    data[pos] = data[pos] | (mask->xFovDeg ? (uint8_t)64 : (uint8_t)0);
-    data[pos] = data[pos] | (mask->yFovDeg ? (uint8_t)32 : (uint8_t)0);
-    data[pos] = data[pos] | (mask->logMode ? (uint8_t)16 : (uint8_t)0);
-    data[pos] = data[pos] | (mask->temperature ? (uint8_t)8 : (uint8_t)0);
-    data[pos] = data[pos] | (mask->isOpen ? (uint8_t)4 : (uint8_t)0);
-    data[pos] = data[pos] | (mask->type ? (uint8_t)2 : (uint8_t)0);
-    data[pos] = data[pos] | (mask->custom1 ? (uint8_t)1 : (uint8_t)0);
-    pos += 1;
-    data[pos] = 0;
-    data[pos] = data[pos] | (mask->custom2 ? (uint8_t)128 : (uint8_t)0);
-    data[pos] = data[pos] | (mask->custom3 ? (uint8_t)64 : (uint8_t)0);
-    pos += 1;
+    // Encode values of the selected params.
+    int pos = PARAMS_HEADER_SIZE;
+    for (int i = 0; i < FIELDS_NUMBER; ++i)
+    {
+        if (!*flags[static_cast<size_t>(i)])
+        {
+            continue;
+        }
 
-    // Encode data.
-    if (mask->zoomPos)
-    {
-        memcpy(&data[pos], &zoomPos, 4); pos += 4;
-    }
-    if (mask->zoomHwPos)
-    {
-        memcpy(&data[pos], &zoomHwPos, 4); pos += 4;
-    }
-    if (mask->focusPos)
-    {
-        memcpy(&data[pos], &focusPos, 4); pos += 4;
-    }
-    if (mask->focusHwPos)
-    {
-        memcpy(&data[pos], &focusHwPos, 4); pos += 4;
-    }
-    if (mask->irisPos)
-    {
-        memcpy(&data[pos], &irisPos, 4); pos += 4;
-    }
-    if (mask->irisHwPos)
-    {
-        memcpy(&data[pos], &irisHwPos, 4); pos += 4;
-    }
-    if (mask->focusMode)
-    {
-        memcpy(&data[pos], &focusMode, 4); pos += 4;
-    }
-    if (mask->filterMode)
-    {
-        memcpy(&data[pos], &filterMode, 4); pos += 4;
-    }
-    if (mask->afRoiX0)
-    {
-        memcpy(&data[pos], &afRoiX0, 4); pos += 4;
-    }
-    if (mask->afRoiY0)
-    {
-        memcpy(&data[pos], &afRoiY0, 4); pos += 4;
-    }
-    if (mask->afRoiX1)
-    {
-        memcpy(&data[pos], &afRoiX1, 4); pos += 4;
-    }
-    if (mask->afRoiY1)
-    {
-        memcpy(&data[pos], &afRoiY1, 4); pos += 4;
-    }
-    if (mask->zoomSpeed)
-    {
-        memcpy(&data[pos], &zoomSpeed, 4); pos += 4;
-    }
-    if (mask->zoomHwSpeed)
-    {
-        memcpy(&data[pos], &zoomHwSpeed, 4); pos += 4;
-    }
-    if (mask->zoomHwMaxSpeed)
-    {
-        memcpy(&data[pos], &zoomHwMaxSpeed, 4); pos += 4;
-    }
-    if (mask->focusSpeed)
-    {
-        memcpy(&data[pos], &focusSpeed, 4); pos += 4;
-    }
-    if (mask->focusHwSpeed)
-    {
-        memcpy(&data[pos], &focusHwSpeed, 4); pos += 4;
-    }
-    if (mask->focusHwMaxSpeed)
-    {
-        memcpy(&data[pos], &focusHwMaxSpeed, 4); pos += 4;
-    }
-    if (mask->irisSpeed)
-    {
-        memcpy(&data[pos], &irisSpeed, 4); pos += 4;
-    }
-    if (mask->irisHwSpeed)
-    {
-        memcpy(&data[pos], &irisHwSpeed, 4); pos += 4;
-    }
-    if (mask->irisHwMaxSpeed)
-    {
-        memcpy(&data[pos], &irisHwMaxSpeed, 4); pos += 4;
-    }
-    if (mask->zoomHwTeleLimit)
-    {
-        memcpy(&data[pos], &zoomHwTeleLimit, 4); pos += 4;
-    }
-    if (mask->zoomHwWideLimit)
-    {
-        memcpy(&data[pos], &zoomHwWideLimit, 4); pos += 4;
-    }
-    if (mask->focusHwFarLimit)
-    {
-        memcpy(&data[pos], &focusHwFarLimit, 4); pos += 4;
-    }
-    if (mask->focusHwNearLimit)
-    {
-        memcpy(&data[pos], &focusHwNearLimit, 4); pos += 4;
-    }
-    if (mask->irisHwOpenLimit)
-    {
-        memcpy(&data[pos], &irisHwOpenLimit, 4); pos += 4;
-    }
-    if (mask->irisHwCloseLimit)
-    {
-        memcpy(&data[pos], &irisHwCloseLimit, 4); pos += 4;
-    }
-    if (mask->focusFactor)
-    {
-        memcpy(&data[pos], &focusFactor, 4); pos += 4;
-    }
-    if (mask->isConnected)
-    {
-        data[pos] = isConnected ? 0x01 : 0x00; pos += 1;
-    }
-    if (mask->afHwSpeed)
-    {
-        memcpy(&data[pos], &afHwSpeed, 4); pos += 4;
-    }
-    if (mask->focusFactorThreshold)
-    {
-        memcpy(&data[pos], &focusFactorThreshold, 4); pos += 4;
-    }
-    if (mask->refocusTimeoutSec)
-    {
-        memcpy(&data[pos], &refocusTimeoutSec, 4); pos += 4;
-    }
-    if (mask->afIsActive)
-    {
-        data[pos] = afIsActive ? 0x01 : 0x00; pos += 1;
-    }
-    if (mask->irisMode)
-    {
-        memcpy(&data[pos], &irisMode, 4); pos += 4;
-    }
-    if (mask->autoAfRoiWidth)
-    {
-        memcpy(&data[pos], &autoAfRoiWidth, 4); pos += 4;
-    }
-    if (mask->autoAfRoiHeight)
-    {
-        memcpy(&data[pos], &autoAfRoiHeight, 4); pos += 4;
-    }
-    if (mask->autoAfRoiBorder)
-    {
-        memcpy(&data[pos], &autoAfRoiBorder, 4); pos += 4;
-    }
-    if (mask->afRoiMode)
-    {
-        memcpy(&data[pos], &afRoiMode, 4); pos += 4;
-    }
-    if (mask->extenderMode)
-    {
-        memcpy(&data[pos], &extenderMode, 4); pos += 4;
-    }
-    if (mask->stabiliserMode)
-    {
-        memcpy(&data[pos], &stabiliserMode, 4); pos += 4;
-    }
-    if (mask->afRange)
-    {
-        memcpy(&data[pos], &afRange, 4); pos += 4;
-    }
-    if (mask->xFovDeg)
-    {
-        memcpy(&data[pos], &xFovDeg, 4); pos += 4;
-    }
-    if (mask->yFovDeg)
-    {
-        memcpy(&data[pos], &yFovDeg, 4); pos += 4;
-    }
-    if (mask->logMode)
-    {
-        memcpy(&data[pos], &logMode, 4); pos += 4;
-    }
-    if (mask->temperature)
-    {
-        memcpy(&data[pos], &temperature, 4); pos += 4;
-    }
-    if (mask->isOpen)
-    {
-        data[pos] = isOpen ? 0x01 : 0x00; pos += 1;
-    }
-    if (mask->type)
-    {
-        memcpy(&data[pos], &type, 4); pos += 4;
-    }
-    if (mask->custom1)
-    {
-        memcpy(&data[pos], &custom1, 4); pos += 4;
-    }
-    if (mask->custom2)
-    {
-        memcpy(&data[pos], &custom2, 4); pos += 4;
-    }
-    if (mask->custom3)
-    {
-        memcpy(&data[pos], &custom3, 4); pos += 4;
+        uint8_t& maskByte = data[PARAMS_MASK_POS + maskByteIndex(i)];
+        maskByte = static_cast<uint8_t>(maskByte | maskBit(i));
+
+        const FieldRef& field = fields[static_cast<size_t>(i)];
+        if (field.size == FLAG_SIZE)
+        {
+            data[pos] = *static_cast<const bool*>(field.value) ? 0x01 : 0x00;
+        }
+        else
+        {
+            std::memcpy(&data[pos], field.value, VALUE_SIZE);
+        }
+        pos += field.size;
     }
 
     size = pos;
@@ -379,548 +284,80 @@ bool cr::lens::LensParams::encode(uint8_t* data, int bufferSize, int& size,
 
 bool cr::lens::LensParams::decode(uint8_t* data, int dataSize)
 {
-    // Check data size.
-    if (dataSize < 11)
+    // Check pointer and data size (header must be complete).
+    if (data == nullptr || dataSize < PARAMS_HEADER_SIZE)
+    {
         return false;
+    }
 
-    // Check header.
-    if (data[0] != 0x02)
+    // Check data type and version.
+    if (data[0] != PARAMS_DATA_TYPE ||
+        data[PARAMS_VERSION_POS] != LENS_MAJOR_VERSION ||
+        data[PARAMS_VERSION_POS + 1] != LENS_MINOR_VERSION)
+    {
         return false;
+    }
 
-    // Check version.
-    if (data[1] != LENS_MAJOR_VERSION ||
-        data[2] != LENS_MINOR_VERSION)
+    // Check that the mask has no bits of unknown fields.
+    if ((data[PARAMS_MASK_POS + PARAMS_MASK_SIZE - 1] &
+         PARAMS_RESERVED_MASK_BITS) != 0)
+    {
         return false;
-
-    int pos = 10;
-    if ((data[3] & (uint8_t)128) == (uint8_t)128)
-    {
-        if (dataSize < pos + 4)
-            return false;
-        memcpy(&zoomPos, &data[pos], 4); pos += 4;
-    }
-    else
-    {
-        zoomPos = 0;
-    }
-    if ((data[3] & (uint8_t)64) == (uint8_t)64)
-    {
-        if (dataSize < pos + 4)
-            return false;
-        memcpy(&zoomHwPos, &data[pos], 4); pos += 4;
-    }
-    else
-    {
-        zoomHwPos = 0;
-    }
-    if ((data[3] & (uint8_t)32) == (uint8_t)32)
-    {
-        if (dataSize < pos + 4)
-            return false;
-        memcpy(&focusPos, &data[pos], 4); pos += 4;
-    }
-    else
-    {
-        focusPos = 0;
-    }
-    if ((data[3] & (uint8_t)16) == (uint8_t)16)
-    {
-        if (dataSize < pos + 4)
-            return false;
-        memcpy(&focusHwPos, &data[pos], 4); pos += 4;
-    }
-    else
-    {
-        focusHwPos = 0;
-    }
-    if ((data[3] & (uint8_t)8) == (uint8_t)8)
-    {
-        if (dataSize < pos + 4)
-            return false;
-        memcpy(&irisPos, &data[pos], 4); pos += 4;
-    }
-    else
-    {
-        irisPos = 0;
-    }
-    if ((data[3] & (uint8_t)4) == (uint8_t)4)
-    {
-        if (dataSize < pos + 4)
-            return false;
-        memcpy(&irisHwPos, &data[pos], 4); pos += 4;
-    }
-    else
-    {
-        irisHwPos = 0;
-    }
-    if ((data[3] & (uint8_t)2) == (uint8_t)2)
-    {
-        if (dataSize < pos + 4)
-            return false;
-        memcpy(&focusMode, &data[pos], 4); pos += 4;
-    }
-    else
-    {
-        focusMode = 0;
-    }
-    if ((data[3] & (uint8_t)1) == (uint8_t)1)
-    {
-        if (dataSize < pos + 4)
-            return false;
-        memcpy(&filterMode, &data[pos], 4); pos += 4;
-    }
-    else
-    {
-        filterMode = 0;
     }
 
+    // Decode into a temporary object: this object is changed only if the
+    // whole data is valid. The temporary object needs memory for the default
+    // init string: an allocation failure is reported as a decoding failure.
+    try
+    {
+        LensParams result;
+        result.initString.clear();
+        const auto fields = makeFieldTable(result);
+        int pos = PARAMS_HEADER_SIZE;
+        for (int i = 0; i < FIELDS_NUMBER; ++i)
+        {
+            const FieldRef& field = fields[static_cast<size_t>(i)];
+            const bool encoded =
+                    (data[PARAMS_MASK_POS + maskByteIndex(i)] &
+                     maskBit(i)) != 0;
+            if (!encoded)
+            {
+                // Params which are not encoded are zero.
+                std::memset(field.value, 0, static_cast<size_t>(field.size));
+                continue;
+            }
 
-    if ((data[4] & (uint8_t)128) == (uint8_t)128)
-    {
-        if (dataSize < pos + 4)
-            return false;
-        memcpy(&afRoiX0, &data[pos], 4); pos += 4;
-    }
-    else
-    {
-        afRoiX0 = 0;
-    }
-    if ((data[4] & (uint8_t)64) == (uint8_t)64)
-    {
-        if (dataSize < pos + 4)
-            return false;
-        memcpy(&afRoiY0, &data[pos], 4); pos += 4;
-    }
-    else
-    {
-        afRoiY0 = 0;
-    }
-    if ((data[4] & (uint8_t)32) == (uint8_t)32)
-    {
-        if (dataSize < pos + 4)
-            return false;
-        memcpy(&afRoiX1, &data[pos], 4); pos += 4;
-    }
-    else
-    {
-        afRoiX1 = 0;
-    }
-    if ((data[4] & (uint8_t)16) == (uint8_t)16)
-    {
-        if (dataSize < pos + 4)
-            return false;
-        memcpy(&afRoiY1, &data[pos], 4); pos += 4;
-    }
-    else
-    {
-        afRoiY1 = 0;
-    }
-    if ((data[4] & (uint8_t)8) == (uint8_t)8)
-    {
-        if (dataSize < pos + 4)
-            return false;
-        memcpy(&zoomSpeed, &data[pos], 4); pos += 4;
-    }
-    else
-    {
-        zoomSpeed = 0;
-    }
-    if ((data[4] & (uint8_t)4) == (uint8_t)4)
-    {
-        if (dataSize < pos + 4)
-            return false;
-        memcpy(&zoomHwSpeed, &data[pos], 4); pos += 4;
-    }
-    else
-    {
-        zoomHwSpeed = 0;
-    }
-    if ((data[4] & (uint8_t)2) == (uint8_t)2)
-    {
-        if (dataSize < pos + 4)
-            return false;
-        memcpy(&zoomHwMaxSpeed, &data[pos], 4); pos += 4;
-    }
-    else
-    {
-        zoomHwMaxSpeed = 0;
-    }
-    if ((data[4] & (uint8_t)1) == (uint8_t)1)
-    {
-        if (dataSize < pos + 4)
-            return false;
-        memcpy(&focusSpeed, &data[pos], 4); pos += 4;
-    }
-    else
-    {
-        focusSpeed = 0;
-    }
+            // Check that the value is inside the data. The position never
+            // exceeds the data size.
+            if (dataSize - pos < field.size)
+            {
+                return false;
+            }
+            if (field.size == FLAG_SIZE)
+            {
+                *static_cast<bool*>(field.value) = data[pos] != 0x00;
+            }
+            else
+            {
+                std::memcpy(field.value, &data[pos], VALUE_SIZE);
+            }
+            pos += field.size;
+        }
 
-
-
-    if ((data[5] & (uint8_t)128) == (uint8_t)128)
-    {
-        if (dataSize < pos + 4)
-            return false;
-        memcpy(&focusHwSpeed, &data[pos], 4); pos += 4;
-    }
-    else
-    {
-        focusHwSpeed = 0;
-    }
-    if ((data[5] & (uint8_t)64) == (uint8_t)64)
-    {
-        if (dataSize < pos + 4)
-            return false;
-        memcpy(&focusHwMaxSpeed, &data[pos], 4); pos += 4;
-    }
-    else
-    {
-        focusHwMaxSpeed = 0;
-    }
-    if ((data[5] & (uint8_t)32) == (uint8_t)32)
-    {
-        if (dataSize < pos + 4)
-            return false;
-        memcpy(&irisSpeed, &data[pos], 4); pos += 4;
-    }
-    else
-    {
-        irisSpeed = 0;
-    }
-    if ((data[5] & (uint8_t)16) == (uint8_t)16)
-    {
-        if (dataSize < pos + 4)
-            return false;
-        memcpy(&irisHwSpeed, &data[pos], 4); pos += 4;
-    }
-    else
-    {
-        irisHwSpeed = 0;
-    }
-    if ((data[5] & (uint8_t)8) == (uint8_t)8)
-    {
-        if (dataSize < pos + 4)
-            return false;
-        memcpy(&irisHwMaxSpeed, &data[pos], 4); pos += 4;
-    }
-    else
-    {
-        irisHwMaxSpeed = 0;
-    }
-    if ((data[5] & (uint8_t)4) == (uint8_t)4)
-    {
-        if (dataSize < pos + 4)
-            return false;
-        memcpy(&zoomHwTeleLimit, &data[pos], 4); pos += 4;
-    }
-    else
-    {
-        zoomHwTeleLimit = 0;
-    }
-    if ((data[5] & (uint8_t)2) == (uint8_t)2)
-    {
-        if (dataSize < pos + 4)
-            return false;
-        memcpy(&zoomHwWideLimit, &data[pos], 4); pos += 4;
-    }
-    else
-    {
-        zoomHwWideLimit = 0;
-    }
-    if ((data[5] & (uint8_t)1) == (uint8_t)1)
-    {
-        if (dataSize < pos + 4)
-            return false;
-        memcpy(&focusHwFarLimit, &data[pos], 4); pos += 4;
-    }
-    else
-    {
-        focusHwFarLimit = 0;
-    }
-
-
-
-    if ((data[6] & (uint8_t)128) == (uint8_t)128)
-    {
-        if (dataSize < pos + 4)
-            return false;
-        memcpy(&focusHwNearLimit, &data[pos], 4); pos += 4;
-    }
-    else
-    {
-        focusHwNearLimit = 0;
-    }
-    if ((data[6] & (uint8_t)64) == (uint8_t)64)
-    {
-        if (dataSize < pos + 4)
-            return false;
-        memcpy(&irisHwOpenLimit, &data[pos], 4); pos += 4;
-    }
-    else
-    {
-        irisHwOpenLimit = 0;
-    }
-    if ((data[6] & (uint8_t)32) == (uint8_t)32)
-    {
-        if (dataSize < pos + 4)
-            return false;
-        memcpy(&irisHwCloseLimit, &data[pos], 4); pos += 4;
-    }
-    else
-    {
-        irisHwCloseLimit = 0;
-    }
-    if ((data[6] & (uint8_t)16) == (uint8_t)16)
-    {
-        if (dataSize < pos + 4)
-            return false;
-        memcpy(&focusFactor, &data[pos], 4); pos += 4;
-    }
-    else
-    {
-        focusFactor = 0;
-    }
-    if ((data[6] & (uint8_t)8) == (uint8_t)8)
-    {
-        if (dataSize < pos + 1)
-            return false;
-        isConnected = data[pos] == 0x00 ? false : true; pos += 1;
-    }
-    else
-    {
-        isConnected = false;
-    }
-    if ((data[6] & (uint8_t)4) == (uint8_t)4)
-    {
-        if (dataSize < pos + 4)
-            return false;
-        memcpy(&afHwSpeed, &data[pos], 4); pos += 4;
-    }
-    else
-    {
-        afHwSpeed = 0;
-    }
-    if ((data[6] & (uint8_t)2) == (uint8_t)2)
-    {
-        if (dataSize < pos + 4)
-            return false;
-        memcpy(&focusFactorThreshold, &data[pos], 4); pos += 4;
-    }
-    else
-    {
-        focusFactorThreshold = 0;
-    }
-    if ((data[6] & (uint8_t)1) == (uint8_t)1)
-    {
-        if (dataSize < pos + 4)
-            return false;
-        memcpy(&refocusTimeoutSec, &data[pos], 4); pos += 4;
-    }
-    else
-    {
-        refocusTimeoutSec = 0;
-    }
-
-
-
-    if ((data[7] & (uint8_t)128) == (uint8_t)128)
-    {
-        if (dataSize < pos + 1)
-            return false;
-        afIsActive = data[pos] == 0x00 ? false : true; pos += 1;
-    }
-    else
-    {
-        afIsActive = false;
-    }
-    if ((data[7] & (uint8_t)64) == (uint8_t)64)
-    {
-        if (dataSize < pos + 4)
-            return false;
-        memcpy(&irisMode, &data[pos], 4); pos += 4;
-    }
-    else
-    {
-        irisMode = 0;
-    }
-    if ((data[7] & (uint8_t)32) == (uint8_t)32)
-    {
-        if (dataSize < pos + 4)
-            return false;
-        memcpy(&autoAfRoiWidth, &data[pos], 4); pos += 4;
-    }
-    else
-    {
-        autoAfRoiWidth = 0;
-    }
-    if ((data[7] & (uint8_t)16) == (uint8_t)16)
-    {
-        if (dataSize < pos + 4)
-            return false;
-        memcpy(&autoAfRoiHeight, &data[pos], 4); pos += 4;
-    }
-    else
-    {
-        autoAfRoiHeight = 0;
-    }
-    if ((data[7] & (uint8_t)8) == (uint8_t)8)
-    {
-        if (dataSize < pos + 4)
-            return false;
-        memcpy(&autoAfRoiBorder, &data[pos], 4); pos += 4;
-    }
-    else
-    {
-        autoAfRoiBorder = 0;
-    }
-    if ((data[7] & (uint8_t)4) == (uint8_t)4)
-    {
-        if (dataSize < pos + 4)
-            return false;
-        memcpy(&afRoiMode, &data[pos], 4); pos += 4;
-    }
-    else
-    {
-        afRoiMode = 0;
-    }
-    if ((data[7] & (uint8_t)2) == (uint8_t)2)
-    {
-        if (dataSize < pos + 4)
-            return false;
-        memcpy(&extenderMode, &data[pos], 4); pos += 4;
-    }
-    else
-    {
-        extenderMode = 0;
-    }
-    if ((data[7] & (uint8_t)1) == (uint8_t)1)
-    {
-        if (dataSize < pos + 4)
-            return false;
-        memcpy(&stabiliserMode, &data[pos], 4); pos += 4;
-    }
-    else
-    {
-        stabiliserMode = 0;
-    }
-
-
-    if ((data[8] & (uint8_t)128) == (uint8_t)128)
-    {
-        if (dataSize < pos + 4)
-            return false;
-        memcpy(&afRange, &data[pos], 4); pos += 4;
-    }
-    else
-    {
-        afRange = 0;
-    }
-    if ((data[8] & (uint8_t)64) == (uint8_t)64)
-    {
-        if (dataSize < pos + 4)
-            return false;
-        memcpy(&xFovDeg, &data[pos], 4); pos += 4;
-    }
-    else
-    {
-        xFovDeg = 0.0f;
-    }
-    if ((data[8] & (uint8_t)32) == (uint8_t)32)
-    {
-        if (dataSize < pos + 4)
-            return false;
-        memcpy(&yFovDeg, &data[pos], 4); pos += 4;
-    }
-    else
-    {
-        yFovDeg = 0.0f;
-    }
-    if ((data[8] & (uint8_t)16) == (uint8_t)16)
-    {
-        if (dataSize < pos + 4)
-            return false;
-        memcpy(&logMode, &data[pos], 4); pos += 4;
-    }
-    else
-    {
-        logMode = 0;
-    }
-    if ((data[8] & (uint8_t)8) == (uint8_t)8)
-    {
-        if (dataSize < pos + 4)
-            return false;
-        memcpy(&temperature, &data[pos], 4); pos += 4;
-    }
-    else
-    {
-        temperature = 0;
-    }
-    if ((data[8] & (uint8_t)4) == (uint8_t)4)
-    {
-        if (dataSize < pos + 1)
-            return false;
-        isOpen = data[pos] == 0x00 ? false : true; pos += 1;
-    }
-    else
-    {
-        isOpen = false;
-    }
-    if ((data[8] & (uint8_t)2) == (uint8_t)2)
-    {
-        if (dataSize < pos + 4)
-            return false;
-        memcpy(&type, &data[pos], 4); pos += 4;
-    }
-    else
-    {
-        type = 0;
-    }
-    if ((data[8] & (uint8_t)1) == (uint8_t)1)
-    {
-        if (dataSize < pos + 4)
-            return false;
-        memcpy(&custom1, &data[pos], 4); pos += 4;
-    }
-    else
-    {
-        custom1 = 0.0f;
-    }
-
-
-    if ((data[9] & (uint8_t)128) == (uint8_t)128)
-    {
-        if (dataSize < pos + 4)
-            return false;
-        memcpy(&custom2, &data[pos], 4); pos += 4;
-    }
-    else
-    {
-        custom2 = 0.0f;
-    }
-    if ((data[9] & (uint8_t)64) == (uint8_t)64)
-    {
-        if (dataSize < pos + 4)
-            return false;
-        memcpy(&custom3, &data[pos], 4);
+        // The move assignment doesn't throw.
+        *this = std::move(result);
     }
-    else
+    catch (const std::bad_alloc&)
     {
-        custom3 = 0.0f;
+        return false;
     }
-
-    initString = "";
-    fovPoints.clear();
 
     return true;
 }
 
 
 
-cr::lens::Lens::~Lens()
-{
-    
-}
+cr::lens::Lens::~Lens() = default;
 
 
 
@@ -931,74 +368,85 @@ std::string cr::lens::Lens::getVersion()
 
 
 
-void cr::lens::Lens::encodeSetParamCommand(uint8_t* data,
-                                           int& size,
-                                           cr::lens::LensParam id,
-                                           float value)
+void cr::lens::Lens::encodeSetParamCommand(
+        uint8_t* data, int& size, LensParam id, float value)
 {
-    // Fill header.
-    data[0] = 0x01;
-    data[1] = LENS_MAJOR_VERSION;
-    data[2] = LENS_MINOR_VERSION;
+    // The size is 0 unless the command is encoded.
+    size = 0;
+    if (data == nullptr)
+    {
+        return;
+    }
 
-    // Fill data.
-    int paramId = (int)id;
-    memcpy(&data[3], &paramId, 4);
-    memcpy(&data[7], &value, 4);
-    size = 11;
+    encodeCommandData(data, SET_PARAM_DATA_TYPE, static_cast<int>(id), value);
+    size = COMMAND_SIZE;
 }
 
 
 
-void cr::lens::Lens::encodeCommand(uint8_t* data,
-                                   int& size,
-                                   cr::lens::LensCommand id,
-                                   float arg)
+void cr::lens::Lens::encodeCommand(
+        uint8_t* data, int& size, LensCommand id, float arg)
 {
-    // Fill header.
-    data[0] = 0x00;
-    data[1] = LENS_MAJOR_VERSION;
-    data[2] = LENS_MINOR_VERSION;
+    // The size is 0 unless the command is encoded.
+    size = 0;
+    if (data == nullptr)
+    {
+        return;
+    }
 
-    // Fill data.
-    int commandId = (int)id;
-    memcpy(&data[3], &commandId, 4);
-    memcpy(&data[7], &arg, 4);
-    size = 11;
+    encodeCommandData(data, COMMAND_DATA_TYPE, static_cast<int>(id), arg);
+    size = COMMAND_SIZE;
 }
 
 
 
 int cr::lens::Lens::decodeCommand(uint8_t* data,
                                   int size,
-                                  cr::lens::LensParam& paramId,
-                                  cr::lens::LensCommand& commandId,
+                                  LensParam& paramId,
+                                  LensCommand& commandId,
                                   float& value)
 {
-    // Check size.
-    if (size != 11)
-        return -1;
+    // Check pointer and size: the size of the command is fixed.
+    if (data == nullptr || size != COMMAND_SIZE)
+    {
+        return DECODE_ERROR;
+    }
 
     // Check version.
-    if (data[1] != LENS_MAJOR_VERSION || data[2] != LENS_MINOR_VERSION)
-        return -1;
+    if (data[COMMAND_VERSION_POS] != LENS_MAJOR_VERSION ||
+        data[COMMAND_VERSION_POS + 1] != LENS_MINOR_VERSION)
+    {
+        return DECODE_ERROR;
+    }
 
-    // Extract data.
+    // Extract data. Output arguments are not changed until the ID is checked.
     int id = 0;
-    memcpy(&id, &data[3], 4);
-    memcpy(&value, &data[7], 4);
+    float decodedValue = 0.0f;
+    std::memcpy(&id, &data[COMMAND_ID_POS], VALUE_SIZE);
+    std::memcpy(&decodedValue, &data[COMMAND_VALUE_POS], VALUE_SIZE);
 
-    // Check command type.
-    if (data[0] == 0x00)
+    // Check command type and ID. An ID outside of the enum range must not be
+    // passed to the lens controller implementation.
+    if (data[0] == COMMAND_DATA_TYPE)
     {
-        commandId = (LensCommand)id;
-        return 0;
+        if (id < FIRST_COMMAND_ID || id > LAST_COMMAND_ID)
+        {
+            return DECODE_ERROR;
+        }
+        commandId = static_cast<LensCommand>(id);
+        value = decodedValue;
+        return COMMAND_DECODED;
     }
-    else if (data[0] == 0x01)
+    if (data[0] == SET_PARAM_DATA_TYPE)
     {
-        paramId = (LensParam)id;
-        return 1;
+        if (id < FIRST_PARAM_ID || id > LAST_PARAM_ID)
+        {
+            return DECODE_ERROR;
+        }
+        paramId = static_cast<LensParam>(id);
+        value = decodedValue;
+        return SET_PARAM_DECODED;
     }
 
-    return -1;
+    return DECODE_ERROR;
 }
