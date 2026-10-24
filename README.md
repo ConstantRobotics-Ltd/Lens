@@ -116,9 +116,7 @@ src ------------------------- Folder with source code of the library.
 **Lens** interface class declared in **Lens.h** file. Class declaration:
 
 ```cpp
-namespace cr
-{
-namespace lens
+namespace rapidpixel
 {
 /// Lens controller interface class.
 class Lens
@@ -159,7 +157,7 @@ public:
     virtual bool executeCommand(LensCommand id, float arg = 0) = 0;
 
     /// Add video frame for auto focus purposes.
-    virtual void addVideoFrame(cr::video::Frame& frame) = 0;
+    virtual void addVideoFrame(rapidpixel::Frame& frame) = 0;
 
     /// Encode set param command.
     static void encodeSetParamCommand(
@@ -197,7 +195,6 @@ protected:
     Lens& operator= (Lens&& src) = default;
 };
 }
-}
 ```
 
 
@@ -213,7 +210,7 @@ static std::string getVersion();
 Method can be used without **Lens** class instance:
 
 ```cpp
-std::cout << "Lens class version: " << cr::lens::Lens::getVersion() << std::endl;
+std::cout << "Lens class version: " << rapidpixel::Lens::getVersion() << std::endl;
 ```
 
 Console output:
@@ -359,7 +356,7 @@ virtual bool executeCommand(LensCommand id, float arg = 0) = 0;
 The **addVideoFrame(...)** method designed to copy video frame data to lens controller to perform autofocus algorithm. Particular lens controller may not support autofocus algorithms. To perform autofocus lens controller calculates focus factor in autofocus ROI (focus factor can be obtained with [getParam(...)](#getparam-method) method and parameters **FOCUS_FACTOR**). To calculate focus factor lens controller needs video frame. If particular lens controller supports autofocus algorithms the method **addVideoFrame(...)** should be called for each captured video frame. Method declaration:
 
 ```cpp
-virtual void addVideoFrame(cr::video::Frame& frame) = 0;
+virtual void addVideoFrame(rapidpixel::Frame& frame) = 0;
 ```
 
 | Parameter | Description                                                  |
@@ -393,8 +390,8 @@ int size = 0;
 // Parameter value.
 float value = 10.0f;
 // Encode command.
-cr::lens::Lens::encodeSetParamCommand(
-    data, size, cr::lens::LensParam::AF_ROI_X0, value);
+rapidpixel::Lens::encodeSetParamCommand(
+    data, size, rapidpixel::LensParam::AF_ROI_X0, value);
 ```
 
 
@@ -424,8 +421,8 @@ int size = 0;
 // Command argument value.
 float arg = 1000.0f;
 // Encode command.
-cr::lens::Lens::encodeCommand(
-    data, size, cr::lens::LensCommand::ZOOM_TO_POS, arg);
+rapidpixel::Lens::encodeCommand(
+    data, size, rapidpixel::LensCommand::ZOOM_TO_POS, arg);
 ```
 
 
@@ -469,10 +466,10 @@ Example of internal implementation of **decodeAndExecuteCommand(...)** method:
 
 ```cpp
 // Decode and execute command.
-cr::lens::LensCommand commandId{cr::lens::LensCommand::ZOOM_TELE};
-cr::lens::LensParam paramId{cr::lens::LensParam::ZOOM_POS};
+rapidpixel::LensCommand commandId{rapidpixel::LensCommand::ZOOM_TELE};
+rapidpixel::LensParam paramId{rapidpixel::LensParam::ZOOM_POS};
 float value{0.0f};
-switch (cr::lens::Lens::decodeCommand(data, size, paramId, commandId, value))
+switch (rapidpixel::Lens::decodeCommand(data, size, paramId, commandId, value))
 {
 // COMMAND.
 case 0:
@@ -497,9 +494,7 @@ default:
 Enum declaration:
 
 ```cpp
-namespace cr
-{
-namespace lens
+namespace rapidpixel
 {
 /**
  * @brief Lens commands enum.
@@ -573,7 +568,6 @@ enum class LensCommand
     DETECT_HW_RANGES
 };
 }
-}
 ```
 
 **Table 2** - Lens commands description. Some commands may be unsupported by particular lens controller.
@@ -604,9 +598,7 @@ enum class LensCommand
 Enum declaration:
 
 ```cpp
-namespace cr
-{
-namespace lens
+namespace rapidpixel
 {
 /**
  * @brief Lens params enum.
@@ -848,7 +840,6 @@ enum class LensParam
     CUSTOM_3
 };
 }
-}
 ```
 
 **Table 3** - Lens params description. Some params may be unsupported by particular lens controller.
@@ -919,9 +910,7 @@ enum class LensParam
 **LensParams** interface class declared in **Lens.h** file. Class declaration:
 
 ```cpp
-namespace cr
-{
-namespace lens
+namespace rapidpixel
 {
 /**
  * @brief Field of view point class.
@@ -1302,7 +1291,6 @@ public:
     bool decode(uint8_t* data, int dataSize);
 };
 }
-}
 ```
 
 **Table 4** - LensParams class fields description is equivalent to **LensParam** enum description.
@@ -1453,7 +1441,7 @@ Example without parameters mask:
 
 ```cpp
 // Encode data.
-cr::lens::LensParams in;
+rapidpixel::LensParams in;
 in.logMode = 3;
 uint8_t data[1024];
 int size = 0;
@@ -1469,11 +1457,11 @@ Example with parameters mask:
 
 ```cpp
 // Prepare params.
-cr::lens::LensParams in;
+rapidpixel::LensParams in;
 in.logMode = 3;
 
 // Prepare mask.
-cr::lens::LensParamsMask mask;
+rapidpixel::LensParamsMask mask;
 mask.logMode = false; // Exclude logMode. Others by default.
 
 // Encode.
@@ -1508,7 +1496,7 @@ Example:
 
 ```cpp
 // Encode data.
-cr::lens::LensParams in;
+rapidpixel::LensParams in;
 uint8_t data[1024];
 int size = 0;
 if (!in.encode(data, 1024, size))
@@ -1519,7 +1507,7 @@ if (!in.encode(data, 1024, size))
 std::cout << "Encoded data size: " << size << " bytes" << std::endl;
 
 // Decode data.
-cr::lens::LensParams out;
+rapidpixel::LensParams out;
 if (!out.decode(data, size))
 {
     std::cout << "Can't decode data" << std::endl;
@@ -1535,10 +1523,10 @@ if (!out.decode(data, size))
 
 ```cpp
 // Prepare params.
-cr::lens::LensParams in;
+rapidpixel::LensParams in;
 for (int i = 0; i < 5; ++i)
 {
-    cr::lens::FovPoint pt;
+    rapidpixel::FovPoint pt;
     pt.hwZoomPos = 100 * i;
     pt.xFovDeg = 10.0f + static_cast<float>(i);
     pt.yFovDeg = 5.0f + static_cast<float>(i);
@@ -1546,7 +1534,7 @@ for (int i = 0; i < 5; ++i)
 }
 
 // Write params to file.
-cr::utils::ConfigReader inConfig;
+rapidpixel::ConfigReader inConfig;
 if (!inConfig.set(in, "lensParams") ||
     !inConfig.writeToFile("TestLensParams.json"))
 {
@@ -1555,8 +1543,8 @@ if (!inConfig.set(in, "lensParams") ||
 }
 
 // Read params from file.
-cr::utils::ConfigReader outConfig;
-cr::lens::LensParams out;
+rapidpixel::ConfigReader outConfig;
+rapidpixel::LensParams out;
 if (!outConfig.readFromFile("TestLensParams.json") ||
     !outConfig.get(out, "lensParams"))
 {
@@ -1865,7 +1853,7 @@ public:
     bool executeCommand(LensCommand id, float arg = 0) override;
 
     /// Add video frame for auto focus purposes.
-    void addVideoFrame(cr::video::Frame& frame) override;
+    void addVideoFrame(rapidpixel::Frame& frame) override;
 
     /// Decode and execute command.
     bool decodeAndExecuteCommand(uint8_t* data, int size) override;

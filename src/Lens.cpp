@@ -27,7 +27,7 @@ constexpr int FIELDS_NUMBER{50};
 constexpr int FLAGS_NUMBER{3};
 /// Number of int and float fields (they use VALUE_SIZE bytes).
 constexpr int VALUES_NUMBER{FIELDS_NUMBER - FLAGS_NUMBER};
-static_assert(sizeof(cr::lens::LensParamsMask) == FIELDS_NUMBER,
+static_assert(sizeof(rapidpixel::LensParamsMask) == FIELDS_NUMBER,
               "wrong number of params mask fields");
 
 /// Data type of the encoded params (the first byte of the data).
@@ -82,12 +82,12 @@ static_assert(COMMAND_VALUE_POS + VALUE_SIZE == COMMAND_SIZE,
 
 /// The first and the last valid command ID (see LensCommand enum).
 constexpr int FIRST_COMMAND_ID{
-    static_cast<int>(cr::lens::LensCommand::ZOOM_TELE)};
+    static_cast<int>(rapidpixel::LensCommand::ZOOM_TELE)};
 constexpr int LAST_COMMAND_ID{
-    static_cast<int>(cr::lens::LensCommand::DETECT_HW_RANGES)};
+    static_cast<int>(rapidpixel::LensCommand::DETECT_HW_RANGES)};
 /// The first and the last valid param ID (see LensParam enum).
-constexpr int FIRST_PARAM_ID{static_cast<int>(cr::lens::LensParam::ZOOM_POS)};
-constexpr int LAST_PARAM_ID{static_cast<int>(cr::lens::LensParam::CUSTOM_3)};
+constexpr int FIRST_PARAM_ID{static_cast<int>(rapidpixel::LensParam::ZOOM_POS)};
+constexpr int LAST_PARAM_ID{static_cast<int>(rapidpixel::LensParam::CUSTOM_3)};
 
 /// Result of Lens::decodeCommand(...): command decoded.
 constexpr int COMMAND_DECODED{0};
@@ -112,7 +112,7 @@ struct FieldRef
 /// Get the table of LensParams fields in the order they are stored in the
 /// encoded data (the same order as the bits of the mask and the fields of
 /// LensParamsMask).
-std::array<FieldRef, FIELDS_NUMBER> makeFieldTable(cr::lens::LensParams& p)
+std::array<FieldRef, FIELDS_NUMBER> makeFieldTable(rapidpixel::LensParams& p)
 {
     return {{
         {&p.zoomPos, VALUE_SIZE},
@@ -173,7 +173,7 @@ std::array<FieldRef, FIELDS_NUMBER> makeFieldTable(cr::lens::LensParams& p)
 /// Get the table of LensParamsMask flags in the same order as the table of
 /// LensParams fields.
 std::array<const bool*, FIELDS_NUMBER> makeFlagTable(
-        const cr::lens::LensParamsMask& m)
+        const rapidpixel::LensParamsMask& m)
 {
     return {{
         &m.zoomPos, &m.zoomHwPos, &m.focusPos, &m.focusHwPos, &m.irisPos,
@@ -227,7 +227,7 @@ void encodeCommandData(
 
 
 
-bool cr::lens::LensParams::encode(
+bool rapidpixel::LensParams::encode(
         uint8_t* data, int bufferSize, int& size, LensParamsMask* mask)
 {
     // The size is 0 unless the params are encoded.
@@ -282,7 +282,7 @@ bool cr::lens::LensParams::encode(
 
 
 
-bool cr::lens::LensParams::decode(uint8_t* data, int dataSize)
+bool rapidpixel::LensParams::decode(uint8_t* data, int dataSize)
 {
     // Check pointer and data size (header must be complete).
     if (data == nullptr || dataSize < PARAMS_HEADER_SIZE)
@@ -357,18 +357,18 @@ bool cr::lens::LensParams::decode(uint8_t* data, int dataSize)
 
 
 
-cr::lens::Lens::~Lens() = default;
+rapidpixel::Lens::~Lens() = default;
 
 
 
-std::string cr::lens::Lens::getVersion()
+std::string rapidpixel::Lens::getVersion()
 {
     return LENS_VERSION;
 }
 
 
 
-void cr::lens::Lens::encodeSetParamCommand(
+void rapidpixel::Lens::encodeSetParamCommand(
         uint8_t* data, int& size, LensParam id, float value)
 {
     // The size is 0 unless the command is encoded.
@@ -384,7 +384,7 @@ void cr::lens::Lens::encodeSetParamCommand(
 
 
 
-void cr::lens::Lens::encodeCommand(
+void rapidpixel::Lens::encodeCommand(
         uint8_t* data, int& size, LensCommand id, float arg)
 {
     // The size is 0 unless the command is encoded.
@@ -400,11 +400,11 @@ void cr::lens::Lens::encodeCommand(
 
 
 
-int cr::lens::Lens::decodeCommand(uint8_t* data,
-                                  int size,
-                                  LensParam& paramId,
-                                  LensCommand& commandId,
-                                  float& value)
+int rapidpixel::Lens::decodeCommand(uint8_t* data,
+                                    int size,
+                                    LensParam& paramId,
+                                    LensCommand& commandId,
+                                    float& value)
 {
     // Check pointer and size: the size of the command is fixed.
     if (data == nullptr || size != COMMAND_SIZE)

@@ -6,9 +6,7 @@
 
 
 
-namespace cr
-{
-namespace lens
+namespace rapidpixel
 {
 /**
  * @brief Custom lens controller class. The class is an example of the Lens
@@ -138,7 +136,7 @@ public:
      * support autofocus algorithms: the frame is ignored.
      * @param frame Video frame object.
      */
-    void addVideoFrame(cr::video::Frame& frame) override;
+    void addVideoFrame(rapidpixel::Frame& frame) override;
 
     /**
      * @brief Decode and execute command.
@@ -156,5 +154,4 @@ private:
     /// Mutex to protect m_params.
     std::mutex m_paramsMutex;
 };
-}
 }

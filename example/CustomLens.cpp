@@ -119,7 +119,7 @@ bool assignFloat(float& target, float value, float minValue, float maxValue)
 
 
 /// Check the values of the params which are set by the user.
-bool isValid(const cr::lens::LensParams& p)
+bool isValid(const rapidpixel::LensParams& p)
 {
     return p.initString.size() <= MAX_INIT_STRING_SIZE &&
            p.fovPoints.size() <= MAX_FOV_POINTS &&
@@ -154,7 +154,7 @@ bool isValid(const cr::lens::LensParams& p)
 
 
 
-cr::lens::CustomLens::CustomLens()
+rapidpixel::CustomLens::CustomLens()
 {
     // Reset connection flags.
     m_params.isOpen = false;
@@ -163,18 +163,18 @@ cr::lens::CustomLens::CustomLens()
 
 
 
-cr::lens::CustomLens::~CustomLens() = default;
+rapidpixel::CustomLens::~CustomLens() = default;
 
 
 
-std::string cr::lens::CustomLens::getVersion()
+std::string rapidpixel::CustomLens::getVersion()
 {
     return CUSTOM_LENS_VERSION;
 }
 
 
 
-bool cr::lens::CustomLens::openLens(std::string initString)
+bool rapidpixel::CustomLens::openLens(std::string initString)
 {
     // Check the size of the init string.
     if (initString.size() > MAX_INIT_STRING_SIZE)
@@ -194,7 +194,7 @@ bool cr::lens::CustomLens::openLens(std::string initString)
 
 
 
-bool cr::lens::CustomLens::initLens(cr::lens::LensParams& params)
+bool rapidpixel::CustomLens::initLens(rapidpixel::LensParams& params)
 {
     // Check params: they are copied only if all values are valid.
     if (!isValid(params))
@@ -216,7 +216,7 @@ bool cr::lens::CustomLens::initLens(cr::lens::LensParams& params)
 
 
 
-void cr::lens::CustomLens::closeLens()
+void rapidpixel::CustomLens::closeLens()
 {
     const std::lock_guard<std::mutex> lock(m_paramsMutex);
 
@@ -227,7 +227,7 @@ void cr::lens::CustomLens::closeLens()
 
 
 
-bool cr::lens::CustomLens::isLensOpen()
+bool rapidpixel::CustomLens::isLensOpen()
 {
     const std::lock_guard<std::mutex> lock(m_paramsMutex);
 
@@ -236,7 +236,7 @@ bool cr::lens::CustomLens::isLensOpen()
 
 
 
-bool cr::lens::CustomLens::isLensConnected()
+bool rapidpixel::CustomLens::isLensConnected()
 {
     const std::lock_guard<std::mutex> lock(m_paramsMutex);
 
@@ -245,197 +245,197 @@ bool cr::lens::CustomLens::isLensConnected()
 
 
 
-bool cr::lens::CustomLens::setParam(cr::lens::LensParam id, float value)
+bool rapidpixel::CustomLens::setParam(rapidpixel::LensParam id, float value)
 {
     const std::lock_guard<std::mutex> lock(m_paramsMutex);
 
     // Check parameter ID and save the value if it is valid.
     switch (id)
     {
-    case cr::lens::LensParam::ZOOM_POS:
+    case rapidpixel::LensParam::ZOOM_POS:
     {
         return assignInt(m_params.zoomPos, value, POSITION_MIN, POSITION_MAX);
     }
-    case cr::lens::LensParam::ZOOM_HW_POS:
+    case rapidpixel::LensParam::ZOOM_HW_POS:
     {
         return assignInt(m_params.zoomHwPos, value, ANY_MIN, ANY_MAX);
     }
-    case cr::lens::LensParam::FOCUS_POS:
+    case rapidpixel::LensParam::FOCUS_POS:
     {
         return assignInt(m_params.focusPos, value, POSITION_MIN, POSITION_MAX);
     }
-    case cr::lens::LensParam::FOCUS_HW_POS:
+    case rapidpixel::LensParam::FOCUS_HW_POS:
     {
         return assignInt(m_params.focusHwPos, value, ANY_MIN, ANY_MAX);
     }
-    case cr::lens::LensParam::IRIS_POS:
+    case rapidpixel::LensParam::IRIS_POS:
     {
         return assignInt(m_params.irisPos, value, POSITION_MIN, POSITION_MAX);
     }
-    case cr::lens::LensParam::IRIS_HW_POS:
+    case rapidpixel::LensParam::IRIS_HW_POS:
     {
         return assignInt(m_params.irisHwPos, value, ANY_MIN, ANY_MAX);
     }
-    case cr::lens::LensParam::FOCUS_MODE:
+    case rapidpixel::LensParam::FOCUS_MODE:
     {
         return assignInt(m_params.focusMode, value, MODE_MIN, MODE_MAX);
     }
-    case cr::lens::LensParam::FILTER_MODE:
+    case rapidpixel::LensParam::FILTER_MODE:
     {
         return assignInt(m_params.filterMode, value, MODE_MIN, MODE_MAX);
     }
-    case cr::lens::LensParam::AF_ROI_X0:
+    case rapidpixel::LensParam::AF_ROI_X0:
     {
         return assignInt(m_params.afRoiX0, value, 0, ANY_MAX);
     }
-    case cr::lens::LensParam::AF_ROI_Y0:
+    case rapidpixel::LensParam::AF_ROI_Y0:
     {
         return assignInt(m_params.afRoiY0, value, 0, ANY_MAX);
     }
-    case cr::lens::LensParam::AF_ROI_X1:
+    case rapidpixel::LensParam::AF_ROI_X1:
     {
         return assignInt(m_params.afRoiX1, value, 0, ANY_MAX);
     }
-    case cr::lens::LensParam::AF_ROI_Y1:
+    case rapidpixel::LensParam::AF_ROI_Y1:
     {
         return assignInt(m_params.afRoiY1, value, 0, ANY_MAX);
     }
-    case cr::lens::LensParam::ZOOM_SPEED:
+    case rapidpixel::LensParam::ZOOM_SPEED:
     {
         return assignInt(m_params.zoomSpeed, value, SPEED_MIN, SPEED_MAX);
     }
-    case cr::lens::LensParam::ZOOM_HW_SPEED:
+    case rapidpixel::LensParam::ZOOM_HW_SPEED:
     {
         return assignInt(m_params.zoomHwSpeed, value, ANY_MIN, ANY_MAX);
     }
-    case cr::lens::LensParam::ZOOM_HW_MAX_SPEED:
+    case rapidpixel::LensParam::ZOOM_HW_MAX_SPEED:
     {
         return assignInt(m_params.zoomHwMaxSpeed, value, ANY_MIN, ANY_MAX);
     }
-    case cr::lens::LensParam::FOCUS_SPEED:
+    case rapidpixel::LensParam::FOCUS_SPEED:
     {
         return assignInt(m_params.focusSpeed, value, SPEED_MIN, SPEED_MAX);
     }
-    case cr::lens::LensParam::FOCUS_HW_SPEED:
+    case rapidpixel::LensParam::FOCUS_HW_SPEED:
     {
         return assignInt(m_params.focusHwSpeed, value, ANY_MIN, ANY_MAX);
     }
-    case cr::lens::LensParam::FOCUS_HW_MAX_SPEED:
+    case rapidpixel::LensParam::FOCUS_HW_MAX_SPEED:
     {
         return assignInt(m_params.focusHwMaxSpeed, value, ANY_MIN, ANY_MAX);
     }
-    case cr::lens::LensParam::IRIS_SPEED:
+    case rapidpixel::LensParam::IRIS_SPEED:
     {
         return assignInt(m_params.irisSpeed, value, SPEED_MIN, SPEED_MAX);
     }
-    case cr::lens::LensParam::IRIS_HW_SPEED:
+    case rapidpixel::LensParam::IRIS_HW_SPEED:
     {
         return assignInt(m_params.irisHwSpeed, value, ANY_MIN, ANY_MAX);
     }
-    case cr::lens::LensParam::IRIS_HW_MAX_SPEED:
+    case rapidpixel::LensParam::IRIS_HW_MAX_SPEED:
     {
         return assignInt(m_params.irisHwMaxSpeed, value, ANY_MIN, ANY_MAX);
     }
-    case cr::lens::LensParam::ZOOM_HW_TELE_LIMIT:
+    case rapidpixel::LensParam::ZOOM_HW_TELE_LIMIT:
     {
         return assignInt(m_params.zoomHwTeleLimit, value, ANY_MIN, ANY_MAX);
     }
-    case cr::lens::LensParam::ZOOM_HW_WIDE_LIMIT:
+    case rapidpixel::LensParam::ZOOM_HW_WIDE_LIMIT:
     {
         return assignInt(m_params.zoomHwWideLimit, value, ANY_MIN, ANY_MAX);
     }
-    case cr::lens::LensParam::FOCUS_HW_FAR_LIMIT:
+    case rapidpixel::LensParam::FOCUS_HW_FAR_LIMIT:
     {
         return assignInt(m_params.focusHwFarLimit, value, ANY_MIN, ANY_MAX);
     }
-    case cr::lens::LensParam::FOCUS_HW_NEAR_LIMIT:
+    case rapidpixel::LensParam::FOCUS_HW_NEAR_LIMIT:
     {
         return assignInt(m_params.focusHwNearLimit, value, ANY_MIN, ANY_MAX);
     }
-    case cr::lens::LensParam::IRIS_HW_OPEN_LIMIT:
+    case rapidpixel::LensParam::IRIS_HW_OPEN_LIMIT:
     {
         return assignInt(m_params.irisHwOpenLimit, value, ANY_MIN, ANY_MAX);
     }
-    case cr::lens::LensParam::IRIS_HW_CLOSE_LIMIT:
+    case rapidpixel::LensParam::IRIS_HW_CLOSE_LIMIT:
     {
         return assignInt(m_params.irisHwCloseLimit, value, ANY_MIN, ANY_MAX);
     }
-    case cr::lens::LensParam::FOCUS_HW_AF_SPEED:
+    case rapidpixel::LensParam::FOCUS_HW_AF_SPEED:
     {
         return assignInt(m_params.afHwSpeed, value, ANY_MIN, ANY_MAX);
     }
-    case cr::lens::LensParam::FOCUS_FACTOR_THRESHOLD:
+    case rapidpixel::LensParam::FOCUS_FACTOR_THRESHOLD:
     {
         return assignFloat(m_params.focusFactorThreshold, value,
                            FOCUS_FACTOR_THRESHOLD_MIN,
                            FOCUS_FACTOR_THRESHOLD_MAX);
     }
-    case cr::lens::LensParam::REFOCUS_TIMEOUT_SEC:
+    case rapidpixel::LensParam::REFOCUS_TIMEOUT_SEC:
     {
         return assignInt(m_params.refocusTimeoutSec, value, 0,
                          REFOCUS_TIMEOUT_MAX);
     }
-    case cr::lens::LensParam::IRIS_MODE:
+    case rapidpixel::LensParam::IRIS_MODE:
     {
         return assignInt(m_params.irisMode, value, MODE_MIN, MODE_MAX);
     }
-    case cr::lens::LensParam::AUTO_AF_ROI_WIDTH:
+    case rapidpixel::LensParam::AUTO_AF_ROI_WIDTH:
     {
         return assignInt(m_params.autoAfRoiWidth, value, AUTO_AF_ROI_SIZE_MIN,
                          ANY_MAX);
     }
-    case cr::lens::LensParam::AUTO_AF_ROI_HEIGHT:
+    case rapidpixel::LensParam::AUTO_AF_ROI_HEIGHT:
     {
         return assignInt(m_params.autoAfRoiHeight, value, AUTO_AF_ROI_SIZE_MIN,
                          ANY_MAX);
     }
-    case cr::lens::LensParam::AUTO_AF_ROI_BORDER:
+    case rapidpixel::LensParam::AUTO_AF_ROI_BORDER:
     {
         return assignInt(m_params.autoAfRoiBorder, value, 0, ANY_MAX);
     }
-    case cr::lens::LensParam::AF_ROI_MODE:
+    case rapidpixel::LensParam::AF_ROI_MODE:
     {
         return assignInt(m_params.afRoiMode, value, MODE_MIN, MODE_MAX);
     }
-    case cr::lens::LensParam::EXTENDER_MODE:
+    case rapidpixel::LensParam::EXTENDER_MODE:
     {
         return assignInt(m_params.extenderMode, value, MODE_MIN, MODE_MAX);
     }
-    case cr::lens::LensParam::STABILIZER_MODE:
+    case rapidpixel::LensParam::STABILIZER_MODE:
     {
         return assignInt(m_params.stabiliserMode, value, MODE_MIN, MODE_MAX);
     }
-    case cr::lens::LensParam::AF_RANGE:
+    case rapidpixel::LensParam::AF_RANGE:
     {
         return assignInt(m_params.afRange, value, ANY_MIN, ANY_MAX);
     }
-    case cr::lens::LensParam::LOG_MODE:
+    case rapidpixel::LensParam::LOG_MODE:
     {
         return assignInt(m_params.logMode, value, LOG_MODE_MIN, LOG_MODE_MAX);
     }
-    case cr::lens::LensParam::TYPE:
+    case rapidpixel::LensParam::TYPE:
     {
         return assignInt(m_params.type, value, ANY_MIN, ANY_MAX);
     }
-    case cr::lens::LensParam::CUSTOM_1:
+    case rapidpixel::LensParam::CUSTOM_1:
     {
         return assignFloat(m_params.custom1, value, CUSTOM_MIN, CUSTOM_MAX);
     }
-    case cr::lens::LensParam::CUSTOM_2:
+    case rapidpixel::LensParam::CUSTOM_2:
     {
         return assignFloat(m_params.custom2, value, CUSTOM_MIN, CUSTOM_MAX);
     }
-    case cr::lens::LensParam::CUSTOM_3:
+    case rapidpixel::LensParam::CUSTOM_3:
     {
         return assignFloat(m_params.custom3, value, CUSTOM_MIN, CUSTOM_MAX);
     }
-    case cr::lens::LensParam::FOCUS_FACTOR:
-    case cr::lens::LensParam::IS_CONNECTED:
-    case cr::lens::LensParam::AF_IS_ACTIVE:
-    case cr::lens::LensParam::X_FOV_DEG:
-    case cr::lens::LensParam::Y_FOV_DEG:
-    case cr::lens::LensParam::TEMPERATURE:
-    case cr::lens::LensParam::IS_OPEN:
+    case rapidpixel::LensParam::FOCUS_FACTOR:
+    case rapidpixel::LensParam::IS_CONNECTED:
+    case rapidpixel::LensParam::AF_IS_ACTIVE:
+    case rapidpixel::LensParam::X_FOV_DEG:
+    case rapidpixel::LensParam::Y_FOV_DEG:
+    case rapidpixel::LensParam::TEMPERATURE:
+    case rapidpixel::LensParam::IS_OPEN:
     default:
     {
         // Read only params and unknown IDs.
@@ -446,210 +446,210 @@ bool cr::lens::CustomLens::setParam(cr::lens::LensParam id, float value)
 
 
 
-float cr::lens::CustomLens::getParam(cr::lens::LensParam id)
+float rapidpixel::CustomLens::getParam(rapidpixel::LensParam id)
 {
     const std::lock_guard<std::mutex> lock(m_paramsMutex);
 
     // Check parameter ID.
     switch (id)
     {
-    case cr::lens::LensParam::ZOOM_POS:
+    case rapidpixel::LensParam::ZOOM_POS:
     {
         return static_cast<float>(m_params.zoomPos);
     }
-    case cr::lens::LensParam::ZOOM_HW_POS:
+    case rapidpixel::LensParam::ZOOM_HW_POS:
     {
         return static_cast<float>(m_params.zoomHwPos);
     }
-    case cr::lens::LensParam::FOCUS_POS:
+    case rapidpixel::LensParam::FOCUS_POS:
     {
         return static_cast<float>(m_params.focusPos);
     }
-    case cr::lens::LensParam::FOCUS_HW_POS:
+    case rapidpixel::LensParam::FOCUS_HW_POS:
     {
         return static_cast<float>(m_params.focusHwPos);
     }
-    case cr::lens::LensParam::IRIS_POS:
+    case rapidpixel::LensParam::IRIS_POS:
     {
         return static_cast<float>(m_params.irisPos);
     }
-    case cr::lens::LensParam::IRIS_HW_POS:
+    case rapidpixel::LensParam::IRIS_HW_POS:
     {
         return static_cast<float>(m_params.irisHwPos);
     }
-    case cr::lens::LensParam::FOCUS_MODE:
+    case rapidpixel::LensParam::FOCUS_MODE:
     {
         return static_cast<float>(m_params.focusMode);
     }
-    case cr::lens::LensParam::FILTER_MODE:
+    case rapidpixel::LensParam::FILTER_MODE:
     {
         return static_cast<float>(m_params.filterMode);
     }
-    case cr::lens::LensParam::AF_ROI_X0:
+    case rapidpixel::LensParam::AF_ROI_X0:
     {
         return static_cast<float>(m_params.afRoiX0);
     }
-    case cr::lens::LensParam::AF_ROI_Y0:
+    case rapidpixel::LensParam::AF_ROI_Y0:
     {
         return static_cast<float>(m_params.afRoiY0);
     }
-    case cr::lens::LensParam::AF_ROI_X1:
+    case rapidpixel::LensParam::AF_ROI_X1:
     {
         return static_cast<float>(m_params.afRoiX1);
     }
-    case cr::lens::LensParam::AF_ROI_Y1:
+    case rapidpixel::LensParam::AF_ROI_Y1:
     {
         return static_cast<float>(m_params.afRoiY1);
     }
-    case cr::lens::LensParam::ZOOM_SPEED:
+    case rapidpixel::LensParam::ZOOM_SPEED:
     {
         return static_cast<float>(m_params.zoomSpeed);
     }
-    case cr::lens::LensParam::ZOOM_HW_SPEED:
+    case rapidpixel::LensParam::ZOOM_HW_SPEED:
     {
         return static_cast<float>(m_params.zoomHwSpeed);
     }
-    case cr::lens::LensParam::ZOOM_HW_MAX_SPEED:
+    case rapidpixel::LensParam::ZOOM_HW_MAX_SPEED:
     {
         return static_cast<float>(m_params.zoomHwMaxSpeed);
     }
-    case cr::lens::LensParam::FOCUS_SPEED:
+    case rapidpixel::LensParam::FOCUS_SPEED:
     {
         return static_cast<float>(m_params.focusSpeed);
     }
-    case cr::lens::LensParam::FOCUS_HW_SPEED:
+    case rapidpixel::LensParam::FOCUS_HW_SPEED:
     {
         return static_cast<float>(m_params.focusHwSpeed);
     }
-    case cr::lens::LensParam::FOCUS_HW_MAX_SPEED:
+    case rapidpixel::LensParam::FOCUS_HW_MAX_SPEED:
     {
         return static_cast<float>(m_params.focusHwMaxSpeed);
     }
-    case cr::lens::LensParam::IRIS_SPEED:
+    case rapidpixel::LensParam::IRIS_SPEED:
     {
         return static_cast<float>(m_params.irisSpeed);
     }
-    case cr::lens::LensParam::IRIS_HW_SPEED:
+    case rapidpixel::LensParam::IRIS_HW_SPEED:
     {
         return static_cast<float>(m_params.irisHwSpeed);
     }
-    case cr::lens::LensParam::IRIS_HW_MAX_SPEED:
+    case rapidpixel::LensParam::IRIS_HW_MAX_SPEED:
     {
         return static_cast<float>(m_params.irisHwMaxSpeed);
     }
-    case cr::lens::LensParam::ZOOM_HW_TELE_LIMIT:
+    case rapidpixel::LensParam::ZOOM_HW_TELE_LIMIT:
     {
         return static_cast<float>(m_params.zoomHwTeleLimit);
     }
-    case cr::lens::LensParam::ZOOM_HW_WIDE_LIMIT:
+    case rapidpixel::LensParam::ZOOM_HW_WIDE_LIMIT:
     {
         return static_cast<float>(m_params.zoomHwWideLimit);
     }
-    case cr::lens::LensParam::FOCUS_HW_FAR_LIMIT:
+    case rapidpixel::LensParam::FOCUS_HW_FAR_LIMIT:
     {
         return static_cast<float>(m_params.focusHwFarLimit);
     }
-    case cr::lens::LensParam::FOCUS_HW_NEAR_LIMIT:
+    case rapidpixel::LensParam::FOCUS_HW_NEAR_LIMIT:
     {
         return static_cast<float>(m_params.focusHwNearLimit);
     }
-    case cr::lens::LensParam::IRIS_HW_OPEN_LIMIT:
+    case rapidpixel::LensParam::IRIS_HW_OPEN_LIMIT:
     {
         return static_cast<float>(m_params.irisHwOpenLimit);
     }
-    case cr::lens::LensParam::IRIS_HW_CLOSE_LIMIT:
+    case rapidpixel::LensParam::IRIS_HW_CLOSE_LIMIT:
     {
         return static_cast<float>(m_params.irisHwCloseLimit);
     }
-    case cr::lens::LensParam::FOCUS_FACTOR:
+    case rapidpixel::LensParam::FOCUS_FACTOR:
     {
         return m_params.focusFactor;
     }
-    case cr::lens::LensParam::IS_CONNECTED:
+    case rapidpixel::LensParam::IS_CONNECTED:
     {
         return m_params.isConnected ? 1.0f : 0.0f;
     }
-    case cr::lens::LensParam::FOCUS_HW_AF_SPEED:
+    case rapidpixel::LensParam::FOCUS_HW_AF_SPEED:
     {
         return static_cast<float>(m_params.afHwSpeed);
     }
-    case cr::lens::LensParam::FOCUS_FACTOR_THRESHOLD:
+    case rapidpixel::LensParam::FOCUS_FACTOR_THRESHOLD:
     {
         return m_params.focusFactorThreshold;
     }
-    case cr::lens::LensParam::REFOCUS_TIMEOUT_SEC:
+    case rapidpixel::LensParam::REFOCUS_TIMEOUT_SEC:
     {
         return static_cast<float>(m_params.refocusTimeoutSec);
     }
-    case cr::lens::LensParam::AF_IS_ACTIVE:
+    case rapidpixel::LensParam::AF_IS_ACTIVE:
     {
         return m_params.afIsActive ? 1.0f : 0.0f;
     }
-    case cr::lens::LensParam::IRIS_MODE:
+    case rapidpixel::LensParam::IRIS_MODE:
     {
         return static_cast<float>(m_params.irisMode);
     }
-    case cr::lens::LensParam::AUTO_AF_ROI_WIDTH:
+    case rapidpixel::LensParam::AUTO_AF_ROI_WIDTH:
     {
         return static_cast<float>(m_params.autoAfRoiWidth);
     }
-    case cr::lens::LensParam::AUTO_AF_ROI_HEIGHT:
+    case rapidpixel::LensParam::AUTO_AF_ROI_HEIGHT:
     {
         return static_cast<float>(m_params.autoAfRoiHeight);
     }
-    case cr::lens::LensParam::AUTO_AF_ROI_BORDER:
+    case rapidpixel::LensParam::AUTO_AF_ROI_BORDER:
     {
         return static_cast<float>(m_params.autoAfRoiBorder);
     }
-    case cr::lens::LensParam::AF_ROI_MODE:
+    case rapidpixel::LensParam::AF_ROI_MODE:
     {
         return static_cast<float>(m_params.afRoiMode);
     }
-    case cr::lens::LensParam::EXTENDER_MODE:
+    case rapidpixel::LensParam::EXTENDER_MODE:
     {
         return static_cast<float>(m_params.extenderMode);
     }
-    case cr::lens::LensParam::STABILIZER_MODE:
+    case rapidpixel::LensParam::STABILIZER_MODE:
     {
         return static_cast<float>(m_params.stabiliserMode);
     }
-    case cr::lens::LensParam::AF_RANGE:
+    case rapidpixel::LensParam::AF_RANGE:
     {
         return static_cast<float>(m_params.afRange);
     }
-    case cr::lens::LensParam::X_FOV_DEG:
+    case rapidpixel::LensParam::X_FOV_DEG:
     {
         return m_params.xFovDeg;
     }
-    case cr::lens::LensParam::Y_FOV_DEG:
+    case rapidpixel::LensParam::Y_FOV_DEG:
     {
         return m_params.yFovDeg;
     }
-    case cr::lens::LensParam::LOG_MODE:
+    case rapidpixel::LensParam::LOG_MODE:
     {
         return static_cast<float>(m_params.logMode);
     }
-    case cr::lens::LensParam::TEMPERATURE:
+    case rapidpixel::LensParam::TEMPERATURE:
     {
         return m_params.temperature;
     }
-    case cr::lens::LensParam::IS_OPEN:
+    case rapidpixel::LensParam::IS_OPEN:
     {
         return m_params.isOpen ? 1.0f : 0.0f;
     }
-    case cr::lens::LensParam::TYPE:
+    case rapidpixel::LensParam::TYPE:
     {
         return static_cast<float>(m_params.type);
     }
-    case cr::lens::LensParam::CUSTOM_1:
+    case rapidpixel::LensParam::CUSTOM_1:
     {
         return m_params.custom1;
     }
-    case cr::lens::LensParam::CUSTOM_2:
+    case rapidpixel::LensParam::CUSTOM_2:
     {
         return m_params.custom2;
     }
-    case cr::lens::LensParam::CUSTOM_3:
+    case rapidpixel::LensParam::CUSTOM_3:
     {
         return m_params.custom3;
     }
@@ -662,7 +662,7 @@ float cr::lens::CustomLens::getParam(cr::lens::LensParam id)
 
 
 
-void cr::lens::CustomLens::getParams(cr::lens::LensParams& params)
+void rapidpixel::CustomLens::getParams(rapidpixel::LensParams& params)
 {
     const std::lock_guard<std::mutex> lock(m_paramsMutex);
 
@@ -671,47 +671,47 @@ void cr::lens::CustomLens::getParams(cr::lens::LensParams& params)
 
 
 
-bool cr::lens::CustomLens::executeCommand(cr::lens::LensCommand id, float arg)
+bool rapidpixel::CustomLens::executeCommand(rapidpixel::LensCommand id, float arg)
 {
     const std::lock_guard<std::mutex> lock(m_paramsMutex);
 
     // Check command ID.
     switch (id)
     {
-    case cr::lens::LensCommand::ZOOM_TELE:
-    case cr::lens::LensCommand::ZOOM_WIDE:
-    case cr::lens::LensCommand::ZOOM_STOP:
-    case cr::lens::LensCommand::FOCUS_FAR:
-    case cr::lens::LensCommand::FOCUS_NEAR:
-    case cr::lens::LensCommand::FOCUS_STOP:
-    case cr::lens::LensCommand::IRIS_OPEN:
-    case cr::lens::LensCommand::IRIS_CLOSE:
-    case cr::lens::LensCommand::IRIS_STOP:
-    case cr::lens::LensCommand::RESTART:
-    case cr::lens::LensCommand::DETECT_HW_RANGES:
+    case rapidpixel::LensCommand::ZOOM_TELE:
+    case rapidpixel::LensCommand::ZOOM_WIDE:
+    case rapidpixel::LensCommand::ZOOM_STOP:
+    case rapidpixel::LensCommand::FOCUS_FAR:
+    case rapidpixel::LensCommand::FOCUS_NEAR:
+    case rapidpixel::LensCommand::FOCUS_STOP:
+    case rapidpixel::LensCommand::IRIS_OPEN:
+    case rapidpixel::LensCommand::IRIS_CLOSE:
+    case rapidpixel::LensCommand::IRIS_STOP:
+    case rapidpixel::LensCommand::RESTART:
+    case rapidpixel::LensCommand::DETECT_HW_RANGES:
     {
         // The example doesn't have lens hardware: the command is accepted.
         return true;
     }
-    case cr::lens::LensCommand::ZOOM_TO_POS:
+    case rapidpixel::LensCommand::ZOOM_TO_POS:
     {
         // Setting the position is equivalent to the ZOOM_TO_POS command.
         return assignInt(m_params.zoomPos, arg, POSITION_MIN, POSITION_MAX);
     }
-    case cr::lens::LensCommand::FOCUS_TO_POS:
+    case rapidpixel::LensCommand::FOCUS_TO_POS:
     {
         return assignInt(m_params.focusPos, arg, POSITION_MIN, POSITION_MAX);
     }
-    case cr::lens::LensCommand::IRIS_TO_POS:
+    case rapidpixel::LensCommand::IRIS_TO_POS:
     {
         return assignInt(m_params.irisPos, arg, POSITION_MIN, POSITION_MAX);
     }
-    case cr::lens::LensCommand::AF_START:
+    case rapidpixel::LensCommand::AF_START:
     {
         m_params.afIsActive = true;
         return true;
     }
-    case cr::lens::LensCommand::AF_STOP:
+    case rapidpixel::LensCommand::AF_STOP:
     {
         m_params.afIsActive = false;
         return true;
@@ -725,13 +725,13 @@ bool cr::lens::CustomLens::executeCommand(cr::lens::LensCommand id, float arg)
 
 
 
-void cr::lens::CustomLens::addVideoFrame(cr::video::Frame&)
+void rapidpixel::CustomLens::addVideoFrame(rapidpixel::Frame&)
 {
 }
 
 
 
-bool cr::lens::CustomLens::decodeAndExecuteCommand(uint8_t* data, int size)
+bool rapidpixel::CustomLens::decodeAndExecuteCommand(uint8_t* data, int size)
 {
     // Decode command. The decoder checks the pointer, the size, the version
     // and the IDs.

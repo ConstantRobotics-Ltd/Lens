@@ -7,9 +7,7 @@
 
 
 
-namespace cr
-{
-namespace lens
+namespace rapidpixel
 {
 
 
@@ -869,7 +867,7 @@ public:
      * may not support this functions.
      * @param frame Video frame object.
      */
-    virtual void addVideoFrame(cr::video::Frame& frame) = 0;
+    virtual void addVideoFrame(rapidpixel::Frame& frame) = 0;
 
     /**
      * @brief Encode set param command.
@@ -958,5 +956,16 @@ protected:
      */
     Lens& operator= (Lens&& src) = default;
 };
+}
+
+
+
+// Compatibility: the names of namespace rapidpixel are also available in
+// namespace cr::lens.
+namespace cr
+{
+namespace lens
+{
+using namespace ::rapidpixel;
 }
 }

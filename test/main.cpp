@@ -27,11 +27,11 @@ constexpr int MASK_POS{3};
 /// Size of the buffers used by the tests, bytes.
 constexpr int BUFFER_SIZE{512};
 /// The first and the last IDs of the commands and of the params.
-constexpr int FIRST_COMMAND{static_cast<int>(cr::lens::LensCommand::ZOOM_TELE)};
+constexpr int FIRST_COMMAND{static_cast<int>(rapidpixel::LensCommand::ZOOM_TELE)};
 constexpr int LAST_COMMAND{
-    static_cast<int>(cr::lens::LensCommand::DETECT_HW_RANGES)};
-constexpr int FIRST_PARAM{static_cast<int>(cr::lens::LensParam::ZOOM_POS)};
-constexpr int LAST_PARAM{static_cast<int>(cr::lens::LensParam::CUSTOM_3)};
+    static_cast<int>(rapidpixel::LensCommand::DETECT_HW_RANGES)};
+constexpr int FIRST_PARAM{static_cast<int>(rapidpixel::LensParam::ZOOM_POS)};
+constexpr int LAST_PARAM{static_cast<int>(rapidpixel::LensParam::CUSTOM_3)};
 /// Number of the random masks in the encode / decode tests.
 constexpr int RANDOM_MASKS_NUMBER{3000};
 /// Number of the damaged samples in the damaged data test.
@@ -105,20 +105,20 @@ struct FieldDesc
     /// Kind of the field.
     FieldKind kind{FieldKind::INT};
     /// Pointer to the int field.
-    int cr::lens::LensParams::* intField{nullptr};
+    int rapidpixel::LensParams::* intField{nullptr};
     /// Pointer to the float field.
-    float cr::lens::LensParams::* floatField{nullptr};
+    float rapidpixel::LensParams::* floatField{nullptr};
     /// Pointer to the bool field.
-    bool cr::lens::LensParams::* flagField{nullptr};
+    bool rapidpixel::LensParams::* flagField{nullptr};
     /// Pointer to the flag of the mask.
-    bool cr::lens::LensParamsMask::* maskFlag{nullptr};
+    bool rapidpixel::LensParamsMask::* maskFlag{nullptr};
 };
 
 
 
 /// Describe an int field.
-FieldDesc intField(const char* name, int cr::lens::LensParams::* field,
-                   bool cr::lens::LensParamsMask::* flag)
+FieldDesc intField(const char* name, int rapidpixel::LensParams::* field,
+                   bool rapidpixel::LensParamsMask::* flag)
 {
     FieldDesc desc;
     desc.name = name;
@@ -131,8 +131,8 @@ FieldDesc intField(const char* name, int cr::lens::LensParams::* field,
 
 
 /// Describe a float field.
-FieldDesc floatField(const char* name, float cr::lens::LensParams::* field,
-                     bool cr::lens::LensParamsMask::* flag)
+FieldDesc floatField(const char* name, float rapidpixel::LensParams::* field,
+                     bool rapidpixel::LensParamsMask::* flag)
 {
     FieldDesc desc;
     desc.name = name;
@@ -145,8 +145,8 @@ FieldDesc floatField(const char* name, float cr::lens::LensParams::* field,
 
 
 /// Describe a bool field.
-FieldDesc flagField(const char* name, bool cr::lens::LensParams::* field,
-                    bool cr::lens::LensParamsMask::* flag)
+FieldDesc flagField(const char* name, bool rapidpixel::LensParams::* field,
+                    bool rapidpixel::LensParamsMask::* flag)
 {
     FieldDesc desc;
     desc.name = name;
@@ -163,8 +163,8 @@ FieldDesc flagField(const char* name, bool cr::lens::LensParams::* field,
 /// (0x80 >> (n % 8)) of the mask byte n / 8.
 const std::array<FieldDesc, 50>& fields()
 {
-    using cr::lens::LensParams;
-    using cr::lens::LensParamsMask;
+    using rapidpixel::LensParams;
+    using rapidpixel::LensParamsMask;
     static const std::array<FieldDesc, 50> table{{
         intField("zoomPos", &LensParams::zoomPos, &LensParamsMask::zoomPos),
         intField("zoomHwPos", &LensParams::zoomHwPos,
@@ -262,7 +262,7 @@ constexpr int FIELDS_NUMBER{50};
 
 /// Get the bits of a field: the bits of an int or float value, 0 or 1 for a
 /// bool value.
-uint32_t fieldBits(const cr::lens::LensParams& p, const FieldDesc& desc)
+uint32_t fieldBits(const rapidpixel::LensParams& p, const FieldDesc& desc)
 {
     switch (desc.kind)
     {
@@ -279,7 +279,7 @@ uint32_t fieldBits(const cr::lens::LensParams& p, const FieldDesc& desc)
 
 
 /// Set the bits of a field.
-void setFieldBits(cr::lens::LensParams& p, const FieldDesc& desc, uint32_t bits)
+void setFieldBits(rapidpixel::LensParams& p, const FieldDesc& desc, uint32_t bits)
 {
     switch (desc.kind)
     {
@@ -306,7 +306,7 @@ int fieldSize(const FieldDesc& desc)
 
 
 /// Get size of the encoded params for the mask, bytes.
-int encodedSize(const cr::lens::LensParamsMask& mask)
+int encodedSize(const rapidpixel::LensParamsMask& mask)
 {
     int size = HEADER_SIZE;
     for (const FieldDesc& desc : fields())
@@ -323,7 +323,7 @@ int encodedSize(const cr::lens::LensParamsMask& mask)
 
 /// Get the position of a field in the encoded data. The field must be selected
 /// by the mask.
-int fieldPos(const cr::lens::LensParamsMask& mask, int index)
+int fieldPos(const rapidpixel::LensParamsMask& mask, int index)
 {
     int pos = HEADER_SIZE;
     for (int i = 0; i < index; ++i)
@@ -340,7 +340,7 @@ int fieldPos(const cr::lens::LensParamsMask& mask, int index)
 
 
 /// Set all flags of the mask.
-void setMask(cr::lens::LensParamsMask& mask, bool value)
+void setMask(rapidpixel::LensParamsMask& mask, bool value)
 {
     for (const FieldDesc& desc : fields())
     {
@@ -352,7 +352,7 @@ void setMask(cr::lens::LensParamsMask& mask, bool value)
 
 /// Set random flags of the mask. The flag is set with the probability 1/2
 /// (mode 0) or 1/8 (mode 1).
-void randomMask(cr::lens::LensParamsMask& mask, int mode)
+void randomMask(rapidpixel::LensParamsMask& mask, int mode)
 {
     for (const FieldDesc& desc : fields())
     {
@@ -363,9 +363,9 @@ void randomMask(cr::lens::LensParamsMask& mask, int mode)
 
 
 /// Get the mask which is stored in the header of the encoded params.
-cr::lens::LensParamsMask maskFromData(const uint8_t* data)
+rapidpixel::LensParamsMask maskFromData(const uint8_t* data)
 {
-    cr::lens::LensParamsMask mask;
+    rapidpixel::LensParamsMask mask;
     for (int i = 0; i < FIELDS_NUMBER; ++i)
     {
         const int byte = data[MASK_POS + i / 8];
@@ -379,7 +379,7 @@ cr::lens::LensParamsMask maskFromData(const uint8_t* data)
 
 /// Fill all fields with random bit patterns (including NaN, infinity and
 /// denormal floats), the init string and the FOV points.
-void randomizeParams(cr::lens::LensParams& p)
+void randomizeParams(rapidpixel::LensParams& p)
 {
     for (const FieldDesc& desc : fields())
     {
@@ -390,7 +390,7 @@ void randomizeParams(cr::lens::LensParams& p)
     const int points = randomInt(5);
     for (int i = 0; i < points; ++i)
     {
-        cr::lens::FovPoint point;
+        rapidpixel::FovPoint point;
         point.hwZoomPos = static_cast<int>(randomBits());
         point.xFovDeg = static_cast<float>(randomInt(180));
         point.yFovDeg = static_cast<float>(randomInt(180));
@@ -402,7 +402,7 @@ void randomizeParams(cr::lens::LensParams& p)
 
 /// Fill the fields with random small integer values: they are written to a
 /// JSON file and read back exactly.
-void randomizeParamsForJson(cr::lens::LensParams& p)
+void randomizeParamsForJson(rapidpixel::LensParams& p)
 {
     for (const FieldDesc& desc : fields())
     {
@@ -423,7 +423,7 @@ void randomizeParamsForJson(cr::lens::LensParams& p)
     p.fovPoints.clear();
     for (int i = 0; i < 5; ++i)
     {
-        cr::lens::FovPoint point;
+        rapidpixel::FovPoint point;
         point.hwZoomPos = randomInt(255);
         point.xFovDeg = static_cast<float>(randomInt(255));
         point.yFovDeg = static_cast<float>(randomInt(255));
@@ -435,7 +435,7 @@ void randomizeParamsForJson(cr::lens::LensParams& p)
 
 /// Compare the fields of two params objects (by bits), the init string and the
 /// FOV points. Prints the name of each different field.
-bool sameParams(const cr::lens::LensParams& a, const cr::lens::LensParams& b)
+bool sameParams(const rapidpixel::LensParams& a, const rapidpixel::LensParams& b)
 {
     bool same = true;
     for (const FieldDesc& desc : fields())
@@ -474,9 +474,9 @@ bool sameParams(const cr::lens::LensParams& a, const cr::lens::LensParams& b)
 /// Check the result of decoding: the fields selected by the mask are equal to
 /// the input, other fields are zero, the init string is empty and there are no
 /// FOV points.
-bool checkDecoded(const cr::lens::LensParams& in,
-                  const cr::lens::LensParams& out,
-                  const cr::lens::LensParamsMask& mask)
+bool checkDecoded(const rapidpixel::LensParams& in,
+                  const rapidpixel::LensParams& out,
+                  const rapidpixel::LensParamsMask& mask)
 {
     bool ok = true;
     for (const FieldDesc& desc : fields())
@@ -509,8 +509,8 @@ bool fail(const char* message)
 
 
 /// Encode params with the mask into the buffer and return the size or -1.
-int encodeParams(cr::lens::LensParams& p, uint8_t* buffer,
-                 cr::lens::LensParamsMask* mask)
+int encodeParams(rapidpixel::LensParams& p, uint8_t* buffer,
+                 rapidpixel::LensParamsMask* mask)
 {
     int size = 0;
     if (!p.encode(buffer, BUFFER_SIZE, size, mask))
@@ -525,34 +525,34 @@ int encodeParams(cr::lens::LensParams& p, uint8_t* buffer,
 /// Copy test: copy and move construction and assignment.
 bool copyTest()
 {
-    cr::lens::LensParams in;
+    rapidpixel::LensParams in;
     randomizeParams(in);
 
-    const cr::lens::LensParams copied(in);
+    const rapidpixel::LensParams copied(in);
     if (!sameParams(in, copied))
     {
         return fail("Copy constructor");
     }
-    cr::lens::LensParams assigned;
+    rapidpixel::LensParams assigned;
     assigned = in;
     if (!sameParams(in, assigned))
     {
         return fail("Copy assignment");
     }
-    cr::lens::LensParams source(in);
-    const cr::lens::LensParams moved(std::move(source));
+    rapidpixel::LensParams source(in);
+    const rapidpixel::LensParams moved(std::move(source));
     if (!sameParams(in, moved))
     {
         return fail("Move constructor");
     }
-    cr::lens::LensParams source2(in);
-    cr::lens::LensParams moveAssigned;
+    rapidpixel::LensParams source2(in);
+    rapidpixel::LensParams moveAssigned;
     moveAssigned = std::move(source2);
     if (!sameParams(in, moveAssigned))
     {
         return fail("Move assignment");
     }
-    const cr::lens::LensParams& self = assigned;
+    const rapidpixel::LensParams& self = assigned;
     assigned = self;
     if (!sameParams(in, assigned))
     {
@@ -560,18 +560,18 @@ bool copyTest()
     }
 
     // The copy is independent of the source.
-    assigned.fovPoints.push_back(cr::lens::FovPoint());
+    assigned.fovPoints.push_back(rapidpixel::FovPoint());
     if (assigned.fovPoints.size() == in.fovPoints.size())
     {
         return fail("The copy shares FOV points with the source");
     }
 
-    cr::lens::FovPoint point;
+    rapidpixel::FovPoint point;
     point.hwZoomPos = 11;
     point.xFovDeg = 22.0f;
     point.yFovDeg = 33.0f;
-    const cr::lens::FovPoint pointCopy(point);
-    cr::lens::FovPoint pointAssigned;
+    const rapidpixel::FovPoint pointCopy(point);
+    rapidpixel::FovPoint pointAssigned;
     pointAssigned = point;
     if (pointCopy.hwZoomPos != 11 || pointAssigned.yFovDeg != 33.0f)
     {
@@ -585,7 +585,7 @@ bool copyTest()
 /// Encode / decode params with all fields.
 bool encodeDecodeParamsTest()
 {
-    cr::lens::LensParams in;
+    rapidpixel::LensParams in;
     randomizeParams(in);
 
     uint8_t data[BUFFER_SIZE];
@@ -597,7 +597,7 @@ bool encodeDecodeParamsTest()
     }
 
     // The same bytes are produced with the default mask.
-    cr::lens::LensParamsMask mask;
+    rapidpixel::LensParamsMask mask;
     uint8_t data2[BUFFER_SIZE];
     const int size2 = encodeParams(in, data2, &mask);
     if (size2 != size ||
@@ -614,7 +614,7 @@ bool encodeDecodeParamsTest()
     }
 
     // Decode into an object with other values.
-    cr::lens::LensParams out;
+    rapidpixel::LensParams out;
     randomizeParams(out);
     if (!out.decode(data, size))
     {
@@ -631,9 +631,9 @@ bool encodeDecodeMaskTest()
     bool ok = true;
     for (int n = 0; n < RANDOM_MASKS_NUMBER; ++n)
     {
-        cr::lens::LensParams in;
+        rapidpixel::LensParams in;
         randomizeParams(in);
-        cr::lens::LensParamsMask mask;
+        rapidpixel::LensParamsMask mask;
         if (n == 0)
         {
             setMask(mask, false);
@@ -659,7 +659,7 @@ bool encodeDecodeMaskTest()
             }
         }
 
-        cr::lens::LensParams out;
+        rapidpixel::LensParams out;
         randomizeParams(out);
         if (!out.decode(data, size))
         {
@@ -684,9 +684,9 @@ bool singleFieldMaskTest()
     for (int i = 0; i < FIELDS_NUMBER; ++i)
     {
         const FieldDesc& desc = fields()[static_cast<size_t>(i)];
-        cr::lens::LensParams in;
+        rapidpixel::LensParams in;
         randomizeParams(in);
-        cr::lens::LensParamsMask mask;
+        rapidpixel::LensParamsMask mask;
         setMask(mask, false);
         mask.*(desc.maskFlag) = true;
 
@@ -727,7 +727,7 @@ bool singleFieldMaskTest()
             ok = false;
         }
 
-        cr::lens::LensParams out;
+        rapidpixel::LensParams out;
         if (!out.decode(data, size) || !checkDecoded(in, out, mask))
         {
             std::cout << "Wrong decoding of field " << desc.name << std::endl;
@@ -742,7 +742,7 @@ bool singleFieldMaskTest()
 /// Buffer boundaries of encode(...).
 bool encodeBoundariesTest()
 {
-    cr::lens::LensParams in;
+    rapidpixel::LensParams in;
     randomizeParams(in);
 
     // Null pointer: the size is set to 0.
@@ -787,7 +787,7 @@ bool encodeBoundariesTest()
     }
 
     // A smaller mask also needs the buffer for all params.
-    cr::lens::LensParamsMask mask;
+    rapidpixel::LensParamsMask mask;
     setMask(mask, false);
     uint8_t data[BUFFER_SIZE];
     size = 123;
@@ -803,16 +803,16 @@ bool encodeBoundariesTest()
 /// Decoding of invalid data: nothing is changed in the object.
 bool decodeInvalidDataTest()
 {
-    cr::lens::LensParams in;
+    rapidpixel::LensParams in;
     randomizeParams(in);
     uint8_t data[BUFFER_SIZE];
     std::memset(data, 0, sizeof(data));
     const int size = encodeParams(in, data, nullptr);
-    const cr::lens::LensParamsMask all;
+    const rapidpixel::LensParamsMask all;
 
-    cr::lens::LensParams target;
+    rapidpixel::LensParams target;
     randomizeParams(target);
-    const cr::lens::LensParams snapshot(target);
+    const rapidpixel::LensParams snapshot(target);
     bool ok = true;
 
     // A rejected decode: the result is false and the object is not changed.
@@ -884,7 +884,7 @@ bool decodeInvalidDataTest()
     // Trailing bytes are ignored.
     for (int extra = 1; extra <= 8; ++extra)
     {
-        cr::lens::LensParams out;
+        rapidpixel::LensParams out;
         if (!out.decode(data, size + extra) || !checkDecoded(in, out, all))
         {
             ok = fail("Data with trailing bytes");
@@ -904,7 +904,7 @@ bool decodeInvalidDataTest()
             uint8_t flagData[BUFFER_SIZE];
             std::memcpy(flagData, data, sizeof(flagData));
             flagData[fieldPos(all, index)] = static_cast<uint8_t>(value);
-            cr::lens::LensParams out;
+            rapidpixel::LensParams out;
             const uint32_t expected = value != 0 ? 1U : 0U;
             if (!out.decode(flagData, size) ||
                 fieldBits(out, desc) != expected)
@@ -928,9 +928,9 @@ bool damagedDataTest()
     bool ok = true;
     for (int n = 0; n < DAMAGED_SAMPLES_NUMBER && ok; ++n)
     {
-        cr::lens::LensParams in;
+        rapidpixel::LensParams in;
         randomizeParams(in);
-        cr::lens::LensParamsMask mask;
+        rapidpixel::LensParamsMask mask;
         randomMask(mask, n % 2);
         uint8_t data[BUFFER_SIZE];
         std::memset(data, 0, sizeof(data));
@@ -945,10 +945,10 @@ bool damagedDataTest()
         const int damagedSize = randomInt(size + 4);
 
         // Two objects with the same state must give the same result.
-        cr::lens::LensParams first;
+        rapidpixel::LensParams first;
         randomizeParams(first);
-        cr::lens::LensParams second(first);
-        const cr::lens::LensParams snapshot(first);
+        rapidpixel::LensParams second(first);
+        const rapidpixel::LensParams snapshot(first);
         const bool firstResult = first.decode(data, damagedSize);
         const bool secondResult = second.decode(data, damagedSize);
         if (firstResult != secondResult || !sameParams(first, second))
@@ -967,10 +967,10 @@ bool damagedDataTest()
         ++accepted;
 
         // The decoded object is encoded and decoded again without changes.
-        cr::lens::LensParamsMask decodedMask = maskFromData(data);
+        rapidpixel::LensParamsMask decodedMask = maskFromData(data);
         uint8_t again[BUFFER_SIZE];
         const int againSize = encodeParams(first, again, &decodedMask);
-        cr::lens::LensParams third;
+        rapidpixel::LensParams third;
         if (againSize != encodedSize(decodedMask) ||
             !third.decode(again, againSize) || !sameParams(first, third))
         {
@@ -996,8 +996,8 @@ bool commandsTest()
 
         uint8_t data[BUFFER_SIZE];
         int size = 0;
-        cr::lens::Lens::encodeCommand(
-                    data, size, static_cast<cr::lens::LensCommand>(id), arg);
+        rapidpixel::Lens::encodeCommand(
+                    data, size, static_cast<rapidpixel::LensCommand>(id), arg);
         if (size != COMMAND_SIZE || data[0] != 0x00 ||
             data[1] != LENS_MAJOR_VERSION || data[2] != LENS_MINOR_VERSION)
         {
@@ -1005,13 +1005,13 @@ bool commandsTest()
             continue;
         }
 
-        cr::lens::LensParam paramId{cr::lens::LensParam::CUSTOM_3};
-        cr::lens::LensCommand commandId{cr::lens::LensCommand::RESTART};
+        rapidpixel::LensParam paramId{rapidpixel::LensParam::CUSTOM_3};
+        rapidpixel::LensCommand commandId{rapidpixel::LensCommand::RESTART};
         float value = 0.0f;
-        if (cr::lens::Lens::decodeCommand(
+        if (rapidpixel::Lens::decodeCommand(
                     data, size, paramId, commandId, value) != 0 ||
             static_cast<int>(commandId) != id || bitsOf(value) != argBits ||
-            paramId != cr::lens::LensParam::CUSTOM_3)
+            paramId != rapidpixel::LensParam::CUSTOM_3)
         {
             std::cout << "Command " << id << std::endl;
             ok = fail("Command is not decoded");
@@ -1026,21 +1026,21 @@ bool commandsTest()
 
         uint8_t data[BUFFER_SIZE];
         int size = 0;
-        cr::lens::Lens::encodeSetParamCommand(
-                    data, size, static_cast<cr::lens::LensParam>(id), outValue);
+        rapidpixel::Lens::encodeSetParamCommand(
+                    data, size, static_cast<rapidpixel::LensParam>(id), outValue);
         if (size != COMMAND_SIZE || data[0] != 0x01)
         {
             ok = fail("Wrong encoded set param command");
             continue;
         }
 
-        cr::lens::LensParam paramId{cr::lens::LensParam::ZOOM_POS};
-        cr::lens::LensCommand commandId{cr::lens::LensCommand::RESTART};
+        rapidpixel::LensParam paramId{rapidpixel::LensParam::ZOOM_POS};
+        rapidpixel::LensCommand commandId{rapidpixel::LensCommand::RESTART};
         float value = 0.0f;
-        if (cr::lens::Lens::decodeCommand(
+        if (rapidpixel::Lens::decodeCommand(
                     data, size, paramId, commandId, value) != 1 ||
             static_cast<int>(paramId) != id || bitsOf(value) != valueBits ||
-            commandId != cr::lens::LensCommand::RESTART)
+            commandId != rapidpixel::LensCommand::RESTART)
         {
             std::cout << "Param " << id << std::endl;
             ok = fail("Set param command is not decoded");
@@ -1058,25 +1058,25 @@ bool invalidCommandsTest()
     uint8_t valid[BUFFER_SIZE];
     std::memset(valid, 0, sizeof(valid));
     int size = 0;
-    cr::lens::Lens::encodeCommand(
-                valid, size, cr::lens::LensCommand::ZOOM_TO_POS, 1.5f);
+    rapidpixel::Lens::encodeCommand(
+                valid, size, rapidpixel::LensCommand::ZOOM_TO_POS, 1.5f);
     uint8_t validParam[BUFFER_SIZE];
     std::memset(validParam, 0, sizeof(validParam));
-    cr::lens::Lens::encodeSetParamCommand(
-                validParam, size, cr::lens::LensParam::ZOOM_POS, 1.5f);
+    rapidpixel::Lens::encodeSetParamCommand(
+                validParam, size, rapidpixel::LensParam::ZOOM_POS, 1.5f);
 
-    cr::lens::LensParam paramId{cr::lens::LensParam::IRIS_POS};
-    cr::lens::LensCommand commandId{cr::lens::LensCommand::IRIS_STOP};
+    rapidpixel::LensParam paramId{rapidpixel::LensParam::IRIS_POS};
+    rapidpixel::LensCommand commandId{rapidpixel::LensCommand::IRIS_STOP};
     float value = 7.0f;
     bool ok = true;
 
     // A rejected decode: the result is -1 and the output is not changed.
     auto rejected = [&](uint8_t* bytes, int bytesSize, const char* what)
     {
-        const int result = cr::lens::Lens::decodeCommand(
+        const int result = rapidpixel::Lens::decodeCommand(
                     bytes, bytesSize, paramId, commandId, value);
-        if (result != -1 || paramId != cr::lens::LensParam::IRIS_POS ||
-            commandId != cr::lens::LensCommand::IRIS_STOP || value != 7.0f)
+        if (result != -1 || paramId != rapidpixel::LensParam::IRIS_POS ||
+            commandId != rapidpixel::LensCommand::IRIS_STOP || value != 7.0f)
         {
             std::cout << what << " (size " << bytesSize << ", result "
                       << result << ")" << std::endl;
@@ -1138,15 +1138,15 @@ bool invalidCommandsTest()
 
     // Null pointer of the encoders: the size is 0.
     size = 5;
-    cr::lens::Lens::encodeCommand(
-                nullptr, size, cr::lens::LensCommand::ZOOM_TELE);
+    rapidpixel::Lens::encodeCommand(
+                nullptr, size, rapidpixel::LensCommand::ZOOM_TELE);
     if (size != 0)
     {
         ok = fail("encodeCommand(nullptr)");
     }
     size = 5;
-    cr::lens::Lens::encodeSetParamCommand(
-                nullptr, size, cr::lens::LensParam::ZOOM_POS, 0.0f);
+    rapidpixel::Lens::encodeSetParamCommand(
+                nullptr, size, rapidpixel::LensParam::ZOOM_POS, 0.0f);
     if (size != 0)
     {
         ok = fail("encodeSetParamCommand(nullptr)");
@@ -1162,8 +1162,8 @@ bool versionTest()
     const std::string expected = std::to_string(LENS_MAJOR_VERSION) + "." +
                                  std::to_string(LENS_MINOR_VERSION) + "." +
                                  std::to_string(LENS_PATCH_VERSION);
-    std::cout << "Lens version: " << cr::lens::Lens::getVersion() << std::endl;
-    if (cr::lens::Lens::getVersion() != expected ||
+    std::cout << "Lens version: " << rapidpixel::Lens::getVersion() << std::endl;
+    if (rapidpixel::Lens::getVersion() != expected ||
         expected != LENS_VERSION)
     {
         return fail("Version string is not equal to the version macros");
@@ -1220,21 +1220,21 @@ private:
 /// Read and write params to a JSON file and to a string.
 bool jsonReadWriteTest()
 {
-    cr::lens::LensParams in;
+    rapidpixel::LensParams in;
     randomizeParamsForJson(in);
 
     // Write params to the file and read them back.
     bool ok = true;
     {
         TempFile file(JSON_FILE_NAME);
-        cr::utils::ConfigReader inConfig;
+        rapidpixel::ConfigReader inConfig;
         if (!inConfig.set(in, "lensParams") ||
             !inConfig.writeToFile(JSON_FILE_NAME))
         {
             return fail("Can't write config file");
         }
-        cr::utils::ConfigReader outConfig;
-        cr::lens::LensParams out;
+        rapidpixel::ConfigReader outConfig;
+        rapidpixel::LensParams out;
         if (!outConfig.readFromFile(JSON_FILE_NAME))
         {
             return fail("Can't open config file");
@@ -1246,7 +1246,7 @@ bool jsonReadWriteTest()
 
         // The JSON file has only the fields of JSON_READABLE macro. Other
         // fields keep the default values.
-        const cr::lens::LensParams defaults;
+        const rapidpixel::LensParams defaults;
         const char* const notInJson[] = {
             "zoomPos", "zoomHwPos", "focusPos", "focusHwPos", "irisPos",
             "irisHwPos", "zoomSpeed", "zoomHwSpeed", "focusSpeed",
@@ -1294,7 +1294,7 @@ bool jsonReadWriteTest()
 
     // Invalid and incomplete documents are rejected, the object is not
     // changed.
-    cr::utils::ConfigReader config;
+    rapidpixel::ConfigReader config;
     config.set(in, "lensParams");
     std::string valid;
     if (!config.writeToString(valid))
@@ -1319,10 +1319,10 @@ bool jsonReadWriteTest()
     documents.push_back(wrongType);
     for (const std::string& document : documents)
     {
-        cr::utils::ConfigReader reader;
-        cr::lens::LensParams target;
+        rapidpixel::ConfigReader reader;
+        rapidpixel::LensParams target;
         randomizeParams(target);
-        const cr::lens::LensParams snapshot(target);
+        const rapidpixel::LensParams snapshot(target);
         if (!reader.readFromString(document))
         {
             std::cout << "Can't parse: " << document.substr(0, 32)
@@ -1337,7 +1337,7 @@ bool jsonReadWriteTest()
             ok = false;
         }
     }
-    cr::utils::ConfigReader broken;
+    rapidpixel::ConfigReader broken;
     if (broken.readFromString("{\"lensParams\":"))
     {
         ok = fail("Accepted a broken JSON text");
